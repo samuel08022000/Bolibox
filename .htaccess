@@ -1,0 +1,15 @@
+Options -Indexes
+RewriteEngine On
+
+# Base del proyecto
+RewriteBase /BOLIBOX/
+
+# Si el archivo existe físicamente (css, js, imágenes), se sirve normal
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Todo lo demás se envía al index.php de la carpeta public
+RewriteRule ^ public/index.php [QSA,L]
+
+DirectoryIndex public/index.php
