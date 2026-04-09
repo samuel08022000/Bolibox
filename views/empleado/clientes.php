@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 require __DIR__ . '/../../config/database.php';
 
@@ -13,8 +12,6 @@ $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -75,7 +72,6 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                         </thead>
                         <tbody>
-<<<<<<< HEAD
                              <?php foreach ($resultado as $row) { ?>
     <tr>
         <td><?php echo $row['id_cliente']; ?></td>
@@ -89,11 +85,6 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </td>
     </tr>
 <?php } ?>
-=======
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No hay clientes registrados por el momento.</td>
-                            </tr>
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
                         </tbody>
                     </table>
                 </div>

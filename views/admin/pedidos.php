@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 require __DIR__ . '/../../config/database.php';
 
@@ -12,11 +11,6 @@ $sql = $con->prepare("
 $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
-
-
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 <!DOCTYPE html>
 <html lang="es">
 <head>

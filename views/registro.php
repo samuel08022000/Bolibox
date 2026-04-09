@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -34,11 +31,7 @@
             <h3 class="fw-bold mb-1" style="color: var(--negro);">Crear Cuenta</h3>
             <p class="text-muted mb-4">Ingresa tus datos personales para comenzar.</p>
 
-<<<<<<< HEAD
             <form action="registro.php" method="POST">
-=======
-            <form action="<?= url('registro') ?>" method="POST">
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
                 
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="nombreCompleto" name="nombre" placeholder="Juan Pérez" required>

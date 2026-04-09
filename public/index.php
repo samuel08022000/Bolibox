@@ -10,11 +10,7 @@ if ($basePath !== '/' && strpos($path, $basePath) === 0) {
     $path = substr($path, strlen($basePath));
 }
 
-<<<<<<< HEAD
 // Limpiar la barra diagonal (/) al final de la ruta si el usuario la escribe por accidente
-=======
-// NUEVO: Limpiar la barra diagonal (/) al final de la ruta si el usuario la escribe por accidente
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 $path = rtrim($path, '/');
 
 if ($path === '' || $path === false) $path = '/';
@@ -32,16 +28,11 @@ switch ($path) {
         break;
 
     // ==========================================
-<<<<<<< HEAD
     // RUTAS DEL PORTAL CLIENTE (Actualizadas a tu nueva estructura)
-=======
-    // RUTAS DEL PORTAL CLIENTE
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
     // ==========================================
     case '/cliente':
         require __DIR__ . '/../views/cliente/cliente.php';
         break;
-<<<<<<< HEAD
     case '/catalogo':
         require __DIR__ . '/../views/cliente/catalogo.php'; 
         break;
@@ -50,13 +41,6 @@ switch ($path) {
         break;
     case '/chatbot':
         require __DIR__ . '/../views/cliente/chatbot.php'; 
-=======
-    case '/productos':
-        require __DIR__ . '/../views/cliente/productos.php'; 
-        break;
-    case '/mis_pedidos':
-        require __DIR__ . '/../views/cliente/mis_pedidos.php'; 
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
         break;
 
     // ==========================================

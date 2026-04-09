@@ -49,7 +49,6 @@
                     <div class="card-body p-4">
                         <form action="<?= url('empleado/pedidos/nuevo') ?>" method="POST">
                             <div class="row">
-<<<<<<< HEAD
                                 
                                 <div class="col-md-6 mb-4">
                                     <div class="form-floating">
@@ -93,27 +92,6 @@
                                     </div>
                                 </div>
 
-=======
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold small text-muted">ID del Cliente</label>
-                                    <input type="number" name="id_cliente" class="form-control" placeholder="Ej: 1" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold small text-muted">Ubicación del Cliente</label>
-                                    <input type="text" name="ubicacion_cliente" class="form-control" placeholder="Dirección de entrega" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold small text-muted">Producto a Importar</label>
-                                    <input type="text" name="nombre_producto" class="form-control" placeholder="Ej: Laptop Dell Alienware" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold small text-naranja">Total Estimado ($us)</label>
-                                    <input type="number" name="total" class="form-control border-naranja" placeholder="Ej: 500.00" step="0.01" required>
-                                </div>
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
                             </div>
                             
                             <hr class="mt-2 mb-4">

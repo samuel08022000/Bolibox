@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 /* ==========================================
    1. RESETEO Y VARIABLES GLOBALES
    ========================================== */
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 * {
     margin: 0;
     padding: 0;
@@ -33,12 +30,9 @@ a {
     color: inherit;
 }
 
-<<<<<<< HEAD
 /* ==========================================
    2. CLASES UTILITARIAS
    ========================================== */
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 .text-naranja { color: var(--naranja) !important; }
 .bg-naranja { background-color: var(--naranja) !important; }
 .bg-negro { background-color: var(--negro) !important; }
@@ -54,7 +48,6 @@ a {
     padding: 80px 0;
 }
 
-<<<<<<< HEAD
 .section-header {
     margin-bottom: 40px;
 }
@@ -110,8 +103,6 @@ a {
 /* ==========================================
    4. VISTA PÚBLICA (INDEX)
    ========================================== */
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 header {
     position: fixed;
     top: 0;
@@ -137,11 +128,7 @@ header {
     align-items: center;
     font-weight: 900;
     font-size: 26px;
-<<<<<<< HEAD
     color: var(--negro);
-=======
-    color: #000;
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
     font-style: italic;
 }
 
@@ -216,11 +203,7 @@ nav a:hover, nav a.active {
 .hero-title {
     font-size: clamp(2.5rem, 4vw, 3.5rem);
     font-weight: 800;
-<<<<<<< HEAD
     color: var(--blanco);
-=======
-    color: white;
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
     line-height: 1.1;
     margin-bottom: 20px;
 }
@@ -238,112 +221,7 @@ nav a:hover, nav a.active {
     margin-bottom: 40px;
 }
 
-<<<<<<< HEAD
 /* Secciones Nosotros, Servicios y Sucursales */
-=======
-.btn-naranja {
-    background: var(--naranja);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 8px;
-    font-weight: 700;
-    border: none;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
-.btn-naranja:hover, .btn-login-submit:hover {
-    background: var(--naranja-hover);
-}
-
-.login-card {
-    background: var(--gris-oscuro);
-    border-radius: 16px;
-    padding: 32px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    color: white;
-}
-
-.login-card h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.login-card p {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 24px;
-}
-
-.form-group-login {
-    margin-bottom: 16px;
-}
-
-.form-group-login input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    border: none;
-    font-size: 15px;
-    outline: none;
-}
-
-.form-group-login input:focus {
-    box-shadow: 0 0 0 2px var(--naranja);
-}
-
-.btn-login-submit {
-    width: 100%;
-    background: var(--naranja);
-    color: white;
-    padding: 14px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
-}
-
-.login-footer {
-    margin-top: 20px;
-    font-size: 13px;
-    color: #aaa;
-    border-top: 1px solid #444;
-    padding-top: 16px;
-    text-align: center;
-}
-
-.login-footer a {
-    color: var(--naranja);
-    font-weight: 600;
-}
-
-.section-header {
-    margin-bottom: 40px;
-}
-
-.section-title {
-    font-size: 32px;
-    font-weight: 800;
-    color: #000;
-    position: relative;
-    padding-bottom: 8px;
-    margin-bottom: 20px;
-}
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 60px;
-    height: 3px;
-    background-color: var(--naranja);
-}
-
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 .nosotros-texto-intro {
     text-align: center;
     max-width: 900px;
@@ -375,11 +253,7 @@ nav a:hover, nav a.active {
 }
 
 .card-nosotros, .card-servicio, .card-sucursal {
-<<<<<<< HEAD
     background: var(--blanco);
-=======
-    background: white;
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.04);
     border: 1px solid #eaeaea;
@@ -392,11 +266,7 @@ nav a:hover, nav a.active {
 
 .card-nosotros i {
     font-size: 35px;
-<<<<<<< HEAD
     color: var(--negro);
-=======
-    color: #000;
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
     margin-bottom: 15px;
     display: block;
 }
@@ -442,7 +312,6 @@ nav a:hover, nav a.active {
     color: var(--naranja);
 }
 
-<<<<<<< HEAD
 /* ==========================================
    5. AUTENTICACIÓN (LOGIN Y REGISTRO)
    ========================================== */
@@ -612,8 +481,6 @@ nav a:hover, nav a.active {
 /* ==========================================
    6. PANEL ADMINISTRADOR Y EMPLEADO
    ========================================== */
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -729,20 +596,6 @@ nav a:hover, nav a.active {
     border: 1px solid #eaeaea;
 }
 
-<<<<<<< HEAD
-=======
-.card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    overflow: hidden;
-}
-
-.card-body.p-0 {
-    border-top: 4px solid var(--naranja);
-}
-
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 .table th {
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -760,7 +613,6 @@ nav a:hover, nav a.active {
     vertical-align: middle;
 }
 
-<<<<<<< HEAD
 /* ==========================================
    7. PORTAL DEL CLIENTE (VISTAS DE USUARIO)
    ========================================== */
@@ -1225,8 +1077,6 @@ nav a:hover, nav a.active {
 /* ==========================================
    11. MEDIA QUERIES (RESPONSIVE DESIGN)
    ========================================== */
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 @media (max-width: 900px) {
     .hero-content {
         grid-template-columns: 1fr;
@@ -1252,109 +1102,9 @@ nav a:hover, nav a.active {
     .sidebar {
         display: none; 
     }
-<<<<<<< HEAD
     .companies-grid, .works-grid {
         grid-template-columns: 1fr;
     }
-=======
-}
-/* ==========================================
-   VISTA DE REGISTRO
-   ========================================== */
-.registro-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-.registro-card {
-    background: var(--blanco);
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    overflow: hidden;
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    border: 1px solid #eaeaea;
-}
-
-.registro-left {
-    background: linear-gradient(135deg, var(--negro) 0%, var(--gris-oscuro) 100%);
-    color: var(--blanco);
-    padding: 50px;
-    width: 45%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-}
-
-.registro-left .logo {
-    font-size: 32px;
-    font-weight: 900;
-    font-style: italic;
-    margin-bottom: 20px;
-}
-
-.registro-left .logo span, .registro-left .logo i {
-    color: var(--naranja);
-}
-
-.registro-right {
-    padding: 50px;
-    width: 55%;
-    background-color: var(--blanco);
-}
-
-.form-floating > label {
-    color: #888;
-    font-size: 0.9rem;
-}
-
-.registro-page .form-control {
-    border-radius: 12px;
-    border: 1px solid #ddd;
-    padding: 1rem 0.75rem;
-}
-
-.registro-page .form-control:focus {
-    border-color: var(--naranja);
-    box-shadow: 0 0 0 0.25rem rgba(255, 140, 0, 0.15);
-}
-
-.btn-submit {
-    background-color: var(--naranja);
-    color: var(--blanco);
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    width: 100%;
-    border: none;
-    margin-top: 10px;
-}
-
-.btn-submit:hover {
-    background-color: var(--naranja-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(255, 140, 0, 0.2);
-}
-
-.btn-volver-icon {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    color: rgba(255,255,255,0.7);
-    font-size: 1.2rem;
-    transition: 0.3s;
-}
-
-.btn-volver-icon:hover {
-    color: var(--naranja);
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
 }
 
 @media (max-width: 768px) {
@@ -1375,128 +1125,9 @@ nav a:hover, nav a.active {
     .registro-right {
         padding: 40px 30px;
     }
-<<<<<<< HEAD
     .whatsapp-wrapper {
         top: auto;
         bottom: 20px;
         right: 20px;
     }
 }
-=======
-}
-/* =========================================
-   SIDEBAR Y DASHBOARD ADMIN (Estilo Elegante)
-========================================= */
-.admin-layout { 
-    display: flex; 
-    min-height: 100vh; 
-    background-color: var(--bg-gris-claro); 
-}
-
-.sidebar { 
-    width: 260px; 
-    background-color: #1a1a2e; /* Color oscuro profesional */
-    color: white; 
-    position: fixed; 
-    height: 100vh; 
-    overflow-y: auto; 
-    z-index: 1000; 
-    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
-}
-
-.sidebar-header { 
-    padding: 30px 20px; 
-    text-align: center; 
-    border-bottom: 1px solid rgba(255,255,255,0.05); 
-    margin-bottom: 15px; 
-}
-
-.sidebar-link { 
-    color: #9aa0a6; 
-    padding: 14px 24px; 
-    display: flex; 
-    align-items: center; 
-    gap: 15px; 
-    font-weight: 500; 
-    transition: 0.3s; 
-    border-left: 4px solid transparent; 
-}
-
-.sidebar-link:hover, .sidebar-link.active { 
-    color: white; 
-    background: rgba(255, 140, 0, 0.1); 
-    border-left-color: var(--naranja); 
-}
-
-.sidebar-link i { font-size: 1.2rem; }
-
-.main-content { 
-    flex-grow: 1; 
-    margin-left: 260px; /* Deja el espacio para el sidebar */
-    padding: 30px 40px; 
-}
-
-.admin-topbar { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 30px; 
-}
-
-/* Tarjetas de Estadísticas (Widgets) */
-.widget-card { 
-    border: none; 
-    border-radius: 12px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
-    padding: 24px; 
-    display: flex; 
-    flex-direction: column; 
-    position: relative; 
-    background: white; 
-    height: 100%;
-}
-
-.widget-dark { 
-    background-color: #1a1a2e; 
-    color: white; 
-}
-
-.widget-icon { 
-    position: absolute; 
-    right: 20px; 
-    top: 20px; 
-    font-size: 1.8rem; 
-    color: var(--naranja); 
-}
-
-.widget-card .value { 
-    font-size: 2.2rem; 
-    font-weight: 800; 
-    margin-top: 15px; 
-    color: #1a1a2e;
-}
-
-.widget-dark .value { color: white; }
-
-.widget-card .label { 
-    font-size: 0.85rem; 
-    color: #888; 
-    font-weight: 600; 
-}
-
-.widget-dark .label { color: #aaa; }
-
-/* Contenedores de Gráficos */
-.chart-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    padding: 20px;
-    margin-bottom: 24px;
-}
-
-@media (max-width: 992px) {
-    .sidebar { transform: translateX(-100%); }
-    .main-content { margin-left: 0; padding: 20px; }
-}
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
