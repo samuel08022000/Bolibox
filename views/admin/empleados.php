@@ -79,7 +79,6 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Cargo</th>
                                 <th>CI</th>
                                 <th>Celular</th>
-<<<<<<< HEAD
                                 <th>Estado</th>
                             </tr>
                         </thead>
@@ -98,12 +97,6 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </td>
     </tr>
 <?php } ?>
-=======
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
                             </tbody>
                     </table>
                 </div>

@@ -64,6 +64,21 @@ switch ($path) {
     case '/admin/pedidos':
         require __DIR__ . '/../views/admin/pedidos.php';
         break;
+    case '/admin/pedidos/eliminar':
+    require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+    $controller = new PedidoController();
+    $controller->eliminar();
+    break;
+    case '/admin/pedidos/editar':
+    require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+    $controller = new PedidoController();
+    $controller->editar();
+    break;
+    case '/admin/pedidos/actualizar':
+    require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+    $controller = new PedidoController();
+    $controller->actualizar();
+    break;
     case '/admin/stock':
         require __DIR__ . '/../views/admin/stock.php';
         break;
@@ -83,7 +98,11 @@ switch ($path) {
     case '/empleado/pedidos':
         require __DIR__ . '/../views/empleado/pedidos.php';
         break;
-
+    case '/empleado/pedidos/nuevo':
+    require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+    $controller = new PedidoController();
+    $controller->guardar();
+    break;
     // ==========================================
     // PÁGINA DE ERROR 404
     // ==========================================

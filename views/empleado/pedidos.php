@@ -5,7 +5,7 @@ $db = new Database();
 $con = $db->conectar();
 
 $sql = $con->prepare("
-    SELECT id_pedido, fecha, total, ciudad_clientes, id_cliente 
+    SELECT id_pedido, fecha, total, ubicacion_clientes, id_cliente 
     FROM pedidos
 ");
 $sql->execute();
@@ -31,11 +31,11 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     <div class="sidebar">
         <div class="sidebar-header">
             <i class="bi bi-person-badge display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Empleado Bolibox</h5>
+            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
             <small class="text-muted">Portal de Atención</small>
         </div>
         <div class="nav flex-column mb-auto">
-            <a class="sidebar-link" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Inicio</a>
+            <a class="sidebar-link" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i>Registrar Pedido</a>
             <a class="sidebar-link active" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
         </div>
@@ -77,11 +77,16 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         <td><?php echo $row['id_pedido']; ?></td>
         <td><?php echo $row['fecha']; ?></td>
         <td><?php echo $row['total']; ?></td>
-        <td><?php echo $row['ciudad_clientes']; ?></td>
+        <td><?php echo $row['ubicacion_clientes']; ?></td>
         <td><?php echo $row['id_cliente']; ?></td>
         <td>
-            <button class="btn btn-sm btn-warning">Editar</button>
-            <button class="btn btn-sm btn-danger">Eliminar</button>
+            <a href="<?= url('admin/pedidos/editar?id=' . $row['id_pedido']) ?>" class="btn btn-sm btn-warning">
+    Editar
+</a>
+            <form action="<?= url('admin/pedidos/eliminar') ?>" method="POST" style="display:inline;">
+    <input type="hidden" name="id" value="<?= $row['id_pedido'] ?>">
+    <button class="btn btn-sm btn-danger">Eliminar</button>
+</form>
         </td>
     </tr>
 <?php } ?>

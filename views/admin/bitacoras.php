@@ -9,7 +9,8 @@ $sql = $con->prepare("
         accion,
         fecha,
         descripcion,
-        id_empleado
+        id_empleado,
+        'almacen' AS tabla
     FROM bitacora_almacen
 
     UNION ALL
@@ -19,7 +20,8 @@ $sql = $con->prepare("
         accion,
         fecha,
         descripcion,
-        id_empleado
+        id_empleado,
+        tabla
     FROM bitacora_ventas
 
     ORDER BY fecha DESC
@@ -90,6 +92,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Fecha</th>
                                 <th>ID Referencia (Prod/Pedido)</th>
                                 <th>ID Empleado</th>
+                                <th>En</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -100,6 +103,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     <td><?php echo $row['fecha']; ?></td>
     <td><?php echo $row['descripcion']; ?></td>
     <td><?php echo $row['id_empleado']; ?></td>
+    <td><?php echo $row['tabla']; ?></td>
 </tr>
 <?php } ?>
                              </tbody>

@@ -5,12 +5,15 @@ $db = new Database();
 $con = $db->conectar();
 
 $sql = $con->prepare("
-    SELECT id_pedido, fecha, total, ciudad_clientes, nro_dui, id_cliente, id_empleado 
+    SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_cliente, id_empleado 
     FROM pedidos
 ");
 $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,7 +65,9 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-naranja text-white fw-bold"><i class="bi bi-cart-plus"></i> Nuevo Pedido</button>
+            <a href="<?= url('empleado') ?>" class="btn btn-naranja text-white fw-bold">
+    <i class="bi bi-cart-plus"></i> Nuevo Pedido
+</a>
         </div>
         
         <div class="card">
@@ -75,30 +80,33 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Fecha</th>
                                 <th>Total</th>
                                 <th>Ubicación Cliente</th>
+                                <th>Nro DUI</th>
                                 <th>ID Cliente</th>
                                 <th>ID Empleado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-<<<<<<< HEAD
                             <?php foreach ($resultado as $row) { ?>
     <tr>
         <td><?php echo $row['id_pedido']; ?></td>
         <td><?php echo $row['fecha']; ?></td>
         <td><?php echo $row['total']; ?></td>
-        <td><?php echo $row['ciudad_clientes']; ?></td>
+        <td><?php echo $row['ubicacion_clientes']; ?></td>
         <td><?php echo $row['nro_dui']; ?></td>
         <td><?php echo $row['id_cliente']; ?></td>
         <td><?php echo $row['id_empleado']; ?></td>
         <td>
-            <button class="btn btn-sm btn-warning">Editar</button>
-            <button class="btn btn-sm btn-danger">Eliminar</button>
+            <a href="<?= url('admin/pedidos/editar?id=' . $row['id_pedido']) ?>" class="btn btn-sm btn-warning">
+    Editar
+</a>
+            <form action="<?= url('admin/pedidos/eliminar') ?>" method="POST" style="display:inline;">
+    <input type="hidden" name="id" value="<?= $row['id_pedido'] ?>">
+    <button class="btn btn-sm btn-danger">Eliminar</button>
+</form>
         </td>
     </tr>
 <?php } ?>
-=======
->>>>>>> a54a5a11c554ba13bec3314e3e2fb268c8f429b6
                             </tbody>
                     </table>
                 </div>

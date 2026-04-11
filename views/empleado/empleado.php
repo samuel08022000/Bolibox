@@ -17,11 +17,11 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <i class="bi bi-person-badge display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Empleado Bolibox</h5>
+            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
             <small class="text-muted">Portal de Atención</small>
         </div>
         <div class="nav flex-column mb-auto">
-            <a class="sidebar-link active" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Inicio</a>
+            <a class="sidebar-link active" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
             <a class="sidebar-link" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
         </div>
