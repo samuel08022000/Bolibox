@@ -12,7 +12,6 @@ $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,7 +34,8 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
             <small class="text-muted">Panel de Control</small>
         </div>
-        <div class="nav flex-column mb-auto">
+    
+    <div class="nav flex-column mb-auto mt-3">
             <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
             <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
@@ -64,7 +64,43 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-naranja text-white fw-bold"><i class="bi bi-person-add"></i> Nuevo Empleado</button>
+            <button class="btn btn-naranja text-white fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelNuevoEmpleado">
+                <i class="bi bi-person-add"></i> Nuevo Empleado
+            </button>
+        </div>
+
+        <div class="collapse mb-4" id="panelNuevoEmpleado">
+            <div class="card card-body border-top border-naranja border-4 shadow-sm" style="background-color: #fff;">
+                <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Registrar Empleado</h5>
+                <form action="<?= url('admin/empleados/guardar') ?>" method="POST">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Nombre Completo</label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Cargo</label>
+                            <input type="text" name="cargo" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">ID Usuario</label>
+                            <input type="number" name="id_usuario" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">CI</label>
+                            <input type="text" name="ci" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Celular</label>
+                            <input type="text" name="celular" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-toggle="collapse" data-bs-target="#panelNuevoEmpleado">Cancelar</button>
+                        <button type="submit" class="btn btn-naranja fw-bold text-white px-4">Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
         
         <div class="card">
@@ -79,25 +115,26 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Cargo</th>
                                 <th>CI</th>
                                 <th>Celular</th>
-                                <th>Estado</th>
+                                <th class="text-center">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($resultado as $row) { ?>
-    <tr>
-        <td><?php echo $row['id_empleado']; ?></td>
-        <td><?php echo $row['id_usuario']; ?></td>
-        <td><?php echo $row['nombre']; ?></td>
-        <td><?php echo $row['cargo']; ?></td>
-        <td><?php echo $row['ci']; ?></td>
-        <td><?php echo $row['celular']; ?></td>
-        <td>
-            <button class="btn btn-sm btn-warning">Activo</button>
-            <button class="btn btn-sm btn-danger">Inactivo</button>
-        </td>
-    </tr>
-<?php } ?>
-                            </tbody>
+                            <tr>
+                                <td><?php echo $row['id_empleado']; ?></td>
+                                <td><?php echo $row['id_usuario']; ?></td>
+                                <td><?php echo $row['nombre']; ?></td>
+                                <td><?php echo $row['cargo']; ?></td>
+                                <td><?php echo $row['ci']; ?></td>
+                                <td><?php echo $row['celular']; ?></td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center" title="Activo">
+                                        <span style="width: 14px; height: 14px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
                     </table>
                 </div>
             </div>

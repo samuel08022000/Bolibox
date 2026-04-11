@@ -1,146 +1,158 @@
+<?php
+require __DIR__ . '/../../config/database.php';
+
+$db = new Database();
+$con = $db->conectar();
+
+// Cliente fijo por ahora según tu petición
+$idClienteLogueado = 12;
+
+// Consulta súper limpia y directa solo a la tabla pedidos
+$sql = $con->prepare("
+    SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar 
+    FROM pedidos 
+    WHERE id_cliente = ?
+    ORDER BY fecha DESC
+");
+$sql->execute([$idClienteLogueado]);
+$misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedidos - BOLIBOX</title>
+    <title>BOLIBOX - Mis Pedidos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
+    <style>
+        .order-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            background: #fff;
+        }
+        .order-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(255, 140, 0, 0.15);
+        }
+        .bg-naranja-header {
+            background: linear-gradient(135deg, #FF8C00 0%, #e67e00 100%);
+            color: white;
+            border-radius: 20px;
+        }
+        .product-badge {
+            background-color: rgba(255, 140, 0, 0.1);
+            color: #FF8C00;
+            font-weight: 700;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
-<body class="user-page orders-page user-dashboard">
+<body class="user-page">
 
     <nav class="top-navbar">
         <div class="nav-inner">
             <a href="<?= url('cliente') ?>" class="logo">
-                <i class="bi bi-box-seam-fill"></i> BOLI<span>BOX</span>
+                <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
             </a>
-            
             <div class="nav-links">
-                <a class="nav-link" href="<?= url('cliente') ?>"><i class="bi bi-grid-1x2-fill"></i> Panel Principal</a>
-                <a class="nav-link" href="<?= url('catalogo') ?>"><i class="bi bi-tag-fill"></i> Catálogos</a>
-                <a class="nav-link active" href="<?= url('pedidos') ?>"><i class="bi bi-box-seam"></i> Mis Pedidos</a>
-                <a class="nav-link" href="<?= url('chatbot') ?>"><i class="bi bi-robot"></i> Asistente Bot</a>
+                <a class="nav-link" href="<?= url('cliente') ?>">Dashboard</a>
+                <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
+                <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
+                <a class="nav-link active" href="<?= url('pedidos') ?>">Mis Pedidos</a>
+                <a class="nav-link" href="<?= url('chatbot') ?>">Volibot</a>
             </div>
-            
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-light rounded-circle shadow-sm"><i class="bi bi-bell"></i></button>
-                <a href="<?= url('/') ?>" class="btn-logout fw-bold"><i class="bi bi-box-arrow-right"></i> Salir</a>
-            </div>
+            <a href="<?= url('/') ?>" class="btn-logout">
+                <i class="bi bi-box-arrow-left"></i> Salir
+            </a>
         </div>
     </nav>
 
-    <div class="whatsapp-wrapper">
-        <div class="whatsapp-tooltip">
-            Empiece con su primer pedido aquí
-        </div>
-        <a href="https://wa.me/591XXXXXXXX" target="_blank" class="whatsapp-float" title="Contactar con Empleado">
-            <i class="bi bi-whatsapp"></i>
-        </a>
-    </div>
-
-    <div class="container" style="margin-top: 40px;">
+    <div class="container user-dashboard">
         
-        <div class="section-header-user">
-            <p class="text-muted small m-0">Historial de importaciones</p>
-            <h1 class="section-title-user">Estado de tu Pedido</h1>
-            <p class="text-muted m-0 mx-auto" style="max-width: 800px;">Visualiza el seguimiento en tiempo real de tu última importación.</p>
-        </div>
-
-        <div class="card border-0 mb-4 rounded-20" style="box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-            <div class="row g-0">
-                
-                <div class="col-md-8 border-end">
-                    <div class="order-tracking-section">
-                        <div class="order-tracking-stepper">
-                            
-                            <div class="tracking-step completed">
-                                <div class="date-col text-center">10 Oct</div>
-                                <div class="icon-indicator completed">
-                                    <i class="bi bi-cart-check"></i>
-                                </div>
-                                <div class="step-info">
-                                    <h5 class="fw-bold m-0" style="color: var(--negro);">Pedido Confirmado</h5>
-                                    <p class="small text-muted mb-0">Su pedido ha sido validado y está siendo procesado por el empleado.</p>
-                                </div>
-                            </div>
-
-                            <div class="tracking-step pending">
-                                <div class="date-col text-center">En espera</div>
-                                <div class="icon-indicator pending">
-                                    <i class="bi bi-globe-americas"></i>
-                                </div>
-                                <div class="step-info">
-                                    <h5 class="fw-bold m-0" style="color: var(--naranja);">En Tránsito Internacional</h5>
-                                    <p class="small text-muted mb-0">El producto ha sido adquirido y está en camino a nuestro almacén logístico.</p>
-                                </div>
-                            </div>
-
-                            <div class="tracking-step inactive">
-                                <div class="date-col text-center">En espera</div>
-                                <div class="icon-indicator inactive">
-                                    <i class="bi bi-boxes"></i>
-                                </div>
-                                <div class="step-info">
-                                    <h5 class="fw-bold m-0" style="color: var(--gris-oscuro);">En Almacén</h5>
-                                    <p class="small text-muted mb-0">El producto ha llegado a nuestro almacén en Bolivia y está siendo verificado.</p>
-                                </div>
-                            </div>
-
-                            <div class="tracking-step inactive">
-                                <div class="date-col text-center">En espera</div>
-                                <div class="icon-indicator inactive">
-                                    <i class="bi bi-file-earmark-bar-graph"></i>
-                                </div>
-                                <div class="step-info">
-                                    <h5 class="fw-bold m-0" style="color: var(--gris-oscuro);">Aduana Boliviana</h5>
-                                    <p class="small text-muted mb-0">Se está procediendo con el despacho y liquidación aduanera.</p>
-                                </div>
-                            </div>
-
-                            <div class="tracking-step inactive">
-                                <div class="date-col text-center">En espera</div>
-                                <div class="icon-indicator inactive">
-                                    <i class="bi bi-house-door-fill"></i>
-                                </div>
-                                <div class="step-info">
-                                    <h5 class="fw-bold m-0" style="color: var(--gris-oscuro);">Entregado</h5>
-                                    <p class="small text-muted mb-0">El producto está listo para ser recogido o entregado en tu dirección.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="card bg-naranja-header shadow-lg mb-5 border-0">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h2 class="fw-bold mb-1">Mis Importaciones</h2>
+                    <p class="mb-0 opacity-75">Revisa el detalle de tus pedidos activos y finalizados.</p>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="order-details-section">
-                        <div class="order-details-header">
-                            <p class="small text-muted m-0">Su Pedido ID:</p>
-                            <h3 class="fw-bold m-0" style="color: var(--negro);">#10</h3>
-                            <span class="badge bg-naranja mt-1">Confirmado</span>
-                        </div>
-                        
-                        <div class="order-details-info">
-                            <h6 class="fw-bold" style="color: var(--gris-oscuro);">Resumen del Pedido:</h6>
-                            <ul class="list-unstyled d-flex flex-column gap-1">
-                                <li><strong>Producto:</strong> Laptop Dell</li>
-                                <li><strong>Plataforma:</strong> Amazon</li>
-                                <li><strong>Categoría:</strong> Computadoras</li>
-                                <li><strong>Almacén Destino:</strong> Oruro - Pagador</li>
-                                <li><strong>Fecha Estimada de Entrega:</strong> 25/10/2026</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <h4 class="fw-bold m-0" style="color: var(--gris-oscuro);">Total a Pagar:</h4>
-                            <h2 class="fw-bold m-0 text-success">Bs 12,628</h2>
-                        </div>
-                    </div>
+                <div class="display-3 opacity-25">
+                    <i class="bi bi-box-seam-fill"></i>
                 </div>
-
             </div>
         </div>
 
+        <div class="row g-4">
+            <?php if (count($misPedidos) > 0): ?>
+                <?php foreach ($misPedidos as $pedido): 
+                    // Lógica simple para saber qué título ponerle a la tarjeta
+                    if (!empty($pedido['producto_importar'])) {
+                        $tituloProducto = $pedido['producto_importar'];
+                    } elseif (!empty($pedido['id_producto'])) {
+                        $tituloProducto = 'Catálogo Propio (ID #' . $pedido['id_producto'] . ')';
+                    } else {
+                        $tituloProducto = 'Pedido Estándar';
+                    }
+                ?>
+                <div class="col-md-6">
+                    <div class="card order-card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-dark rounded-pill px-3">ID #<?php echo $pedido['id_pedido']; ?></span>
+                            </div>
+
+                            <h5 class="fw-bold mb-3 text-dark">
+                                <i class="bi bi-tag-fill text-naranja me-2"></i>
+                                <?php echo $tituloProducto; ?>
+                            </h5>
+
+                            <div class="row mb-4">
+                                <div class="col-6 border-end">
+                                    <label class="text-muted small fw-bold text-uppercase d-block">Número DUI</label>
+                                    <span class="fw-bold text-naranja"><?php echo $pedido['nro_dui']; ?></span>
+                                </div>
+                                <div class="col-6 ps-3">
+                                    <label class="text-muted small fw-bold text-uppercase d-block">Monto Invertido</label>
+                                    <span class="fw-bold text-dark">Bs <?php echo number_format($pedido['total'], 2); ?></span>
+                                </div>
+                            </div>
+
+                            <div class="bg-light p-3 rounded-4 mb-4">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-geo-alt-fill text-naranja"></i>
+                                    <span class="small"><strong>Destino:</strong> <?php echo $pedido['ubicacion_clientes']; ?></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-event text-naranja"></i>
+                                    <span class="small"><strong>Fecha de registro:</strong> <?php echo date('d/m/Y', strtotime($pedido['fecha'])); ?></span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                                <span class="small fw-bold text-muted">ESTADO ACTUAL:</span>
+                                <div class="d-flex align-items-center gap-2 text-success fw-bold">
+                                    <span class="spinner-grow spinner-grow-sm" role="status"></span>
+                                    En Proceso de Aduana
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-inbox text-muted display-1"></i>
+                    <h4 class="mt-3 text-muted">Aún no tienes pedidos registrados.</h4>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

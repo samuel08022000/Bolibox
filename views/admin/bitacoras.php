@@ -48,12 +48,13 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="admin-layout">
     <div class="sidebar">
-        <div class="sidebar-header">
+    <div class="sidebar-header">
             <i class="bi bi-person-circle display-4 text-naranja"></i>
             <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
             <small class="text-muted">Panel de Control</small>
         </div>
-        <div class="nav flex-column mb-auto">
+    
+    <div class="nav flex-column mb-auto mt-3">
             <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
             <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>

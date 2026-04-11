@@ -1,15 +1,69 @@
+<?php
+require __DIR__ . '/../../config/database.php';
+
+$db = new Database();
+$con = $db->conectar();
+
+// ==========================================
+// 1. MÉTRICAS PARA LAS TARJETAS (CON BARRITAS)
+// ==========================================
+$sqlIngresos = $con->query("SELECT SUM(total) as ingresos FROM pedidos");
+$ingresos = $sqlIngresos->fetch(PDO::FETCH_ASSOC)['ingresos'];
+$ingresos = $ingresos ? $ingresos : 0; 
+
+$totalPedidos = $con->query("SELECT COUNT(*) as total FROM pedidos")->fetch(PDO::FETCH_ASSOC)['total'];
+$totalClientes = $con->query("SELECT COUNT(*) as total FROM clientes")->fetch(PDO::FETCH_ASSOC)['total'];
+$totalProductos = $con->query("SELECT COUNT(*) as total FROM producto")->fetch(PDO::FETCH_ASSOC)['total'];
+
+// ==========================================
+// 2. DATOS PARA LA GRÁFICA DE LÍNEAS (Últimos 7 días)
+// ==========================================
+$sqlGraficaActividad = $con->query("
+    SELECT fecha, COUNT(*) as cantidad 
+    FROM pedidos 
+    GROUP BY fecha 
+    ORDER BY fecha ASC 
+    LIMIT 7
+");
+$fechas = [];
+$cantidades = [];
+while($row = $sqlGraficaActividad->fetch(PDO::FETCH_ASSOC)) {
+    $fechas[] = date('d/m', strtotime($row['fecha']));
+    $cantidades[] = $row['cantidad'];
+}
+
+// ==========================================
+// 3. DATOS PARA LA GRÁFICA DE DONA (Propio vs Externo)
+// ==========================================
+$propio = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE id_producto IS NOT NULL")->fetch(PDO::FETCH_ASSOC)['total'];
+$externo = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE producto_importar IS NOT NULL")->fetch(PDO::FETCH_ASSOC)['total'];
+
+// ==========================================
+// 4. DATOS PARA LA TABLA CLÁSICA (Últimos 5)
+// ==========================================
+$sqlRecientes = $con->query("
+    SELECT p.id_pedido, p.fecha, p.total, p.ubicacion_clientes, c.nombre as cliente_nombre 
+    FROM pedidos p
+    LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+    ORDER BY p.fecha DESC 
+    LIMIT 5
+");
+$pedidosRecientes = $sqlRecientes->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Admin Dashboard</title>
+    <title>BOLIBOX - Dashboard Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { padding-top: 0; }
+        body { padding-top: 0; background-color: #f8f9fa;}
+        .chart-container { position: relative; height: 300px; width: 100%; }
     </style>
 </head>
 <body>
@@ -31,84 +85,146 @@
             <a class="sidebar-link" href="<?= url('admin/empleados') ?>"><i class="bi bi-person-badge-fill"></i> Empleados</a>
             <a class="sidebar-link" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
         </div>
-        <div class="p-3 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
-                <i class="bi bi-box-arrow-left"></i> Salir
-            </a>
+        <div class="p-3 mt-auto border-top">
+            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
         </div>
     </div>
 
     <div class="main-content">
-        <div class="admin-topbar">
+        <div class="admin-topbar mb-4">
             <div>
-                <h3 class="fw-bold m-0" style="color: var(--gris-oscuro);">Dashboard Overview</h3>
-                <p class="text-muted small m-0">Resumen logístico y financiero</p>
+                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Resumen del Sistema</h3>
+                <p class="text-muted small m-0">Monitoreo en tiempo real de Bolibox</p>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-light rounded-circle shadow-sm"><i class="bi bi-bell"></i></button>
+                <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-circle-fill small me-1"></i> Sistema Online</span>
             </div>
         </div>
 
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="widget-card widget-dark">
-                    <span class="label">Ingresos Totales</span>
-                    <i class="bi bi-currency-dollar widget-icon"></i>
-                    <span class="value">$ 12,628</span>
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem;">Ingresos Totales</h6>
+                            <div class="bg-light p-2 rounded-circle"><i class="bi bi-currency-dollar text-naranja" style="font-size: 1.2rem;"></i></div>
+                        </div>
+                        <h3 class="fw-bold mb-3">Bs <?php echo number_format($ingresos, 2); ?></h3>
+                        <div class="progress" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar" role="progressbar" style="width: 75%; background-color: var(--naranja);"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block"><i class="bi bi-arrow-up-short text-success"></i> 75% de la meta</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="widget-card">
-                    <span class="label">Pedidos Activos</span>
-                    <i class="bi bi-share widget-icon" style="color: var(--naranja);"></i>
-                    <span class="value">2,434</span>
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem;">Pedidos Activos</h6>
+                            <div class="bg-light p-2 rounded-circle"><i class="bi bi-cart-check text-primary" style="font-size: 1.2rem;"></i></div>
+                        </div>
+                        <h3 class="fw-bold mb-3"><?php echo $totalPedidos; ?></h3>
+                        <div class="progress" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 60%;"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block"><i class="bi bi-activity text-primary"></i> 60% capacidad operativa</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="widget-card">
-                    <span class="label">Clientes Nuevos</span>
-                    <i class="bi bi-hand-thumbs-up widget-icon" style="color: var(--naranja);"></i>
-                    <span class="value">1,259</span>
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem;">Clientes</h6>
+                            <div class="bg-light p-2 rounded-circle"><i class="bi bi-people text-success" style="font-size: 1.2rem;"></i></div>
+                        </div>
+                        <h3 class="fw-bold mb-3"><?php echo $totalClientes; ?></h3>
+                        <div class="progress" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%;"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block"><i class="bi bi-arrow-up-short text-success"></i> Crecimiento estable</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="widget-card">
-                    <span class="label">Calificación</span>
-                    <i class="bi bi-star-fill widget-icon" style="color: var(--naranja);"></i>
-                    <span class="value">4.8</span>
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem;">En Catálogo</h6>
+                            <div class="bg-light p-2 rounded-circle"><i class="bi bi-box-seam text-info" style="font-size: 1.2rem;"></i></div>
+                        </div>
+                        <h3 class="fw-bold mb-3"><?php echo $totalProductos; ?></h3>
+                        <div class="progress" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 40%;"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block"><i class="bi bi-arrow-repeat text-info"></i> Rotación activa</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
-                <div class="chart-container h-100">
-                    <div class="d-flex justify-content-between mb-3">
-                        <h6 class="fw-bold">Rendimiento Mensual</h6>
-                        <span class="badge bg-naranja">2026</span>
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-graph-up text-naranja me-2"></i>Tendencia de Entregas (Días)</h5>
+                    <div class="chart-container">
+                        <canvas id="lineChart"></canvas>
                     </div>
-                    <canvas id="barChart" height="100"></canvas>
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="chart-container h-100 d-flex flex-column">
-                    <h6 class="fw-bold mb-4">Ocupación de Almacenes</h6>
-                    <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative">
-                        <canvas id="donutChart"></canvas>
-                        <div class="position-absolute text-center" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                            <h3 class="fw-bold m-0" style="color: var(--gris-oscuro);">75%</h3>
-                            <small class="text-muted">Ocupado</small>
-                        </div>
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-pie-chart text-naranja me-2"></i>Tipo de Pedidos</h5>
+                    <div class="chart-container">
+                        <canvas id="doughnutChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-12">
-                <div class="chart-container">
-                    <h6 class="fw-bold mb-3">Flujo de Entregas (Últimos 7 días)</h6>
-                    <canvas id="lineChart" height="60"></canvas>
+        <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+            <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold m-0"><i class="bi bi-clock-history text-naranja me-2"></i>Últimos Pedidos Registrados</h5>
+                <a href="<?= url('admin/pedidos') ?>" class="btn btn-sm btn-outline-dark rounded-pill px-3">Ver Todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">ID Pedido</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Destino</th>
+                                <th>Monto Total</th>
+                                <th class="text-end pe-4">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(count($pedidosRecientes) > 0): ?>
+                                <?php foreach($pedidosRecientes as $pedido): ?>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-muted">#<?php echo $pedido['id_pedido']; ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($pedido['fecha'])); ?></td>
+                                    <td class="fw-bold text-dark"><?php echo $pedido['cliente_nombre'] ? $pedido['cliente_nombre'] : 'Cliente Eliminado'; ?></td>
+                                    <td><i class="bi bi-geo-alt text-naranja me-1"></i><?php echo $pedido['ubicacion_clientes']; ?></td>
+                                    <td class="fw-bold text-naranja">Bs <?php echo number_format($pedido['total'], 2); ?></td>
+                                    <td class="text-end pe-4">
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 border border-success">En Proceso</span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox display-4 mb-3 d-block opacity-50"></i>
+                                        No hay pedidos recientes en la base de datos.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -116,104 +232,51 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Variables de color alineadas con tu CSS actual
-    const colorNaranja = '#FF8C00';
-    const colorOscuro = '#212529'; // Gris oscuro que reemplazó al azul
-    const colorGris = '#e9ecef';
-
-    // 1. Inicialización del Gráfico de Barras
-    const ctxBar = document.getElementById('barChart');
-    if (ctxBar) {
-        new Chart(ctxBar.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep'],
-                datasets: [
-                    {
-                        label: 'Ingresos',
-                        data: [35, 45, 30, 50, 40, 60, 45, 35, 55],
-                        backgroundColor: colorOscuro,
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Gastos',
-                        data: [20, 25, 15, 30, 20, 35, 25, 20, 30],
-                        backgroundColor: colorNaranja,
-                        borderRadius: 4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: colorGris } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
+// Gráfica de Líneas
+const ctxLine = document.getElementById('lineChart').getContext('2d');
+new Chart(ctxLine, {
+    type: 'line',
+    data: {
+        labels: <?= json_encode($fechas) ?>,
+        datasets: [{
+            label: 'Pedidos por día',
+            data: <?= json_encode($cantidades) ?>,
+            borderColor: '#FF8C00',
+            backgroundColor: 'rgba(255, 140, 0, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
     }
+});
 
-    // 2. Inicialización del Gráfico de Dona
-    const ctxDonut = document.getElementById('donutChart');
-    if (ctxDonut) {
-        new Chart(ctxDonut.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Ocupado', 'Libre'],
-                datasets: [{
-                    data: [75, 25],
-                    backgroundColor: [colorOscuro, colorNaranja],
-                    borderWidth: 0,
-                    cutout: '75%' 
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
+// Gráfica de Dona
+const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+new Chart(ctxDoughnut, {
+    type: 'doughnut',
+    data: {
+        labels: ['Propio', 'Externo'],
+        datasets: [{
+            data: [<?= $propio ?>, <?= $externo ?>],
+            backgroundColor: ['#FF8C00', '#111827'],
+            hoverOffset: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
     }
-
-    // 3. Inicialización del Gráfico de Líneas
-    const ctxLine = document.getElementById('lineChart');
-    if (ctxLine) {
-        new Chart(ctxLine.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                datasets: [
-                    {
-                        label: 'Entregas',
-                        data: [10, 25, 15, 40, 20, 35, 25],
-                        borderColor: colorNaranja,
-                        backgroundColor: 'rgba(255, 140, 0, 0.2)', 
-                        fill: true,
-                        tension: 0.4 
-                    },
-                    {
-                        label: 'En Tránsito',
-                        data: [5, 15, 10, 20, 10, 25, 15],
-                        borderColor: colorOscuro,
-                        backgroundColor: 'rgba(33, 37, 41, 0.1)', 
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { display: false }, 
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    }
+});
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

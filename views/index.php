@@ -43,27 +43,26 @@
         </div>
       </div>
 
-      <div class="login-card">
-        <h3>Iniciar sesión</h3>
-        <p>Ingresa tus credenciales para acceder a tu panel y conocer el estado de tus paquetes en tiempo real.</p>
+      <div class="login-card" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); text-align: center; padding: 2.5rem 2rem; max-width: 400px; width: 100%;">
         
-        <form action="<?= url('login') ?>" method="POST">
-          <div class="form-group-login">
-            <input type="text" name="usuario" placeholder="Usuario" required />
-          </div>
-          <div class="form-group-login">
-            <input type="password" name="password" placeholder="Contraseña" required />
-          </div>
-          <button type="submit" class="btn-login-submit">
-            <i class="bi bi-box-arrow-in-right"></i> Ingresar
-          </button>
-        </form>
+        <div style="background-color: rgba(255, 140, 0, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+            <i class="bi bi-box-seam" style="font-size: 2rem; color: #FF8C00;"></i>
+        </div>
         
-        <div class="login-footer">
-          <i class="bi bi-person-plus"></i> ¿Aún no eres cliente? 
-          <a href="<?= url('registro') ?>">Regístrate aquí</a>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem;">¿Quieres hacer pedidos con nosotros?</h3>
+        <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1.8rem; line-height: 1.5;">Ingresa a tu cuenta para gestionar tus importaciones o regístrate totalmente gratis.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <a href="<?= url('login') ?>" style="display: block; width: 100%; background-color: #FF8C00; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease;">
+                <i class="bi bi-box-arrow-in-right" style="margin-right: 5px;"></i> Iniciar sesión
+            </a>
+            
+            <a href="<?= url('registro') ?>" style="display: block; width: 100%; background-color: #111827; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease;">
+                <i class="bi bi-person-plus" style="margin-right: 5px;"></i> Regístrate aquí
+            </a>
         </div>
       </div>
+
     </div>
   </section>
 
@@ -140,41 +139,61 @@
       </div>
 
       <div class="sucursales-grid">
-        <div class="card-sucursal">
-          <h3>Sucursal La Paz</h3>
+        
+        <div class="card-sucursal" style="display: flex; flex-direction: column;">
+          <h3 style="color: #FF8C00; margin-bottom: 1.5rem;">Sucursal La Paz</h3>
           <div class="info-line">
-            <i class="bi bi-geo-alt"></i>
+            <i class="bi bi-geo-alt" style="color: #FF8C00;"></i>
             <div><strong>Dirección:</strong> Zona San Pedro entre 20 de octubre y Otero de la Vega. Edificio Torre Mollinedo Nro 1628 piso 6 oficina 3.</div>
           </div>
           <div class="info-line">
-            <i class="bi bi-clock"></i>
+            <i class="bi bi-clock" style="color: #FF8C00;"></i>
             <div><strong>Horarios:</strong> Lunes a viernes de 8:30 a 12:30 / 14:30 a 18:30<br>Sábados de 9:00 a 13:00</div>
+          </div>
+          
+          <div style="margin-top: auto; padding-top: 1.5rem; text-align: center;">
+            <a href="https://maps.app.goo.gl/1e4ZvBLeX3WeV4R88" target="_blank" style="color: #4a5568; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease;">
+              <i class="bi bi-map"></i> Ver en mapa
+            </a>
           </div>
         </div>
 
-        <div class="card-sucursal">
-          <h3>Sucursal Cochabamba</h3>
+        <div class="card-sucursal" style="display: flex; flex-direction: column;">
+          <h3 style="color: #FF8C00; margin-bottom: 1.5rem;">Sucursal Cochabamba</h3>
           <div class="info-line">
-            <i class="bi bi-geo-alt"></i>
+            <i class="bi bi-geo-alt" style="color: #FF8C00;"></i>
             <div><strong>Dirección:</strong> Calle Alcides Arguedas esquina Manchay Puito Edif Akros PB oficina 1.</div>
           </div>
           <div class="info-line">
-            <i class="bi bi-clock"></i>
+            <i class="bi bi-clock" style="color: #FF8C00;"></i>
             <div><strong>Horarios:</strong> Lunes a viernes de 8:30 a 12:30 / 14:30 a 18:30<br>Sábados de 9:00 a 13:00</div>
+          </div>
+
+          <div style="margin-top: auto; padding-top: 1.5rem; text-align: center;">
+            <a href="https://maps.app.goo.gl/G9AsU1pfnSAc6geV6" target="_blank" style="color: #4a5568; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease;">
+              <i class="bi bi-map"></i> Ver en mapa
+            </a>
           </div>
         </div>
 
-        <div class="card-sucursal">
-          <h3>Sucursal Santa Cruz</h3>
+        <div class="card-sucursal" style="display: flex; flex-direction: column;">
+          <h3 style="color: #FF8C00; margin-bottom: 1.5rem;">Sucursal Santa Cruz</h3>
           <div class="info-line">
-            <i class="bi bi-geo-alt"></i>
+            <i class="bi bi-geo-alt" style="color: #FF8C00;"></i>
             <div><strong>Dirección:</strong> Entre 4to y 5to anillo (Zona Cambodromo), Calle 1 # 1225, Entre c/ transversal 1 y 2.<br><strong>BOLIBOX SRL</strong></div>
           </div>
           <div class="info-line">
-            <i class="bi bi-clock"></i>
+            <i class="bi bi-clock" style="color: #FF8C00;"></i>
             <div><strong>Horarios:</strong> Lunes a viernes de 8:30 a 12:30 / 14:30 a 18:30<br>Sábados de 9:00 a 13:00</div>
           </div>
+
+          <div style="margin-top: auto; padding-top: 1.5rem; text-align: center;">
+            <a href="https://maps.app.goo.gl/1e4ZvBLeX3WeV4R88" target="_blank" style="color: #4a5568; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease;">
+              <i class="bi bi-map"></i> Ver en mapa
+            </a>
+          </div>
         </div>
+
       </div>
     </div>
   </section>

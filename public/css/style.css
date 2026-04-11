@@ -499,38 +499,51 @@ nav a:hover, nav a.active {
     z-index: 1000;
 }
 
+/* Novedad: Header del sidebar modificado para destacar el logo */
 .sidebar-header {
-    padding: 30px 20px;
+    padding: 40px 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
+.sidebar-header i.logo-icon {
+    font-size: 3.5rem;
+    color: var(--naranja);
+    display: block;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 4px 8px rgba(255, 140, 0, 0.3));
+}
+
+/* Novedad: Enlaces flotantes con animación */
 .sidebar-link {
     color: #a0a0b5;
-    padding: 15px 24px;
+    padding: 16px 28px;
+    margin: 8px 15px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     font-weight: 500;
-    transition: all 0.3s ease;
     text-decoration: none;
-    border-left: 4px solid transparent;
+    border-radius: 12px;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .sidebar-link i {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
 }
 
 .sidebar-link:hover {
-    background-color: var(--sidebar-hover);
+    background-color: rgba(255, 140, 0, 0.1);
     color: var(--naranja);
-    border-left-color: var(--naranja);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-link.active {
-    background-color: var(--sidebar-hover);
-    color: var(--blanco);
-    border-left-color: var(--naranja);
+    background-color: var(--naranja);
+    color: var(--blanco) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(255, 140, 0, 0.3);
 }
 
 .main-content {
@@ -1059,12 +1072,10 @@ nav a:hover, nav a.active {
     color: #adb5bd;
 }
 
-/* Efecto hover interactivo en el contenedor de los inputs */
 .card-body form .mb-4:hover .form-label {
     color: var(--naranja);
 }
 
-/* Animación para el botón de confirmar en el formulario */
 .card-body form button[type="submit"] {
     transition: all 0.3s ease;
 }

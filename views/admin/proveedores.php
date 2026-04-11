@@ -12,7 +12,6 @@ $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,7 +34,8 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
             <small class="text-muted">Panel de Control</small>
         </div>
-        <div class="nav flex-column mb-auto">
+    
+    <div class="nav flex-column mb-auto mt-3">
             <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
             <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
@@ -64,7 +64,43 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-naranja text-white fw-bold"><i class="bi bi-plus-circle"></i> Nuevo Proveedor</button>
+            <button class="btn btn-naranja text-white fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelNuevoProveedor">
+                <i class="bi bi-plus-circle"></i> Nuevo Proveedor
+            </button>
+        </div>
+
+        <div class="collapse mb-4" id="panelNuevoProveedor">
+            <div class="card card-body border-top border-naranja border-4 shadow-sm" style="background-color: #fff;">
+                <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Registrar Proveedor</h5>
+                <form action="<?= url('admin/proveedores/guardar') ?>" method="POST">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Nombre Empresa</label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">País</label>
+                            <input type="text" name="pais" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Contacto</label>
+                            <input type="text" name="contacto" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Correo</label>
+                            <input type="email" name="correo" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Tipo Moneda</label>
+                            <input type="text" name="tipo_moneda" class="form-control" placeholder="Ej: USD, Bs" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-toggle="collapse" data-bs-target="#panelNuevoProveedor">Cancelar</button>
+                        <button type="submit" class="btn btn-naranja fw-bold text-white px-4">Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
         
         <div class="card">
@@ -79,25 +115,71 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Contacto</th>
                                 <th>Correo</th>
                                 <th>Tipo Moneda</th>
-                                <th>Acciones</th>
+                                <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($resultado as $row) { ?>
-    <tr>
-        <td><?php echo $row['id_proveedor']; ?></td>
-        <td><?php echo $row['nombre']; ?></td>
-        <td><?php echo $row['pais']; ?></td>
-        <td><?php echo $row['contacto']; ?></td>
-        <td><?php echo $row['correo']; ?></td>
-        <td><?php echo $row['tipo_moneda']; ?></td>
-        <td>
-            <button class="btn btn-sm btn-warning">Editar</button>
-            <button class="btn btn-sm btn-danger">Eliminar</button>
-        </td>
-    </tr>
-<?php } ?>
-                            </tbody>
+                            <tr>
+                                <td><?php echo $row['id_proveedor']; ?></td>
+                                <td><?php echo $row['nombre']; ?></td>
+                                <td><?php echo $row['pais']; ?></td>
+                                <td><?php echo $row['contacto']; ?></td>
+                                <td><?php echo $row['correo']; ?></td>
+                                <td><?php echo $row['tipo_moneda']; ?></td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarProv<?php echo $row['id_proveedor']; ?>" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    
+                                    <a href="<?= url('admin/proveedores/eliminar?id=' . $row['id_proveedor']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Estás seguro de eliminar este proveedor?');" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="modalEditarProv<?php echo $row['id_proveedor']; ?>" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="border-radius: 12px; border: none;">
+                                        <div class="modal-header bg-negro text-white">
+                                            <h5 class="modal-title fw-bold">Editar Proveedor #<?php echo $row['id_proveedor']; ?></h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="<?= url('admin/proveedores/actualizar') ?>" method="POST">
+                                            <div class="modal-body p-4">
+                                                <input type="hidden" name="id_proveedor" value="<?php echo $row['id_proveedor']; ?>">
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">Empresa</label>
+                                                    <input type="text" name="nombre" class="form-control" value="<?php echo $row['nombre']; ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">Contacto</label>
+                                                    <input type="text" name="contacto" class="form-control" value="<?php echo $row['contacto']; ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">País</label>
+                                                    <input type="text" name="pais" class="form-control" value="<?php echo $row['pais']; ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">Correo</label>
+                                                    <input type="email" name="correo" class="form-control" value="<?php echo $row['correo']; ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">Tipo Moneda</label>
+                                                    <input type="text" name="tipo_moneda" class="form-control" value="<?php echo $row['tipo_moneda']; ?>" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer bg-light border-0">
+                                                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary fw-bold px-4">Actualizar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php } ?>
+                        </tbody>
                     </table>
                 </div>
             </div>
