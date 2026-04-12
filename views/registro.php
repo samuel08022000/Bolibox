@@ -45,7 +45,7 @@
             <h3 class="fw-bold mb-1" style="color: #111827;">Crear Cuenta</h3>
             <p class="text-muted mb-4">Ingresa tus datos personales para comenzar.</p>
 
-            <form action="<?= url('registro') ?>" method="POST">
+            <form action="<?= url('registro/guardar') ?>" method="POST">
                 
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="nombreCompleto" name="nombre" placeholder="Juan Pérez" required>

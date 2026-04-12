@@ -45,7 +45,7 @@
             <h3 class="fw-bold mb-1" style="color: #111827;">Iniciar Sesión</h3>
             <p class="text-muted mb-4">Ingresa tus credenciales para continuar.</p>
 
-            <form action="<?= url('cliente') ?>" method="POST">
+            <form action="<?= url('login/ingresar') ?>" method="POST">
                 
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>

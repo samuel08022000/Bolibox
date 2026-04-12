@@ -1,24 +1,38 @@
 <?php
-require __DIR__ . '/../../config/database.php';
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
+    header("Location: " . url('login')); 
+    exit;
+}
+?>
+require_once __DIR__ . '/../../config/database.php';
 
 $db = new Database();
 $con = $db->conectar();
 
+// Combinamos la consulta: Traemos los IDs para usar internamente y los Nombres para mostrar al usuario
 $sql = $con->prepare("
-    SELECT id_stock, id_producto, id_almacen, cantidad
-    FROM stock
+    SELECT 
+        s.id_stock,
+        s.id_producto,
+        s.id_almacen,
+        p.nombre AS producto,
+        a.nombre AS almacen,
+        s.cantidad
+    FROM stock s
+    JOIN producto p ON s.id_producto = p.id_producto
+    JOIN almacen a ON s.id_almacen = a.id_almacen
 ");
 $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Stock</title>
+    <title>BOLIBOX - Gestión de Stock</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
@@ -29,14 +43,14 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <div class="admin-layout">
-<div class="sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar">
+        <div class="sidebar-header">
             <i class="bi bi-person-circle display-4 text-naranja"></i>
             <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
             <small class="text-muted">Panel de Control</small>
         </div>
-    
-    <div class="nav flex-column mb-auto mt-3">
+        
+        <div class="nav flex-column mb-auto mt-3">
             <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
             <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
@@ -56,8 +70,8 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     <div class="main-content">
         <div class="admin-topbar">
             <div>
-                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Control de Stock</h3>
-                <p class="text-muted small m-0">Inventario disponible en los almacenes</p>
+                <h3 class="fw-bold m-0" style="color:#1a1a2e;">Gestión de Stock</h3>
+                <p class="text-muted small m-0">Control de inventario de productos</p>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <button class="btn btn-light rounded-circle shadow-sm"><i class="bi bi-bell"></i></button>
@@ -102,9 +116,9 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>ID Stock</th>
-                                <th>ID Producto</th>
-                                <th>ID Almacén</th>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Almacén</th>
                                 <th>Cantidad</th>
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
@@ -112,12 +126,16 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                         <tbody>
                             <?php foreach ($resultado as $row) { ?>
                             <tr>
-                                <td><?php echo $row['id_stock']; ?></td>
-                                <td><?php echo $row['id_producto']; ?></td>
-                                <td><?php echo $row['id_almacen']; ?></td>
-                                <td><span class="badge bg-success" style="font-size: 0.9rem;"><?php echo $row['cantidad']; ?></span></td>
+                                <td><?= $row['id_stock']; ?></td>
+                                <td><?= $row['producto']; ?></td>
+                                <td><?= $row['almacen']; ?></td>
+                                <td>
+                                    <span class="badge <?= $row['cantidad'] < 5 ? 'bg-danger' : 'bg-success' ?>" style="font-size: 0.9rem;">
+                                        <?= $row['cantidad']; ?>
+                                    </span>
+                                </td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarStock<?php echo $row['id_stock']; ?>" title="Editar">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarStock<?= $row['id_stock']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <a href="<?= url('admin/stock/eliminar?id=' . $row['id_stock']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Estás seguro de eliminar este registro de stock?');" title="Eliminar">
@@ -126,19 +144,25 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                             </tr>
 
-                            <div class="modal fade" id="modalEditarStock<?php echo $row['id_stock']; ?>" tabindex="-1">
+                            <div class="modal fade" id="modalEditarStock<?= $row['id_stock']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content" style="border-radius: 12px; border: none;">
                                         <div class="modal-header bg-negro text-white">
-                                            <h5 class="modal-title fw-bold">Ajustar Stock #<?php echo $row['id_stock']; ?></h5>
+                                            <h5 class="modal-title fw-bold">Ajustar Stock #<?= $row['id_stock']; ?></h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
                                         <form action="<?= url('admin/stock/actualizar') ?>" method="POST">
                                             <div class="modal-body p-4 text-start">
-                                                <input type="hidden" name="id_stock" value="<?php echo $row['id_stock']; ?>">
+                                                <input type="hidden" name="id_stock" value="<?= $row['id_stock']; ?>">
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase">Producto</label>
+                                                    <input type="text" class="form-control" value="<?= $row['producto']; ?>" disabled>
+                                                </div>
+
                                                 <div class="mb-3">
                                                     <label class="form-label text-muted small fw-bold text-uppercase">Nueva Cantidad</label>
-                                                    <input type="number" name="cantidad" class="form-control" value="<?php echo $row['cantidad']; ?>" required>
+                                                    <input type="number" name="cantidad" class="form-control" value="<?= $row['cantidad']; ?>" required>
                                                 </div>
                                             </div>
                                             <div class="modal-footer bg-light border-0">
@@ -155,6 +179,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

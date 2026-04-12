@@ -1,5 +1,12 @@
+
 <?php
-require __DIR__ . '/../../config/database.php';
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
+    header("Location: " . url('login')); 
+    exit;
+}
+?>
+require_once __DIR__ . '/../../config/database.php';
 
 $db = new Database();
 $con = $db->conectar();
