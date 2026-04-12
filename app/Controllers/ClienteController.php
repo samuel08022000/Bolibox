@@ -10,10 +10,11 @@ class ClienteController {
     }
 
     public function index() {
-        require_once __DIR__ . '/../../views/admin/clientes.php';
-    }
-
-    public function nuevo() {
+        // Traemos todos los clientes para la tabla
+        $sql = $this->conn->prepare("SELECT id_cliente, nombre, nit, telefono, ciudad FROM clientes");
+        $sql->execute();
+        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+        
         require_once __DIR__ . '/../../views/admin/clientes.php';
     }
 

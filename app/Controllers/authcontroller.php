@@ -8,47 +8,48 @@ class AuthController {
     public function __construct() {
         $db = new Database();
         $this->conn = $db->conectar();
-        // 🔥 CORRECCIÓN 1: Eliminamos el session_start() de aquí porque ya está en index.php
     }
 
     public function guardar() {
         try {
             $this->conn->beginTransaction();
 
-            // 📥 DATOS DEL FORM
+            // Datos del formulario
             $nombre = $_POST['nombre'];
             $nit = $_POST['ci'];
             $telefono = $_POST['telefono'];
-            $ciudad = "La Paz"; // o $_POST si luego lo agregas
+            $ciudad = "La Paz"; 
             $email = $_POST['email'];
-            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $rol = 'cliente'; // 🔥 importante
+            $password = $_POST['password']; // Se guarda normal, sin encriptar
+            $rol = 'cliente'; 
             $estado = 1;
 
-            // 🔍 verificar email
+            // Verificar si el correo ya existe
             $check = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
             $check->execute([$email]);
 
             if ($check->fetch()) {
                 echo "<script>alert('Correo ya registrado'); window.history.back();</script>";
-                exit; // Añadido exit
+                exit;
             }
 
-            // 🧾 1. INSERTAR CLIENTE
-            $sqlCliente = $this->conn->prepare("
-                INSERT INTO clientes (nombre, nit, telefono, ciudad)
-                VALUES (?, ?, ?, ?)
-            ");
-            $sqlCliente->execute([$nombre, $nit, $telefono, $ciudad]);
-
-            // 👤 2. INSERTAR USUARIO
-            $username = explode("@", $email)[0]; // ejemplo: user@gmail → user
-
+            // 1. Insertar en la tabla USUARIOS
+            $username = explode("@", $email)[0]; 
             $sqlUsuario = $this->conn->prepare("
                 INSERT INTO usuarios (username, email, password_hash, rol, estado)
                 VALUES (?, ?, ?, ?, ?)
             ");
             $sqlUsuario->execute([$username, $email, $password, $rol, $estado]);
+
+            // Obtenemos el ID del usuario que se acaba de crear
+            $id_usuario_nuevo = $this->conn->lastInsertId();
+
+            // 2. Insertar en la tabla CLIENTES (vinculándolo con el ID de usuario)
+            $sqlCliente = $this->conn->prepare("
+                INSERT INTO clientes (id_usuario, nombre, nit, telefono, ciudad)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $sqlCliente->execute([$id_usuario_nuevo, $nombre, $nit, $telefono, $ciudad]);
 
             $this->conn->commit();
 
@@ -56,7 +57,7 @@ class AuthController {
                 alert('Cuenta creada correctamente. Ahora inicia sesión.');
                 window.location.href = '/BOLIBOX/login';
             </script>";
-            exit; // Añadido exit
+            exit;
 
         } catch (Exception $e) {
             $this->conn->rollBack();
@@ -65,22 +66,25 @@ class AuthController {
     }
 
     public function login() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $email = $_POST['email'];
         $password = $_POST['password'];
 
+        // Buscamos que el email y la contraseña coincidan directamente
         $sql = $this->conn->prepare("
-            SELECT * FROM usuarios WHERE email = ?
+            SELECT * FROM usuarios WHERE email = ? AND password_hash = ? AND estado = 1
         ");
-        $sql->execute([$email]);
+        $sql->execute([$email, $password]);
 
         $user = $sql->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash'])) {
-
-            // Guardamos al usuario en la sesión
+        if ($user) {
             $_SESSION['usuario'] = $user;
 
-            // 🔥 CORRECCIÓN 2 Y 3: Añadimos al 'cliente' y ponemos los 'exit;'
+            // Redirección por ROLES
             if ($user['rol'] == 'admin') {
                 header("Location: /BOLIBOX/admin");
                 exit;
@@ -94,13 +98,16 @@ class AuthController {
 
         } else {
             echo "<script>alert('Correo o contraseña incorrectos'); window.history.back();</script>";
-            exit; // Añadido exit
+            exit;
         }
     }
 
     public function logout() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         session_destroy();
         header("Location: /BOLIBOX/");
-        exit; // Añadido exit
+        exit;
     }
 }

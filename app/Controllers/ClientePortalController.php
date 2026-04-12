@@ -6,61 +6,62 @@ class ClientePortalController {
     private $conn;
 
     public function __construct() {
-        // Conectamos a la base de datos cada vez que se llame a este controlador
         $db = new Database();
         $this->conn = $db->conectar();
     }
 
+    // 1. Dashboard del Cliente
     public function dashboard() {
         require_once __DIR__ . '/../../views/cliente/cliente.php';
     }
 
-    // 🔥 AHORA SÍ BUSCAMOS LOS PRODUCTOS ANTES DE MOSTRAR LA VISTA
+    // 2. Nuestro Catálogo (Trae productos)
     public function nuestroCatalogo() {
         try {
             $sql = $this->conn->prepare("SELECT * FROM producto");
             $sql->execute();
-            $productos = $sql->fetchAll(PDO::FETCH_ASSOC); // Guardamos todo en $productos
+            $productos = $sql->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            $productos = []; // Si hay error, mandamos un array vacío para que no explote
+            $productos = [];
         }
-
         require_once __DIR__ . '/../../views/cliente/nuestro_catalogo.php';
     }
 
+    // 3. Catálogos Asociados (Amazon, Alibaba)
     public function catalogosAsociados() {
         require_once __DIR__ . '/../../views/cliente/catalogo.php'; 
     }
 
-    // 🔥 AHORA BUSCAMOS LOS PEDIDOS DEL CLIENTE
+    // 4. Mis Pedidos (Busca solo los pedidos del cliente logueado)
     public function misPedidos() {
+        // Necesitamos leer la sesión para saber qué cliente está conectado
         if (session_status() == PHP_SESSION_NONE) { session_start(); }
         
-        $misPedidos = []; // Array vacío por defecto
+        $misPedidos = []; 
         
         try {
-            // Asumiendo que guardamos el id_usuario en la sesión al loguearse
             $id_usuario = $_SESSION['usuario']['id_usuario'] ?? 0;
 
-            // Primero buscamos cuál es su id_cliente asociado (por las tablas que me mostraste antes)
+            // Buscamos su ID de cliente
             $sqlCliente = $this->conn->prepare("SELECT id_cliente FROM clientes WHERE id_usuario = ?");
             $sqlCliente->execute([$id_usuario]);
             $cliente = $sqlCliente->fetch(PDO::FETCH_ASSOC);
 
+            // Si es cliente, traemos sus pedidos
             if ($cliente) {
-                // Si encontramos al cliente, buscamos sus pedidos
                 $id_cliente = $cliente['id_cliente'];
                 $sqlPedidos = $this->conn->prepare("SELECT * FROM pedidos WHERE id_cliente = ?");
                 $sqlPedidos->execute([$id_cliente]);
-                $misPedidos = $sqlPedidos->fetchAll(PDO::FETCH_ASSOC); // Guardamos en $misPedidos
+                $misPedidos = $sqlPedidos->fetchAll(PDO::FETCH_ASSOC);
             }
         } catch (Exception $e) {
-            $misPedidos = []; // Evitamos que explote si la tabla no existe o algo falla
+            $misPedidos = []; 
         }
 
         require_once __DIR__ . '/../../views/cliente/pedidos.php';
     }
 
+    // 5. Chatbot IA
     public function chatbot() {
         require_once __DIR__ . '/../../views/cliente/chatbot.php';
     }

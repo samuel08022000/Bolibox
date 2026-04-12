@@ -5,18 +5,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     exit;
 }
 ?>
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-$sql = $con->prepare("
-    SELECT id_empleado, id_usuario, nombre, cargo, ci, celular 
-    FROM empleados
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-?>
 
 <!DOCTYPE html>
 <html lang="es">

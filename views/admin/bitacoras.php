@@ -1,42 +1,12 @@
 <?php
+// 1. EL CANDADO (Protegiendo la pestaña)
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
+// 🔥 AQUÍ CERRAMOS EL PHP (Ya no hay consultas a la base de datos aquí)
 ?>
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-$sql = $con->prepare("
-    SELECT 
-        'ALMACEN' AS tipo,
-        accion,
-        fecha,
-        descripcion,
-        id_empleado,
-        'almacen' AS tabla
-    FROM bitacora_almacen
-
-    UNION ALL
-
-    SELECT 
-        'VENTA' AS tipo,
-        accion,
-        fecha,
-        descripcion,
-        id_empleado,
-        tabla
-    FROM bitacora_ventas
-
-    ORDER BY fecha DESC
-");
-
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -54,13 +24,13 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="admin-layout">
     <div class="sidebar">
-    <div class="sidebar-header">
+        <div class="sidebar-header">
             <i class="bi bi-person-circle display-4 text-naranja"></i>
             <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
             <small class="text-muted">Panel de Control</small>
         </div>
     
-    <div class="nav flex-column mb-auto mt-3">
+        <div class="nav flex-column mb-auto mt-3">
             <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
             <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
             <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
@@ -71,7 +41,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             <a class="sidebar-link active" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
         </div>
         <div class="p-3 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
+            <a href="<?= url('logout') ?>" class="btn btn-outline-danger w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
                 <i class="bi bi-box-arrow-left"></i> Salir
             </a>
         </div>
@@ -94,26 +64,41 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>ID Bitácora</th>
+                                <th>Tipo / Origen</th>
                                 <th>Acción Realizada</th>
                                 <th>Fecha</th>
-                                <th>ID Referencia (Prod/Pedido)</th>
+                                <th>Descripción / Ref.</th>
                                 <th>ID Empleado</th>
-                                <th>En</th>
+                                <th>Tabla</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($resultado as $row) { ?>
-<tr>
-    <td><?php echo $row['tipo']; ?></td>
-    <td><?php echo $row['accion']; ?></td>
-    <td><?php echo $row['fecha']; ?></td>
-    <td><?php echo $row['descripcion']; ?></td>
-    <td><?php echo $row['id_empleado']; ?></td>
-    <td><?php echo $row['tabla']; ?></td>
-</tr>
-<?php } ?>
-                             </tbody>
+                            <?php if(!empty($resultado)): ?>
+                                <?php foreach ($resultado as $row): ?>
+                                <tr>
+                                    <td>
+                                        <?php if($row['tipo'] == 'ALMACEN'): ?>
+                                            <span class="badge bg-primary">Almacén</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">Venta</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="fw-bold"><?php echo $row['accion']; ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($row['fecha'])); ?></td>
+                                    <td><?php echo $row['descripcion']; ?></td>
+                                    <td><i class="bi bi-person-badge me-1 text-muted"></i> #<?php echo $row['id_empleado']; ?></td>
+                                    <td><span class="badge bg-light text-dark border"><?php echo $row['tabla']; ?></span></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="bi bi-journal-x display-6 d-block mb-2 opacity-50"></i>
+                                        No hay registros en la bitácora todavía.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
                     </table>
                 </div>
             </div>

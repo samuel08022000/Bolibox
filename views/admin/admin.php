@@ -1,63 +1,11 @@
-
 <?php
+// 1. EL CANDADO DE SEGURIDAD (Obligatorio en la primera línea)
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
 ?>
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-// ==========================================
-// 1. MÉTRICAS PARA LAS TARJETAS (CON BARRITAS)
-// ==========================================
-$sqlIngresos = $con->query("SELECT SUM(total) as ingresos FROM pedidos");
-$ingresos = $sqlIngresos->fetch(PDO::FETCH_ASSOC)['ingresos'];
-$ingresos = $ingresos ? $ingresos : 0; 
-
-$totalPedidos = $con->query("SELECT COUNT(*) as total FROM pedidos")->fetch(PDO::FETCH_ASSOC)['total'];
-$totalClientes = $con->query("SELECT COUNT(*) as total FROM clientes")->fetch(PDO::FETCH_ASSOC)['total'];
-$totalProductos = $con->query("SELECT COUNT(*) as total FROM producto")->fetch(PDO::FETCH_ASSOC)['total'];
-
-// ==========================================
-// 2. DATOS PARA LA GRÁFICA DE LÍNEAS (Últimos 7 días)
-// ==========================================
-$sqlGraficaActividad = $con->query("
-    SELECT fecha, COUNT(*) as cantidad 
-    FROM pedidos 
-    GROUP BY fecha 
-    ORDER BY fecha ASC 
-    LIMIT 7
-");
-$fechas = [];
-$cantidades = [];
-while($row = $sqlGraficaActividad->fetch(PDO::FETCH_ASSOC)) {
-    $fechas[] = date('d/m', strtotime($row['fecha']));
-    $cantidades[] = $row['cantidad'];
-}
-
-// ==========================================
-// 3. DATOS PARA LA GRÁFICA DE DONA (Propio vs Externo)
-// ==========================================
-$propio = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE id_producto IS NOT NULL")->fetch(PDO::FETCH_ASSOC)['total'];
-$externo = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE producto_importar IS NOT NULL")->fetch(PDO::FETCH_ASSOC)['total'];
-
-// ==========================================
-// 4. DATOS PARA LA TABLA CLÁSICA (Últimos 5)
-// ==========================================
-$sqlRecientes = $con->query("
-    SELECT p.id_pedido, p.fecha, p.total, p.ubicacion_clientes, c.nombre as cliente_nombre 
-    FROM pedidos p
-    LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
-    ORDER BY p.fecha DESC 
-    LIMIT 5
-");
-$pedidosRecientes = $sqlRecientes->fetchAll(PDO::FETCH_ASSOC);
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -93,7 +41,7 @@ $pedidosRecientes = $sqlRecientes->fetchAll(PDO::FETCH_ASSOC);
             <a class="sidebar-link" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
         </div>
         <div class="p-3 mt-auto border-top">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
+            <a href="<?= url('logout') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
         </div>
     </div>
 

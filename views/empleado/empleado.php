@@ -6,16 +6,6 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     exit;
 }
 ?>
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-// Traemos los productos propios de la base de datos para armar la lista
-$sql = $con->prepare("SELECT id_producto, nombre, precio_unitario FROM producto");
-$sql->execute();
-$productosPropios = $sql->fetchAll(PDO::FETCH_ASSOC);
-?>
 
 <!DOCTYPE html>
 <html lang="es">

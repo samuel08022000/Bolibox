@@ -10,10 +10,10 @@ class ProveedorController {
     }
 
     public function index() {
-        require_once __DIR__ . '/../../views/admin/proveedores.php';
-    }
-
-    public function nuevo() {
+        $sql = $this->conn->prepare("SELECT id_proveedor, nombre, pais, contacto, correo, tipo_moneda FROM proveedor");
+        $sql->execute();
+        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+        
         require_once __DIR__ . '/../../views/admin/proveedores.php';
     }
 
@@ -22,7 +22,7 @@ class ProveedorController {
         $sql = $this->conn->prepare("SELECT * FROM proveedor WHERE id_proveedor = ?");
         $sql->execute([$id]);
         $proveedor = $sql->fetch(PDO::FETCH_ASSOC);
-        require_once __DIR__ . '/../../views/admin/proveedores.php'; // Aquí el modal de edición se activaría con los datos de $proveedor
+        require_once __DIR__ . '/../../views/admin/proveedores.php';
     }
 
     public function guardar() {

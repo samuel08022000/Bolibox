@@ -6,15 +6,6 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     exit;
 }
 ?>
-require_once __DIR__ . '/../../config/database.php';
-$db = new Database(); 
-$con = $db->conectar();
-$sql = $con->prepare("
-SELECT id_cliente, nombre, nit, telefono, ciudad FROM clientes
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

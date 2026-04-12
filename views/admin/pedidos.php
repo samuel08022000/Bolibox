@@ -4,26 +4,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-?>
-require_once __DIR__ . '/../../config/database.php';
 
-$db = new Database();
-$con = $db->conectar();
-
-// Traemos los productos propios para las listas desplegables
-$sqlProd = $con->prepare("SELECT id_producto, nombre, precio_unitario FROM producto");
-$sqlProd->execute();
-$productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
-
-// Traemos los pedidos con un LEFT JOIN para ver el nombre del producto si es propio
-$sql = $con->prepare("
-    SELECT p.id_pedido, p.fecha, p.total, p.ubicacion_clientes, p.nro_dui, p.id_cliente, p.id_empleado, p.id_producto, p.producto_importar, pr.nombre as nombre_producto
-    FROM pedidos p
-    LEFT JOIN producto pr ON p.id_producto = pr.id_producto
-    ORDER BY p.fecha DESC
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -79,56 +60,69 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             <div class="card card-body border-top border-naranja border-4 shadow-sm bg-white">
                 <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Registrar Pedido</h5>
                 <form action="<?= url('admin/pedidos/guardar') ?>" method="POST">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Origen del Producto</label>
-                            <select id="tipoProdAdmin" class="form-select border-naranja bg-light" onchange="toggleProdAdmin()" required>
-                                <option value="propio">Producto Propio (Catálogo Bolibox)</option>
-                                <option value="externo">Importación Externa (Amazon, Alibaba)</option>
-                            </select>
-                        </div>
+    <h6 class="fw-bold text-naranja border-bottom pb-2 mb-3">1. Datos del Cliente</h6>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label text-muted small fw-bold text-uppercase">Nombre Completo</label>
+            <input type="text" name="nombre" class="form-control bg-light" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label text-muted small fw-bold text-uppercase">NIT / CI</label>
+            <input type="text" name="nit" class="form-control bg-light" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
+            <input type="tel" name="telefono" class="form-control bg-light" required>
+        </div>
+        <div class="col-md-6 mb-4">
+            <label class="form-label text-muted small fw-bold text-uppercase">Ubicación</label>
+            <input type="text" name="ubicacion" class="form-control bg-light" required>
+        </div>
+    </div>
 
-                        <div id="divPropioAdmin" class="col-md-12 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Seleccionar Producto</label>
-                            <select name="id_producto" id="selectPropioAdmin" class="form-select bg-light">
-                                <option value="">-- Selecciona un producto --</option>
-                                <?php foreach ($productosPropios as $p): ?>
-                                    <option value="<?= $p['id_producto'] ?>">ID: #<?= $p['id_producto'] ?> - <?= $p['nombre'] ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+    <h6 class="fw-bold text-naranja border-bottom pb-2 mb-3">2. Detalle del Pedido</h6>
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <label class="form-label text-muted small fw-bold text-uppercase">Origen del Producto</label>
+            <select id="tipoProdAdmin" class="form-select border-naranja bg-light" onchange="toggleProdAdmin()" required>
+                <option value="propio">Producto Propio (Catálogo Bolibox)</option>
+                <option value="externo">Importación Externa (Amazon, Alibaba)</option>
+            </select>
+        </div>
 
-                        <div id="divExternoAdmin" class="col-md-12 mb-3" style="display:none;">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Producto a Importar</label>
-                            <input type="text" name="producto_importar" id="inputExternoAdmin" class="form-control bg-light" placeholder="Ej: Laptop Dell (Link)">
-                        </div>
+        <div id="divPropioAdmin" class="col-md-12 mb-3">
+            <label class="form-label text-muted small fw-bold text-uppercase">Seleccionar Producto</label>
+            <select name="id_producto" id="selectPropioAdmin" class="form-select bg-light">
+                <option value="">-- Selecciona un producto --</option>
+                <?php foreach ($productosPropios as $p): ?>
+                    <option value="<?= $p['id_producto'] ?>">ID: #<?= $p['id_producto'] ?> - <?= $p['nombre'] ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Ubicación Cliente</label>
-                            <input type="text" name="ubicacion" class="form-control" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
-                            <input type="text" name="nro_dui" class="form-control" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Total (Bs)</label>
-                            <input type="number" step="0.01" name="total" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">ID Cliente</label>
-                            <input type="number" name="id_cliente" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">ID Empleado</label>
-                            <input type="number" name="id_empleado" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end gap-2 mt-2">
-                        <button type="button" class="btn btn-light fw-bold" data-bs-toggle="collapse" data-bs-target="#panelNuevoPedido">Cancelar</button>
-                        <button type="submit" class="btn btn-naranja fw-bold text-white px-4">Guardar</button>
-                    </div>
-                </form>
+        <div id="divExternoAdmin" class="col-md-12 mb-3" style="display:none;">
+            <label class="form-label text-muted small fw-bold text-uppercase">Producto a Importar</label>
+            <input type="text" name="producto_importar" id="inputExternoAdmin" class="form-control bg-light" placeholder="Ej: Laptop Dell (Link)">
+        </div>
+
+        <div class="col-md-4 mb-4 mt-2">
+            <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
+            <input type="text" name="nro_dui" class="form-control bg-light" required>
+        </div>
+        <div class="col-md-4 mb-4 mt-2">
+            <label class="form-label text-muted small fw-bold text-uppercase">ID Empleado</label>
+            <input type="number" name="id_empleado" class="form-control bg-light" required>
+        </div>
+        <div class="col-md-4 mb-4 mt-2">
+            <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
+            <input type="number" step="0.01" name="total" class="form-control border-naranja" style="background-color: #fffaf0;" required>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-2">
+        <button type="button" class="btn btn-light fw-bold" data-bs-toggle="collapse" data-bs-target="#panelNuevoPedido">Cancelar</button>
+        <button type="submit" class="btn btn-naranja fw-bold text-white px-4">Guardar</button>
+    </div>
+</form>
             </div>
         </div>
         
