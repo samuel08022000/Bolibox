@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <style>
         body.login-page {
-            /* Imagen de fondo con capa oscura profesional */
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                         url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;

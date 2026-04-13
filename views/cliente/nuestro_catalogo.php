@@ -10,7 +10,6 @@ require_once __DIR__ . '/../../config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-// Traemos los productos de la base de datos
 $sql = $con->prepare("SELECT id_producto, nombre, descripcion, categoria, precio_unitario FROM producto");
 $sql->execute();
 $productos = $sql->fetchAll(PDO::FETCH_ASSOC);

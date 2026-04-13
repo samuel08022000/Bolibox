@@ -138,7 +138,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                         </thead>
                         <tbody>
                             <?php foreach ($resultado as $row) { 
-                                // Determinar qué nombre mostrar en la tabla
                                 $nombreAMostrar = !empty($row['producto_importar']) ? $row['producto_importar'] : (!empty($row['id_producto']) ? $row['nombre_producto'] : 'Sin asignar');
                             ?>
 
@@ -156,7 +155,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                     <td class="fw-bold">Bs <?= $row['total']; ?></td>
                                     <td><?= $row['nro_dui']; ?></td>
 
-                                    <!-- 🔥 ESTO FALTABA -->
                                     <td><?= $row['cliente_nombre']; ?></td>
                                     <td><?= $row['ciudad_cliente'] ?? $row['ubicacion_clientes'] ?? 'Sin ciudad' ?></td>
 
@@ -243,7 +241,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Toggle para el formulario Nuevo Pedido
+
 function toggleProdAdmin() {
     var tipo = document.getElementById("tipoProdAdmin").value;
     if (tipo === "propio") {
@@ -257,7 +255,6 @@ function toggleProdAdmin() {
     }
 }
 
-// Toggle para los Modales de Edición (Dinámicos por ID)
 function toggleEdit(id) {
     var tipo = document.getElementById("tipoEdit" + id).value;
     if (tipo === "propio") {

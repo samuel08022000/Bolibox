@@ -33,10 +33,22 @@ class ClienteController {
     }
 
     public function actualizar() {
-        $sql = $this->conn->prepare("UPDATE clientes SET nombre=?, nit=?, telefono=?, ciudad=? WHERE id_cliente=?");
-        $sql->execute([$_POST['nombre'], $_POST['nit'], $_POST['telefono'], $_POST['ciudad'], $_POST['id_cliente']]);
-        header("Location: " . url('admin/clientes'));
-    }
+    $sql = $this->conn->prepare("
+        UPDATE clientes 
+        SET nombre=?, telefono=?, ciudad=? 
+        WHERE id_cliente=?
+    ");
+
+    $sql->execute([
+        $_POST['nombre'],
+        $_POST['telefono'],
+        $_POST['ciudad'],
+        $_POST['id_cliente']
+    ]);
+
+    header("Location: " . url('admin/clientes'));
+}
+    
 
     public function eliminar() {
         $id = $_GET['id'] ?? null;

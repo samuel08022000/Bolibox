@@ -10,8 +10,6 @@ require_once __DIR__ . '/../../config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-
-// Consulta súper limpia y directa solo a la tabla pedidos
 $sql = $con->prepare("
     SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar 
     FROM pedidos 
@@ -93,7 +91,6 @@ $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
         <div class="row g-4">
             <?php if (count($misPedidos) > 0): ?>
                 <?php foreach ($misPedidos as $pedido): 
-                    // Lógica simple para saber qué título ponerle a la tarjeta
                     if (!empty($pedido['producto_importar'])) {
                         $tituloProducto = $pedido['producto_importar'];
                     } elseif (!empty($pedido['id_producto'])) {

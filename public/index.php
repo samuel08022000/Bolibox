@@ -1,7 +1,9 @@
 <?php
+
 // =====================================================================
 // 1. CONFIGURACIÓN INICIAL (Sesiones y Helpers)
 // =====================================================================
+
 session_start();
 require_once __DIR__ . '/../app/helpers.php';
 
@@ -9,6 +11,7 @@ require_once __DIR__ . '/../app/helpers.php';
 // =====================================================================
 // 2. LIMPIEZA DE LA URL (Para que el enrutador entienda qué pedimos)
 // =====================================================================
+
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $basePath = str_replace('/public', '', dirname($_SERVER['SCRIPT_NAME']));
 
@@ -22,314 +25,310 @@ $path = rtrim($path, '/') ?: '/';
 // =====================================================================
 // 3. ENRUTADOR PRINCIPAL (Switch)
 // =====================================================================
+
 switch ($path) {
 
     // ---------------------------------------------------
     // RUTAS PÚBLICAS Y DE AUTENTICACIÓN
     // ---------------------------------------------------
-    case '/':                  
-        require __DIR__ . '/../views/index.php'; 
+
+    case '/':
+        require __DIR__ . '/../views/index.php';
         break;
 
-    case '/login':             
-        require __DIR__ . '/../views/login.php'; 
+    case '/login':
+        require __DIR__ . '/../views/login.php';
         break;
 
-    case '/registro':          
-        require __DIR__ . '/../views/registro.php'; 
-        break;
-    
-    case '/login/ingresar':    
-        require_once __DIR__ . '/../app/Controllers/AuthController.php'; 
-        (new AuthController())->login(); 
+    case '/registro':
+        require __DIR__ . '/../views/registro.php';
         break;
 
-    case '/registro/guardar':  
-        require_once __DIR__ . '/../app/Controllers/AuthController.php'; 
-        (new AuthController())->guardar(); 
+    case '/login/ingresar':
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->login();
         break;
 
-    case '/logout':            
-        require_once __DIR__ . '/../app/Controllers/AuthController.php'; 
-        (new AuthController())->logout(); 
+    case '/registro/guardar':
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->guardar();
+        break;
+
+    case '/logout':
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->logout();
         break;
 
 
     // ---------------------------------------------------
     // PORTAL CLIENTE
     // ---------------------------------------------------
-    case '/cliente':             
-        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php'; 
-        (new ClientePortalController())->dashboard(); 
+
+    case '/cliente':
+        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php';
+        (new ClientePortalController())->dashboard();
         break;
 
-    case '/nuestro-catalogo':    
-        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php'; 
-        (new ClientePortalController())->nuestroCatalogo(); 
+    case '/nuestro-catalogo':
+        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php';
+        (new ClientePortalController())->nuestroCatalogo();
         break;
 
-    case '/catalogos-asociados': 
-        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php'; 
-        (new ClientePortalController())->catalogosAsociados(); 
+    case '/catalogos-asociados':
+        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php';
+        (new ClientePortalController())->catalogosAsociados();
         break;
 
-    case '/pedidos':             
-        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php'; 
-        (new ClientePortalController())->misPedidos(); 
+    case '/pedidos':
+        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php';
+        (new ClientePortalController())->misPedidos();
         break;
 
-    case '/chatbot':             
-        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php'; 
-        (new ClientePortalController())->chatbot(); 
+    case '/chatbot':
+        require_once __DIR__ . '/../app/Controllers/ClientePortalController.php';
+        (new ClientePortalController())->chatbot();
         break;
 
 
     // ---------------------------------------------------
     // PANEL EMPLEADO
     // ---------------------------------------------------
-    case '/empleado':                
-        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php'; 
-        (new EmpleadoPortalController())->index(); 
+
+    case '/empleado':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->index();
         break;
 
-    case '/empleado/clientes':       
-        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php'; 
-        (new EmpleadoPortalController())->clientes(); 
+    case '/empleado/clientes':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->clientes();
         break;
 
-    case '/empleado/pedidos':        
-        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php'; 
-        (new EmpleadoPortalController())->pedidos(); 
+    case '/empleado/pedidos':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->pedidos();
         break;
 
-    case '/empleado/pedidos/nuevo':  
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->guardar(); 
-        break;
-    
-     case '/empleado/clientes/actualizar':       
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->actualizarCliente(); 
+    case '/empleado/pedidos/nuevo':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->guardar();
         break;
 
-    case '/empleado/clientes/eliminar':       
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->eliminarCliente(); 
+    case '/empleado/clientes/actualizar':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->actualizarCliente();
         break;
 
-    case '/empleado/pedidos':        
-        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php'; 
-        (new EmpleadoPortalController())->pedidos(); 
+    case '/empleado/clientes/eliminar':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->eliminarCliente();
         break;
 
-    case '/empleado/pedidos/nuevo':  
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->guardar(); 
+    case '/empleado/pedidos/editar':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->editar();
         break;
 
-    // 🔥 RUTAS NUEVAS PARA PEDIDOS (EMPLEADO)
-    case '/empleado/pedidos/editar':  
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->editar(); 
+    case '/empleado/pedidos/actualizar':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->actualizar();
         break;
 
-    case '/empleado/pedidos/actualizar':  
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->actualizar(); 
-        break;
-
-    case '/empleado/pedidos/eliminar':  
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
-        (new PedidoController())->eliminar(); 
+    case '/empleado/pedidos/eliminar':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // PANEL ADMINISTRADOR (Dashboard Principal)
     // ---------------------------------------------------
-    case '/admin': 
-        require_once __DIR__ . '/../app/Controllers/AdminController.php'; 
-        (new AdminController())->index(); 
+
+    case '/admin':
+        require_once __DIR__ . '/../app/Controllers/AdminController.php';
+        (new AdminController())->index();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: PRODUCTOS
     // ---------------------------------------------------
-    case '/admin/productos':            
-        require_once __DIR__ . '/../app/Controllers/ProductoController.php'; 
-        (new ProductoController())->index(); 
-        break;
-    case '/admin/productos/guardar':    
-        require_once __DIR__ . '/../app/Controllers/ProductoController.php'; 
-        (new ProductoController())->guardar(); 
+
+    case '/admin/productos':
+        require_once __DIR__ . '/../app/Controllers/ProductoController.php';
+        (new ProductoController())->index();
         break;
 
-    case '/admin/productos/editar':     
-        require_once __DIR__ . '/../app/Controllers/ProductoController.php'; 
-        (new ProductoController())->editar(); 
+    case '/admin/productos/guardar':
+        require_once __DIR__ . '/../app/Controllers/ProductoController.php';
+        (new ProductoController())->guardar();
         break;
 
-    case '/admin/productos/actualizar': 
-        require_once __DIR__ . '/../app/Controllers/ProductoController.php'; 
-        (new ProductoController())->actualizar(); 
+    case '/admin/productos/editar':
+        require_once __DIR__ . '/../app/Controllers/ProductoController.php';
+        (new ProductoController())->editar();
         break;
 
-    case '/admin/productos/eliminar':   
-        require_once __DIR__ . '/../app/Controllers/ProductoController.php'; 
-        (new ProductoController())->eliminar(); 
+    case '/admin/productos/actualizar':
+        require_once __DIR__ . '/../app/Controllers/ProductoController.php';
+        (new ProductoController())->actualizar();
+        break;
+
+    case '/admin/productos/eliminar':
+        require_once __DIR__ . '/../app/Controllers/ProductoController.php';
+        (new ProductoController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: PROVEEDORES
     // ---------------------------------------------------
-    case '/admin/proveedores':            
-        require_once __DIR__ . '/../app/Controllers/ProveedorController.php'; 
-        (new ProveedorController())->index(); 
-        break;
-    case '/admin/proveedores/guardar':    
-        require_once __DIR__ . '/../app/Controllers/ProveedorController.php'; 
-        (new ProveedorController())->guardar(); 
+
+    case '/admin/proveedores':
+        require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
+        (new ProveedorController())->index();
         break;
 
-    case '/admin/proveedores/editar':     
-        require_once __DIR__ . '/../app/Controllers/ProveedorController.php'; 
-        (new ProveedorController())->editar(); 
+    case '/admin/proveedores/guardar':
+        require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
+        (new ProveedorController())->guardar();
         break;
 
-    case '/admin/proveedores/actualizar': 
-        require_once __DIR__ . '/../app/Controllers/ProveedorController.php'; 
-        (new ProveedorController())->actualizar(); 
+    case '/admin/proveedores/editar':
+        require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
+        (new ProveedorController())->editar();
         break;
 
-    case '/admin/proveedores/eliminar':   
-        require_once __DIR__ . '/../app/Controllers/ProveedorController.php'; 
-        (new ProveedorController())->eliminar(); 
+    case '/admin/proveedores/actualizar':
+        require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
+        (new ProveedorController())->actualizar();
+        break;
+
+    case '/admin/proveedores/eliminar':
+        require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
+        (new ProveedorController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: CLIENTES
     // ---------------------------------------------------
-    case '/admin/clientes':            
-        require_once __DIR__ . '/../app/Controllers/ClienteController.php'; 
-        (new ClienteController())->index(); 
+
+    case '/admin/clientes':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->index();
         break;
 
-    case '/admin/clientes/guardar':    
-        require_once __DIR__ . '/../app/Controllers/ClienteController.php'; 
-        (new ClienteController())->guardar(); 
+    case '/admin/clientes/guardar':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->guardar();
         break;
 
-    case '/admin/clientes/editar':     
-        require_once __DIR__ . '/../app/Controllers/ClienteController.php'; 
-        (new ClienteController())->editar(); 
+    case '/admin/clientes/editar':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->editar();
         break;
 
-    case '/admin/clientes/actualizar': 
-        require_once __DIR__ . '/../app/Controllers/ClienteController.php'; 
-        (new ClienteController())->actualizar(); 
+    case '/admin/clientes/actualizar':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->actualizar();
         break;
 
-    case '/admin/clientes/eliminar':   
-        require_once __DIR__ . '/../app/Controllers/ClienteController.php'; 
-        (new ClienteController())->eliminar(); 
+    case '/admin/clientes/eliminar':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: PEDIDOS
     // ---------------------------------------------------
-    case '/admin/pedidos':            
-        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php'; 
-        (new AdminPedidoController())->index(); 
-        break;
-    case '/admin/pedidos/guardar':    
-        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php'; 
-        (new AdminPedidoController())->guardar(); 
-        break;
-    case '/admin/pedidos/editar':     
-        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php'; 
-        (new AdminPedidoController())->editar(); 
+
+    case '/admin/pedidos':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->index();
         break;
 
-    case '/admin/pedidos/actualizar': 
-        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php'; 
-        (new AdminPedidoController())->actualizar(); 
+    case '/admin/pedidos/guardar':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->guardar();
         break;
 
-    case '/admin/pedidos/eliminar':   
-        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php'; 
-        (new AdminPedidoController())->eliminar(); 
+    case '/admin/pedidos/editar':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->editar();
+        break;
+
+    case '/admin/pedidos/actualizar':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->actualizar();
+        break;
+
+    case '/admin/pedidos/eliminar':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: STOCK
     // ---------------------------------------------------
-    case '/admin/stock':            
-        require_once __DIR__ . '/../app/Controllers/StockController.php'; 
-        (new StockController())->index(); 
+
+    case '/admin/stock':
+        require_once __DIR__ . '/../app/Controllers/StockController.php';
+        (new StockController())->index();
         break;
 
-    case '/admin/stock/guardar':    
-        require_once __DIR__ . '/../app/Controllers/StockController.php'; 
-        (new StockController())->guardar(); 
+    case '/admin/stock/guardar':
+        require_once __DIR__ . '/../app/Controllers/StockController.php';
+        (new StockController())->guardar();
         break;
 
-    case '/admin/stock/editar':     
-        require_once __DIR__ . '/../app/Controllers/StockController.php'; 
-        (new StockController())->editar(); 
+    case '/admin/stock/editar':
+        require_once __DIR__ . '/../app/Controllers/StockController.php';
+        (new StockController())->editar();
         break;
 
-    case '/admin/stock/actualizar': 
-        require_once __DIR__ . '/../app/Controllers/StockController.php'; 
-        (new StockController())->actualizar(); 
+    case '/admin/stock/actualizar':
+        require_once __DIR__ . '/../app/Controllers/StockController.php';
+        (new StockController())->actualizar();
         break;
 
-    case '/admin/stock/eliminar':   
-        require_once __DIR__ . '/../app/Controllers/StockController.php'; 
-        (new StockController())->eliminar(); 
+    case '/admin/stock/eliminar':
+        require_once __DIR__ . '/../app/Controllers/StockController.php';
+        (new StockController())->eliminar();
         break;
 
 
     // ---------------------------------------------------
     // ADMIN: OTROS (Empleados y Bitácoras)
     // ---------------------------------------------------
-    case '/admin/empleados': 
-        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
-        (new EmpleadoController())->index(); 
+
+    case '/admin/empleados':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php';
+        (new EmpleadoController())->index();
         break;
 
-    case '/admin/bitacoras': 
-        require_once __DIR__ . '/../app/Controllers/BitacoraController.php'; 
-        (new BitacoraController())->index(); 
-        break;
-    case '/admin/empleados': 
-        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
-        (new EmpleadoController())->index(); 
+    case '/admin/empleados/guardar':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php';
+        (new EmpleadoController())->guardar();
         break;
 
-    case '/admin/empleados/guardar': 
-        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
-        (new EmpleadoController())->guardar(); 
+    case '/admin/empleados/cambiar-estado':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php';
+        (new EmpleadoController())->cambiarEstado();
         break;
 
-    case '/admin/empleados/cambiar-estado': 
-        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
-        (new EmpleadoController())->cambiarEstado(); 
-        break;
-
-    case '/admin/bitacoras': 
-        require_once __DIR__ . '/../app/Controllers/BitacoraController.php'; 
-        (new BitacoraController())->index(); 
+    case '/admin/bitacoras':
+        require_once __DIR__ . '/../app/Controllers/BitacoraController.php';
+        (new BitacoraController())->index();
         break;
 
 
     // ---------------------------------------------------
     // PÁGINA DE ERROR 404
     // ---------------------------------------------------
+
     default:
         http_response_code(404);
         echo "<h1 style='text-align:center; margin-top:50px; color:#FF8C00; font-family: sans-serif;'>404 - Página no encontrada</h1>";
