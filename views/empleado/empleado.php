@@ -88,11 +88,17 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                     <label class="form-label text-muted small fw-bold text-uppercase">Seleccionar Producto</label>
                                     <select name="id_producto" id="selectPropio" class="form-select bg-light">
                                         <option value="">-- Selecciona un producto de la lista --</option>
-                                        <?php foreach ($productosPropios as $p): ?>
-                                            <option value="<?= $p['id_producto'] ?>">
-                                                <?= $p['nombre'] ?> (Bs <?= number_format($p['precio_unitario'], 2) ?>)
-                                            </option>
-                                        <?php endforeach; ?>
+                                        
+                                        <?php if (isset($productosPropios) && is_array($productosPropios) && count($productosPropios) > 0): ?>
+                                            <?php foreach ($productosPropios as $p): ?>
+                                                <option value="<?= $p['id_producto'] ?>">
+                                                    <?= htmlspecialchars($p['nombre']) ?> (Bs <?= number_format((float)($p['precio_unitario'] ?? 0), 2) ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <option value="" disabled class="text-danger fw-bold">⚠️ No se encontraron productos registrados</option>
+                                        <?php endif; ?>
+                                        
                                     </select>
                                 </div>
 

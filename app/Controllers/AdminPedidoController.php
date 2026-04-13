@@ -10,13 +10,9 @@ class AdminPedidoController {
     }
 
     public function index() {
-        $sqlProd = $this->conn->prepare("SELECT id_producto, nombre, precio_unitario FROM producto");
-        $sqlProd->execute();
-        $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
-
-        // Traemos pedidos con JOIN a productos y clientes para mostrar nombres en la tabla
+        // Traemos todos los pedidos con JOIN para ver nombres de productos y clientes
         $sql = $this->conn->prepare("
-            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente, c.nit as nit_cliente
+            SELECT p.*, pr.nombre as nombre_producto, c.nombre as cliente_nombre 
             FROM pedidos p
             LEFT JOIN producto pr ON p.id_producto = pr.id_producto
             LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
@@ -25,7 +21,43 @@ class AdminPedidoController {
         $sql->execute();
         $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
+        // Productos para el modal de nuevo pedido
+        $sqlProd = $this->conn->prepare("SELECT id_producto, nombre, precio_unitario FROM producto");
+        $sqlProd->execute();
+        $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
+
         require_once __DIR__ . '/../../views/admin/pedidos.php';
+    }
+
+    public function guardar() {
+        if ($_POST) {
+            try {
+                $this->conn->beginTransaction();
+
+                // Lógica de Cliente
+                $id_cliente = $this->obtenerOCrearCliente($_POST['nombre'], $_POST['nit'], $_POST['telefono'], $_POST['ubicacion']);
+                
+                // ID Empleado (Admin logueado traducido a su ID de empleado)
+                $id_usuario_sesion = $_SESSION['usuario']['id_usuario'];
+                $stmtEmp = $this->conn->prepare("SELECT id_empleado FROM empleados WHERE id_usuario = ?");
+                $stmtEmp->execute([$id_usuario_sesion]);
+                $emp = $stmtEmp->fetch();
+                $id_empleado = $emp ? $emp['id_empleado'] : 1;
+
+                $id_producto = !empty($_POST['id_producto']) ? $_POST['id_producto'] : null;
+                $producto_importar = !empty($_POST['producto_importar']) ? $_POST['producto_importar'] : null;
+
+                $sql = $this->conn->prepare("INSERT INTO pedidos (fecha, total, ubicacion_clientes, nro_dui, id_cliente, id_empleado, id_producto, producto_importar) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?)");
+                $sql->execute([$_POST['total'], $_POST['ubicacion'], $_POST['nro_dui'], $id_cliente, $id_empleado, $id_producto, $producto_importar]);
+                
+                if ($id_producto) {
+                    $this->conn->prepare("UPDATE stock SET cantidad = cantidad - 1 WHERE id_producto = ? AND cantidad > 0")->execute([$id_producto]);
+                }
+
+                $this->conn->commit();
+                header("Location: " . url('admin/pedidos'));
+            } catch (Exception $e) { $this->conn->rollBack(); die("Error: " . $e->getMessage()); }
+        }
     }
 
     public function editar() {
@@ -50,37 +82,7 @@ class AdminPedidoController {
         require_once __DIR__ . '/../../views/admin/editar_pedido.php';
     }
 
-    public function guardar() {
-        if ($_POST) {
-            try {
-                $this->conn->beginTransaction();
-
-                // Lógica de Cliente Automático
-                $id_cliente = $this->obtenerOCrearCliente($_POST['nombre'], $_POST['nit'], $_POST['telefono'], $_POST['ubicacion']);
-
-                $sql = $this->conn->prepare("INSERT INTO pedidos (fecha, total, ubicacion_clientes, nro_dui, id_cliente, id_empleado, id_producto, producto_importar) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?)");
-                $sql->execute([
-                    $_POST['total'], 
-                    $_POST['ubicacion'], 
-                    $_POST['nro_dui'], 
-                    $id_cliente, 
-                    $_POST['id_empleado'], 
-                    $_POST['id_producto'] ?: null, 
-                    $_POST['producto_importar'] ?: null
-                ]);
-
-                // Descontar stock si es producto propio
-                if (!empty($_POST['id_producto'])) {
-                    $this->conn->prepare("UPDATE stock SET cantidad = cantidad - 1 WHERE id_producto = ? AND cantidad > 0")->execute([$_POST['id_producto']]);
-                }
-
-                $this->conn->commit();
-            } catch (Exception $e) {
-                $this->conn->rollBack();
-            }
-        }
-        header("Location: " . url('admin/pedidos'));
-    }
+    
 
     public function actualizar() {
     if ($_POST) {

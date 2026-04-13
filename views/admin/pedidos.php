@@ -131,6 +131,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 <th>Producto</th>
                                 <th>Total</th>
                                 <th>DUI</th>
+                                <th>Cliente</th>
+                                <th>Ciudad</th>
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
@@ -139,26 +141,39 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 // Determinar qué nombre mostrar en la tabla
                                 $nombreAMostrar = !empty($row['producto_importar']) ? $row['producto_importar'] : (!empty($row['id_producto']) ? $row['nombre_producto'] : 'Sin asignar');
                             ?>
-                            <tr>
-                                <td class="ps-3 fw-bold text-muted">#<?php echo $row['id_pedido']; ?></td>
-                                <td>
-                                    <?php if(!empty($row['producto_importar'])): ?>
-                                        <span class="badge bg-secondary">Externo</span> <?= $nombreAMostrar ?>
-                                    <?php else: ?>
-                                        <span class="badge bg-naranja">Propio</span> <?= $nombreAMostrar ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="fw-bold">Bs <?php echo $row['total']; ?></td>
-                                <td><?php echo $row['nro_dui']; ?></td>
-                                <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarPedido<?php echo $row['id_pedido']; ?>" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <a href="<?= url('admin/pedidos/eliminar?id=' . $row['id_pedido']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Eliminar pedido?');" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
+
+                                <tr>
+                                    <td class="ps-3 fw-bold text-muted">#<?= $row['id_pedido']; ?></td>
+
+                                    <td>
+                                        <?php if(!empty($row['producto_importar'])): ?>
+                                            <span class="badge bg-secondary">Externo</span> <?= $nombreAMostrar ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-naranja">Propio</span> <?= $nombreAMostrar ?>
+                                        <?php endif; ?>
+                                    </td>
+
+                                    <td class="fw-bold">Bs <?= $row['total']; ?></td>
+                                    <td><?= $row['nro_dui']; ?></td>
+
+                                    <!-- 🔥 ESTO FALTABA -->
+                                    <td><?= $row['cliente_nombre']; ?></td>
+                                    <td><?= $row['ciudad_cliente'] ?? $row['ubicacion_clientes'] ?? 'Sin ciudad' ?></td>
+
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-primary rounded-circle me-1"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditarPedido<?= $row['id_pedido']; ?>">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+
+                                        <a href="<?= url('admin/pedidos/eliminar?id=' . $row['id_pedido']) ?>"
+                                        class="btn btn-sm btn-outline-danger rounded-circle"
+                                        onclick="return confirm('¿Eliminar pedido?');">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
 
                             <div class="modal fade" id="modalEditarPedido<?php echo $row['id_pedido']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
