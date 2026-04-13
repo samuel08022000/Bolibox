@@ -106,6 +106,42 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
         (new PedidoController())->guardar(); 
         break;
+    
+     case '/empleado/clientes/actualizar':       
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->actualizarCliente(); 
+        break;
+
+    case '/empleado/clientes/eliminar':       
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->eliminarCliente(); 
+        break;
+
+    case '/empleado/pedidos':        
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php'; 
+        (new EmpleadoPortalController())->pedidos(); 
+        break;
+
+    case '/empleado/pedidos/nuevo':  
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->guardar(); 
+        break;
+
+    // 🔥 RUTAS NUEVAS PARA PEDIDOS (EMPLEADO)
+    case '/empleado/pedidos/editar':  
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->editar(); 
+        break;
+
+    case '/empleado/pedidos/actualizar':  
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->actualizar(); 
+        break;
+
+    case '/empleado/pedidos/eliminar':  
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php'; 
+        (new PedidoController())->eliminar(); 
+        break;
 
 
     // ---------------------------------------------------

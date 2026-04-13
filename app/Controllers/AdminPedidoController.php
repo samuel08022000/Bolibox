@@ -138,7 +138,20 @@ class AdminPedidoController {
     public function eliminar() {
         $id = $_GET['id'] ?? null;
         if ($id) {
-            $this->conn->prepare("DELETE FROM pedidos WHERE id_pedido = ?")->execute([$id]);
+            try {
+                $this->conn->beginTransaction();
+                
+                // 1. Primero borramos los detalles del pedido (Los hijos)
+                $this->conn->prepare("DELETE FROM detalle_pedido WHERE id_pedido = ?")->execute([$id]);
+                
+                // 2. Luego borramos el pedido de la lista principal (El padre)
+                $this->conn->prepare("DELETE FROM pedidos WHERE id_pedido = ?")->execute([$id]);
+                
+                $this->conn->commit();
+            } catch (Exception $e) {
+                $this->conn->rollBack();
+                // Si quieres ver el error por si algo falla, puedes poner un echo aquí
+            }
         }
         header("Location: " . url('admin/pedidos'));
     }

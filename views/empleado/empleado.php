@@ -90,7 +90,7 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                         <option value="">-- Selecciona un producto de la lista --</option>
                                         <?php foreach ($productosPropios as $p): ?>
                                             <option value="<?= $p['id_producto'] ?>">
-                                                ID: #<?= $p['id_producto'] ?> - <?= $p['nombre'] ?> (Bs <?= number_format($p['precio_unitario'], 2) ?>)
+                                                <?= $p['nombre'] ?> (Bs <?= number_format($p['precio_unitario'], 2) ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -101,15 +101,13 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                     <input type="text" name="producto_importar" id="inputExterno" class="form-control bg-light" placeholder="Ej: Repuestos de Auto (Link Amazon)">
                                 </div>
 
-                                <div class="col-md-4 mb-4 mt-2">
+                                <input type="hidden" name="id_empleado" value="<?= $_SESSION['usuario']['id_usuario'] ?>">
+
+                                <div class="col-md-6 mb-4 mt-2">
                                     <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
                                     <input type="text" name="nro_dui" class="form-control bg-light" required>
                                 </div>
-                                <div class="col-md-4 mb-4 mt-2">
-                                    <label class="form-label text-muted small fw-bold text-uppercase">ID de Empleado</label>
-                                    <input type="number" name="id_empleado" class="form-control bg-light" placeholder="Tu ID interno" required>
-                                </div>
-                                <div class="col-md-4 mb-4 mt-2">
+                                <div class="col-md-6 mb-4 mt-2">
                                     <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
                                     <input type="number" name="total" class="form-control border-naranja" step="0.01" style="background-color: #fffaf0;" required>
                                 </div>
@@ -134,11 +132,11 @@ function toggleProducto() {
     if (tipo === "propio") {
         document.getElementById("divPropio").style.display = "block";
         document.getElementById("divExterno").style.display = "none";
-        document.getElementById("inputExterno").value = ""; // Limpia el texto
+        document.getElementById("inputExterno").value = ""; 
     } else {
         document.getElementById("divPropio").style.display = "none";
         document.getElementById("divExterno").style.display = "block";
-        document.getElementById("selectPropio").value = ""; // Limpia el select
+        document.getElementById("selectPropio").value = ""; 
     }
 }
 </script>

@@ -41,8 +41,29 @@ class ClienteController {
     public function eliminar() {
         $id = $_GET['id'] ?? null;
         if ($id) {
-            $sql = $this->conn->prepare("DELETE FROM clientes WHERE id_cliente = ?");
-            $sql->execute([$id]);
+            try {
+                $this->conn->beginTransaction();
+                
+                // 1. Buscamos todos los pedidos asociados a este cliente
+                $stmt = $this->conn->prepare("SELECT id_pedido FROM pedidos WHERE id_cliente = ?");
+                $stmt->execute([$id]);
+                $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // 2. Borramos los detalles (tabla detalle_pedido) de cada uno de esos pedidos
+                foreach ($pedidos as $pedido) {
+                    $this->conn->prepare("DELETE FROM detalle_pedido WHERE id_pedido = ?")->execute([$pedido['id_pedido']]);
+                }
+                
+                // 3. Borramos los pedidos de ese cliente
+                $this->conn->prepare("DELETE FROM pedidos WHERE id_cliente = ?")->execute([$id]);
+                
+                // 4. Finalmente, ya podemos borrar al cliente sin que la base de datos se queje
+                $this->conn->prepare("DELETE FROM clientes WHERE id_cliente = ?")->execute([$id]);
+                
+                $this->conn->commit();
+            } catch (Exception $e) {
+                $this->conn->rollBack();
+            }
         }
         header("Location: " . url('admin/clientes'));
     }
