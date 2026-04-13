@@ -11,7 +11,7 @@ class Database {
     function conectar() {
         try {
             $conexion = new PDO(
-                "mysql:host={$this->hostname};dbname={$this->database};port=3307;charset={$this->charset}",
+                "mysql:host={$this->hostname};dbname={$this->database};port=3306;charset={$this->charset}",
                 $this->username,
                 $this->password
             );
