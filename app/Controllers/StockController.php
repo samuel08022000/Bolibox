@@ -8,19 +8,29 @@ class StockController {
         $db = new Database(); 
         $this->conn = $db->conectar();
     }
-
     public function index() { 
-        $sql = $this->conn->prepare("
-            SELECT s.id_stock, s.id_producto, s.id_almacen, p.nombre AS producto, a.nombre AS almacen, s.cantidad
-            FROM stock s
-            JOIN producto p ON s.id_producto = p.id_producto
-            JOIN almacen a ON s.id_almacen = a.id_almacen
-        ");
-        $sql->execute();
-        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-        
-        require_once __DIR__ . '/../../views/admin/stock.php'; 
-    }
+    // STOCK
+    $sql = $this->conn->prepare("
+        SELECT s.id_stock, s.id_producto, s.id_almacen, p.nombre AS producto, a.nombre AS almacen, s.cantidad
+        FROM stock s
+        JOIN producto p ON s.id_producto = p.id_producto
+        JOIN almacen a ON s.id_almacen = a.id_almacen
+    ");
+    $sql->execute();
+    $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+    // 🔥 PRODUCTOS (para el select)
+    $productos = $this->conn->query("
+        SELECT id_producto, nombre FROM producto
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
+    // 🔥 ALMACENES (para el select)
+    $almacenes = $this->conn->query("
+        SELECT id_almacen, nombre FROM almacen
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    
+    require_once __DIR__ . '/../../views/admin/stock.php'; 
+}
 
     public function editar() {
         $id = $_GET['id'] ?? null;

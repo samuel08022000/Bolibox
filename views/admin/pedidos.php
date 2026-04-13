@@ -4,7 +4,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -95,7 +94,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
             <select name="id_producto" id="selectPropioAdmin" class="form-select bg-light">
                 <option value="">-- Selecciona un producto --</option>
                 <?php foreach ($productosPropios as $p): ?>
-                    <option value="<?= $p['id_producto'] ?>">ID: #<?= $p['id_producto'] ?> - <?= $p['nombre'] ?></option>
+                    <option value="<?= $p['id_producto'] ?>"><?= $p['nombre'] ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -108,10 +107,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
         <div class="col-md-4 mb-4 mt-2">
             <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
             <input type="text" name="nro_dui" class="form-control bg-light" required>
-        </div>
-        <div class="col-md-4 mb-4 mt-2">
-            <label class="form-label text-muted small fw-bold text-uppercase">ID Empleado</label>
-            <input type="number" name="id_empleado" class="form-control bg-light" required>
         </div>
         <div class="col-md-4 mb-4 mt-2">
             <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
@@ -136,8 +131,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 <th>Producto</th>
                                 <th>Total</th>
                                 <th>DUI</th>
-                                <th>ID Cli.</th>
-                                <th>ID Emp.</th>
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
@@ -157,8 +150,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 </td>
                                 <td class="fw-bold">Bs <?php echo $row['total']; ?></td>
                                 <td><?php echo $row['nro_dui']; ?></td>
-                                <td><?php echo $row['id_cliente']; ?></td>
-                                <td><?php echo $row['id_empleado']; ?></td>
                                 <td class="text-end pe-4">
                                     <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarPedido<?php echo $row['id_pedido']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
@@ -195,8 +186,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                                             <option value="">-- Selecciona --</option>
                                                             <?php foreach ($productosPropios as $p): ?>
                                                                 <option value="<?= $p['id_producto'] ?>" <?php echo ($row['id_producto'] == $p['id_producto']) ? 'selected' : ''; ?>>
-                                                                    ID: #<?= $p['id_producto'] ?> - <?= $p['nombre'] ?>
-                                                                </option>
+                                                                <?= $p['nombre'] ?>
+                                                            </option>
                                                             <?php endforeach; ?>
                                                         </select>
                                                     </div>
@@ -217,16 +208,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                                     <div class="col-md-4 mb-3">
                                                         <label class="form-label text-muted small fw-bold text-uppercase">Ubicación</label>
                                                         <input type="text" name="ubicacion" class="form-control" value="<?php echo $row['ubicacion_clientes']; ?>" required>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">ID Cliente</label>
-                                                        <input type="number" name="id_cliente" class="form-control" value="<?php echo $row['id_cliente']; ?>" required>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">ID Empleado</label>
-                                                        <input type="number" name="id_empleado" class="form-control" value="<?php echo $row['id_empleado']; ?>" required>
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div class="modal-footer bg-light border-0">
                                                 <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancelar</button>

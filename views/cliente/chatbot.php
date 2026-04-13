@@ -22,8 +22,7 @@ if (!isset($_SESSION['usuario'])) {
             <a href="<?= url('cliente') ?>" class="logo">
                 <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
             </a>
-           <div class="nav-links">
-    <a class="nav-link" href="<?= url('cliente') ?>">Dashboard</a>
+            <div class="nav-links">
     <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
     <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
     <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>

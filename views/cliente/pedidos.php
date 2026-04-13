@@ -10,8 +10,6 @@ require_once __DIR__ . '/../../config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-// Cliente fijo por ahora según tu petición
-$idClienteLogueado = 12;
 
 // Consulta súper limpia y directa solo a la tabla pedidos
 $sql = $con->prepare("
@@ -67,11 +65,10 @@ $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
                 <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
             </a>
             <div class="nav-links">
-                <a class="nav-link" href="<?= url('cliente') ?>">Dashboard</a>
                 <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
                 <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
                 <a class="nav-link active" href="<?= url('pedidos') ?>">Mis Pedidos</a>
-                <a class="nav-link" href="<?= url('chatbot') ?>">Volibot</a>
+                <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
             </div>
             <a href="<?= url('/') ?>" class="btn-logout">
                 <i class="bi bi-box-arrow-left"></i> Salir

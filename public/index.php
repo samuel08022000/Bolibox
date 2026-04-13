@@ -270,6 +270,25 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/BitacoraController.php'; 
         (new BitacoraController())->index(); 
         break;
+    case '/admin/empleados': 
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
+        (new EmpleadoController())->index(); 
+        break;
+
+    case '/admin/empleados/guardar': 
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
+        (new EmpleadoController())->guardar(); 
+        break;
+
+    case '/admin/empleados/cambiar-estado': 
+        require_once __DIR__ . '/../app/Controllers/EmpleadoController.php'; 
+        (new EmpleadoController())->cambiarEstado(); 
+        break;
+
+    case '/admin/bitacoras': 
+        require_once __DIR__ . '/../app/Controllers/BitacoraController.php'; 
+        (new BitacoraController())->index(); 
+        break;
 
 
     // ---------------------------------------------------

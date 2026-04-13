@@ -4,27 +4,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-// Combinamos la consulta: Traemos los IDs para usar internamente y los Nombres para mostrar al usuario
-$sql = $con->prepare("
-    SELECT 
-        s.id_stock,
-        s.id_producto,
-        s.id_almacen,
-        p.nombre AS producto,
-        a.nombre AS almacen,
-        s.cantidad
-    FROM stock s
-    JOIN producto p ON s.id_producto = p.id_producto
-    JOIN almacen a ON s.id_almacen = a.id_almacen
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -91,11 +70,25 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">ID Producto</label>
-                            <input type="number" name="id_producto" class="form-control" required>
+                            <select name="id_producto" class="form-select">
+                                <option value="">Selecciona producto</option>
+                                <?php foreach ($productos as $p): ?>
+                                    <option value="<?= $p['id_producto'] ?>">
+                                <?= $p['nombre'] ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">ID Almacén</label>
-                            <input type="number" name="id_almacen" class="form-control" required>
+                            <select name="id_almacen" class="form-select">
+                                <option value="">Selecciona almacén</option>
+                                    <?php foreach ($almacenes as $a): ?>
+                                <option value="<?= $a['id_almacen'] ?>">
+                                    <?= $a['nombre'] ?>
+                                </option>
+                                    <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Cantidad</label>

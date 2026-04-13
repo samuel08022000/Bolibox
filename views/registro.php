@@ -68,6 +68,11 @@
                 </div>
 
                 <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="ciudad" name="ciudad" placeholder="La Paz" required>
+                    <label for="nombreCompleto">Ciudad</label>
+                </div>
+
+                <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="correo" name="email" placeholder="tucorreo@ejemplo.com" required>
                     <label for="correo"><i class="bi bi-envelope me-2"></i>Correo Electrónico</label>
                 </div>

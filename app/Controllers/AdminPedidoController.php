@@ -83,33 +83,39 @@ class AdminPedidoController {
     }
 
     public function actualizar() {
-        if ($_POST) {
-            try {
-                $this->conn->beginTransaction();
+    if ($_POST) {
+        try {
+            $this->conn->beginTransaction();
 
-                // Al actualizar, también verificamos si el cliente cambió o debe actualizarse
-                $id_cliente = $this->obtenerOCrearCliente($_POST['nombre'], $_POST['nit'], $_POST['telefono'], $_POST['ubicacion']);
+            $sql = $this->conn->prepare("
+                UPDATE pedidos 
+                SET total = ?, 
+                    ubicacion_clientes = ?, 
+                    nro_dui = ?, 
+                    id_producto = ?, 
+                    producto_importar = ?
+                WHERE id_pedido = ?
+            ");
 
-                $sql = $this->conn->prepare("UPDATE pedidos SET total=?, ubicacion_clientes=?, nro_dui=?, id_cliente=?, id_empleado=?, id_producto=?, producto_importar=? WHERE id_pedido=?");
-                $sql->execute([
-                    $_POST['total'], 
-                    $_POST['ubicacion'], 
-                    $_POST['nro_dui'], 
-                    $id_cliente, 
-                    $_POST['id_empleado'], 
-                    $_POST['id_producto'] ?: null, 
-                    $_POST['producto_importar'] ?: null, 
-                    $_POST['id_pedido']
-                ]);
+            $sql->execute([
+                $_POST['total'],
+                $_POST['ubicacion'],
+                $_POST['nro_dui'],
+                $_POST['id_producto'] ?: null,
+                $_POST['producto_importar'] ?: null,
+                $_POST['id_pedido']
+            ]);
 
-                $this->conn->commit();
-            } catch (Exception $e) {
-                $this->conn->rollBack();
-            }
+            $this->conn->commit();
+
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            echo "Error: " . $e->getMessage();
         }
-        header("Location: " . url('admin/pedidos'));
     }
 
+    header("Location: " . url('admin/pedidos'));
+}
     // Función privada para no repetir código (La lógica que querías)
     private function obtenerOCrearCliente($nombre, $nit, $tel, $ub) {
         $stmt = $this->conn->prepare("SELECT id_cliente FROM clientes WHERE nit = ?");

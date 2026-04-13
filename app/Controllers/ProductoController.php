@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . "/../../config/database.php";
 
 class ProductoController {
@@ -10,12 +11,23 @@ class ProductoController {
     }
 
     public function index() { 
-        $sql = $this->conn->prepare("SELECT id_producto, nombre, descripcion, categoria, precio_unitario, id_proveedor FROM producto");
-        $sql->execute();
-        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-        
-        require_once __DIR__ . '/../../views/admin/productos.php'; 
-    }
+
+    // 🔥 ESTE VA ARRIBA (PROVEEDORES)
+    $sqlProv = $this->conn->prepare("SELECT id_proveedor, nombre FROM proveedor");
+    $sqlProv->execute();
+    $proveedores = $sqlProv->fetchAll(PDO::FETCH_ASSOC);
+
+    // 🔥 ESTE ES TU QUERY CON JOIN
+    $sql = $this->conn->prepare("
+    SELECT p.id_producto, p.nombre, p.descripcion, p.categoria, p.precio_unitario, pr.nombre as proveedor
+    FROM producto p
+    LEFT JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor");
+    
+    $sql->execute();
+    $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+    
+    require_once __DIR__ . '/../../views/admin/productos.php'; 
+}
 
     public function editar() {
         $id = $_GET['id'] ?? null;

@@ -10,16 +10,16 @@ class Database {
 
     function conectar() {
         try {
-            $conexion = "mysql:host=" . $this->hostname . ";dbname=" . $this->database . ";charset=" . $this->charset;
+            $conexion = new PDO(
+                "mysql:host={$this->hostname};dbname={$this->database};port=3307;charset={$this->charset}",
+                $this->username,
+                $this->password
+            );
 
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ];
+            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $conexion->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
-            $pdo = new PDO($conexion, $this->username, $this->password, $options);
-
-            return $pdo;
+            return $conexion;
 
         } catch (PDOException $e) {
             echo "Error de conexión: " . $e->getMessage();
@@ -27,5 +27,6 @@ class Database {
         }
     }
 }
+
 ?>
 

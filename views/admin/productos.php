@@ -4,18 +4,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-$sql = $con->prepare("
-    SELECT id_producto, nombre, descripcion, categoria, precio_unitario, id_proveedor 
-    FROM producto
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -97,8 +85,15 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                             <input type="number" step="0.01" name="precio_unitario" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">ID Proveedor</label>
-                            <input type="number" name="id_proveedor" class="form-control" required>
+                            <label class="form-label text-muted small fw-bold text-uppercase">Nombre Proveedor</label>
+                            <select name="id_proveedor" class="form-select" required>
+                                <option value="">Selecciona proveedor</option>
+                                    <?php foreach ($proveedores as $prov): ?>
+                                <option value="<?= $prov['id_proveedor'] ?>">
+                                    <?= $prov['nombre'] ?>
+                                </option>
+                                    <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-2">
@@ -120,7 +115,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Descripción</th>
                                 <th>Categoría</th>
                                 <th>Precio Unitario</th>
-                                <th>ID Prov.</th>
+                                <th>Proveedor</th>
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
@@ -132,7 +127,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo $row['descripcion']; ?></td>
                                 <td><?php echo $row['categoria']; ?></td>
                                 <td>Bs <?php echo $row['precio_unitario']; ?></td>
-                                <td><?php echo $row['id_proveedor']; ?></td>
+                                <td><?php echo $row['proveedor']; ?></td>
                                 <td class="text-end pe-4">
                                     <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarProd<?php echo $row['id_producto']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
