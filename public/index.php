@@ -58,6 +58,17 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/AuthController.php';
         (new AuthController())->logout();
         break;
+        
+    case '/verificar_otp':
+        // Esta ruta simplemente carga la vista del formulario
+        require_once __DIR__ . '/../views/verificar_otp.php';
+        break;
+
+    case '/verificar_otp/validar':
+        // Esta ruta procesa el código enviado
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->verificar_otp();
+        break;
 
 
     // ---------------------------------------------------
