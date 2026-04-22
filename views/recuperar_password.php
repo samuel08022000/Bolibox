@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificar Acceso - BOLIBOX</title>
+    <title>Recuperar Cuenta - BOLIBOX</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/BOLIBOX/public/css/style.css"> 
+    <link rel="stylesheet" href="/BOLIBOX/public/css/style.css">
     <style>
         body.login-page {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
@@ -32,31 +32,31 @@
             <a href="/BOLIBOX/login" class="btn-volver-icon" title="Volver al inicio"><i class="bi bi-arrow-left"></i></a>
             
             <div class="logo mt-4">
-                <i class="bi bi-shield-check"></i> BOLI<span>BOX</span>
+                <i class="bi bi-globe-americas"></i> BOLI<span>BOX</span>
             </div>
-            <h2 class="fw-bold mb-3">Verificación en dos pasos</h2>
+            <h2 class="fw-bold mb-3">Recuperación de cuenta</h2>
             <p style="color: #aaa; font-size: 1.05rem;">
-                Por tu seguridad, hemos habilitado este paso adicional. Revisa tu bandeja de entrada y escribe el código temporal para acceder a tu panel de importaciones.
+                Sabemos que estas cosas pasan. Te ayudaremos a recuperar el acceso rápidamente para que puedas seguir gestionando tus pedidos sin interrupciones.
             </p>
         </div>
 
         <div class="registro-right">
-            <h3 class="fw-bold mb-1" style="color: #111827;">Código de Seguridad</h3>
-            <p class="text-muted mb-4">Ingresa el código OTP de 6 dígitos enviado a tu correo.</p>
+            <h3 class="fw-bold mb-1" style="color: #111827;">¿Olvidaste tu contraseña?</h3>
+            <p class="text-muted mb-4">Ingresa el correo asociado a tu cuenta para enviarte un enlace de recuperación.</p>
 
-            <form action="/BOLIBOX/verificar_otp/validar" method="POST">
+            <form action="/BOLIBOX/recuperar/enviar" method="POST">
                 
                 <div class="form-floating mb-4">
-                    <input type="text" class="form-control text-center fw-bold fs-4" id="otp" name="otp" placeholder="000000" maxlength="6" pattern="\d{6}" required autofocus autocomplete="off">
-                    <label for="otp"><i class="bi bi-key me-2"></i>Código OTP</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required autofocus>
+                    <label for="email"><i class="bi bi-envelope me-2"></i>Correo Electrónico</label>
                 </div>
 
-                <button type="submit" class="btn-submit py-3">Verificar Acceso</button>
+                <button type="submit" class="btn-submit py-3">Enviar Instrucciones</button>
             </form>
 
             <div class="text-center mt-4 pt-3 border-top">
                 <p class="small text-muted mb-0">
-                    ¿No recibiste el correo? <a href="/BOLIBOX/login" class="text-naranja fw-bold text-decoration-none">Intenta iniciar sesión de nuevo</a>
+                    ¿Recordaste tu contraseña? <a href="/BOLIBOX/login" class="text-naranja fw-bold text-decoration-none">Inicia sesión aquí</a>
                 </p>
             </div>
         </div>

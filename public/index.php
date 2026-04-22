@@ -69,6 +69,28 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/AuthController.php';
         (new AuthController())->verificar_otp();
         break;
+    case '/recuperar':
+        // Vista para ingresar el correo electrónico
+        require_once __DIR__ . '/../views/recuperar_password.php';
+        break;
+
+    case '/recuperar/enviar':
+        // Procesa la solicitud y envía el correo con el link
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->solicitar_recuperacion();
+        break;
+
+    case '/reset-password':
+        // Vista donde el usuario escribe su nueva contraseña (viene del link del correo)
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->mostrar_formulario_reset();
+        break;
+
+    case '/reset-password/actualizar':
+        // Procesa el cambio final de la contraseña
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->actualizar_password();
+        break;
 
 
     // ---------------------------------------------------

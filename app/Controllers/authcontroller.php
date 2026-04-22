@@ -36,8 +36,8 @@ class AuthController {
             // Nota: Configura tu servidor local o usa PHPMailer si mail() no funciona en tu entorno
             $asunto = "Código de verificación de seguridad - Bolibox";
             $mensaje = "Tu código de acceso es: " . $otp . "\n\nEste código expirará en 10 minutos.";
-            $cabeceras = "From: bolibox.noreply@gmail.com\r\n";
-            $cabeceras .= "Reply-To: bolibox.noreply@gmail.com\r\n";
+            $cabeceras = "From: soportebolibox@gmail.com\r\n";
+            $cabeceras .= "Reply-To: soportebolibox@gmail.com\r\n";
             $cabeceras .= "X-Mailer: PHP/" . phpversion();
 
             mail($email, $asunto, $mensaje, $cabeceras);
@@ -159,6 +159,65 @@ class AuthController {
             $this->conn->rollBack();
             echo "Error en el servidor: " . $e->getMessage();
         }
+    }
+    public function solicitar_recuperacion() {
+        $email = $_POST['email'];
+        
+        // 1. Verificación de existencia
+        $sql = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE email = ? AND estado = 1");
+        $sql->execute([$email]);
+        $user = $sql->fetch(PDO::FETCH_ASSOC);
+
+        // Mensaje genérico por seguridad (punto 2 de tu flujo)
+        $mensaje_exito = "<script>alert('Si el correo existe, se han enviado las instrucciones.'); window.location.href='/BOLIBOX/login';</script>";
+
+        if ($user) {
+            // 2. Generación de Token criptográfico (punto 3 de tu flujo)
+            $token = bin2hex(random_bytes(32));
+            $expiracion = date("Y-m-d H:i:s", strtotime("+1 hour"));
+
+            // 3. Almacenamiento temporal (punto 4 de tu flujo)
+            $update = $this->conn->prepare("UPDATE usuarios SET reset_token = ?, reset_expires_at = ? WHERE id_usuario = ?");
+            $update->execute([$token, $expiracion, $user['id_usuario']]);
+
+            // 4. Envío del correo con el enlace (punto 5 de tu flujo)
+            $enlace = "http://localhost/BOLIBOX/reset-password?token=" . $token;
+            $asunto = "Restablecer Contraseña - Bolibox";
+            $cuerpo = "Hola. Haz clic en el siguiente enlace para cambiar tu contraseña: " . $enlace . "\n\nEste enlace expira en 1 hora.";
+            $cabeceras = "From: soportebolibox@gmail.com\r\n";
+            
+            mail($email, $asunto, $cuerpo, $cabeceras);
+        }
+
+        echo $mensaje_exito;
+        exit;
+    }
+
+    public function mostrar_formulario_reset() {
+        $token = $_GET['token'] ?? '';
+
+        // 5. Validación del Enlace (punto 6 de tu flujo)
+        $sql = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE reset_token = ? AND reset_expires_at > NOW()");
+        $sql->execute([$token]);
+        $user = $sql->fetch();
+
+        if ($user) {
+            require_once __DIR__ . '/../../views/reset_password.php';
+        } else {
+            echo "<script>alert('Enlace inválido o expirado.'); window.location.href='/BOLIBOX/login';</script>";
+        }
+    }
+
+    public function actualizar_password() {
+        $token = $_POST['token'];
+        $nueva_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+        // 6. Cambio de credenciales (punto 7 de tu flujo)
+        $sql = $this->conn->prepare("UPDATE usuarios SET password_hash = ?, reset_token = NULL, reset_expires_at = NULL WHERE reset_token = ?");
+        $sql->execute([$nueva_password, $token]);
+
+        echo "<script>alert('Contraseña actualizada con éxito.'); window.location.href='/BOLIBOX/login';</script>";
+        exit;
     }
 
     public function logout() {

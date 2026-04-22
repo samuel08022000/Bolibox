@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - BOLIBOX</title>
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <style>
         body.login-page {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
                         url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
@@ -21,9 +20,11 @@
             align-items: center;
             justify-content: center;
             padding: 2rem 0;
+            margin: 0;
         }
     </style>
 </head>
+
 <body class="login-page">
 
     <div class="registro-card border-0 shadow-lg">
@@ -57,7 +58,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end mb-4">
-                    <a href="#" class="text-naranja small fw-bold text-decoration-none">¿Olvidaste tu contraseña?</a>
+                    <a href="<?= url('recuperar') ?>" class="text-secondary text-decoration-none">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 <button type="submit" class="btn-submit py-3">Ingresar al Portal</button>
