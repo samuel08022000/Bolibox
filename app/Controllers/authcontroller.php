@@ -18,38 +18,102 @@ class AuthController {
         $email = $_POST['email'];
         $password = $_POST['password'];
 
+        // 1. FILTRO ADMINISTRATIVO: Buscar al usuario por correo y que su estado sea 1 (Activo)
         $sql = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ? AND estado = 1");
         $sql->execute([$email]);
         $user = $sql->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash'])) {
-            
-            // 1. Generar código OTP de 6 dígitos y establecer expiración (10 minutos)
-            $otp = sprintf("%06d", mt_rand(1, 999999));
-            $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+        if ($user) {
+            $ahora = date("Y-m-d H:i:s");
 
-            // 2. Guardar el código en la base de datos
-            $update = $this->conn->prepare("UPDATE usuarios SET otp_code = ?, otp_expires_at = ? WHERE id_usuario = ?");
-            $update->execute([$otp, $expiry, $user['id_usuario']]);
+            // 2. FILTRO DE CIBERSEGURIDAD: ¿Está cumpliendo un bloqueo temporal?
+            if ($user['bloqueado_hasta'] != NULL && $user['bloqueado_hasta'] > $ahora) {
+                // Calcular cuántos minutos le faltan de castigo
+                $fecha_bloqueo = new DateTime($user['bloqueado_hasta']);
+                $fecha_actual = new DateTime($ahora);
+                $intervalo = $fecha_actual->diff($fecha_bloqueo);
+                $minutos_restantes = $intervalo->i + ($intervalo->h * 60); // Convierte horas a minutos si las hay
 
-            // 3. Enviar el correo (Usamos la función mail nativa por ahora)
-            // Nota: Configura tu servidor local o usa PHPMailer si mail() no funciona en tu entorno
-            $asunto = "Código de verificación de seguridad - Bolibox";
-            $mensaje = "Tu código de acceso es: " . $otp . "\n\nEste código expirará en 10 minutos.";
-            $cabeceras = "From: soportebolibox@gmail.com\r\n";
-            $cabeceras .= "Reply-To: soportebolibox@gmail.com\r\n";
-            $cabeceras .= "X-Mailer: PHP/" . phpversion();
+                // Expulsar sin comprobar la contraseña
+                echo "<script>alert('Demasiados intentos fallidos. Tu cuenta está bloqueada. Intenta de nuevo en $minutos_restantes minutos.'); window.history.back();</script>";
+                exit;
+            }
 
-            mail($email, $asunto, $mensaje, $cabeceras);
+            // 3. PRUEBA DE FUEGO: Verificar la contraseña
+            if (password_verify($password, $user['password_hash'])) {
+                
+                // --- ACIERTO ---
+                // Resetear el contador de fallos y limpiar la fecha de bloqueo
+                $limpiar = $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id_usuario = ?");
+                $limpiar->execute([$user['id_usuario']]);
 
-            // 4. Guardar el email temporalmente en la sesión y redirigir
-            $_SESSION['temp_email'] = $email;
-            
-            // Debes crear esta vista/ruta para que el usuario ingrese el código
-            header("Location: /BOLIBOX/verificar_otp"); 
-            exit;
+                // --- INICIA EL FLUJO OTP ---
+                $otp = sprintf("%06d", mt_rand(1, 999999));
+                $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+
+                $update = $this->conn->prepare("UPDATE usuarios SET otp_code = ?, otp_expires_at = ? WHERE id_usuario = ?");
+                $update->execute([$otp, $expiry, $user['id_usuario']]);
+
+                // Enviar el correo OTP
+                $asunto = "Código de verificación de seguridad - Bolibox";
+                $mensaje = "Tu código de acceso es: " . $otp . "\n\nEste código expirará en 10 minutos.";
+                $cabeceras = "From: soportebolibox@gmail.com\r\n";
+                $cabeceras .= "Reply-To: soportebolibox@gmail.com\r\n";
+                $cabeceras .= "X-Mailer: PHP/" . phpversion();
+
+                mail($email, $asunto, $mensaje, $cabeceras);
+
+                // Guardar email temporal y redirigir a la vista del código
+                $_SESSION['temp_email'] = $email;
+                header("Location: " . url('verificar_otp')); // Usando tu helper url()
+                exit;
+
+            } else {
+                
+                // --- FALLA EN LA CONTRASEÑA ---
+                $intentos = $user['intentos_fallidos'] + 1;
+
+                if ($intentos >= 5) {
+                    // 1. Aplicar el bloqueo de 15 minutos en la BD
+                    $fecha_desbloqueo = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+                    $bloquear = $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = ?, bloqueado_hasta = ? WHERE id_usuario = ?");
+                    $bloquear->execute([$intentos, $fecha_desbloqueo, $user['id_usuario']]);
+                    
+                    // 2. NUEVO: Enviar correo de alerta al dueño legítimo de la cuenta
+                    $asunto_alerta = "⚠️ Alerta de Seguridad: Cuenta bloqueada - Bolibox";
+                    $mensaje_alerta = "Hola.\n\n";
+                    $mensaje_alerta .= "Hemos detectado 5 intentos de inicio de sesión fallidos en tu cuenta de Bolibox. ";
+                    $mensaje_alerta .= "Por tu protección, hemos bloqueado temporalmente el acceso por 15 minutos.\n\n";
+                    $mensaje_alerta .= "¿Fuiste tú?\n";
+                    $mensaje_alerta .= "No te preocupes, espera 15 minutos e intenta de nuevo, o utiliza la opción '¿Olvidaste tu contraseña?'.\n\n";
+                    $mensaje_alerta .= "¿No fuiste tú?\n";
+                    $mensaje_alerta .= "Alguien podría estar intentando acceder a tu cuenta. Te recomendamos cambiar tu contraseña una vez finalice el bloqueo.\n\n";
+                    $mensaje_alerta .= "Equipo de Seguridad - Bolibox";
+                    
+                    $cabeceras_alerta = "From: soportebolibox@gmail.com\r\n";
+                    $cabeceras_alerta .= "Reply-To: soportebolibox@gmail.com\r\n";
+                    $cabeceras_alerta .= "X-Mailer: PHP/" . phpversion();
+                    
+                    mail($email, $asunto_alerta, $mensaje_alerta, $cabeceras_alerta);
+
+                    // 3. Avisar en pantalla y detener el proceso
+                    echo "<script>alert('Has fallado 5 veces. Por seguridad, la cuenta ha sido bloqueada por 15 minutos. Hemos enviado una alerta a tu correo.'); window.history.back();</script>";
+                    exit;
+                    
+                } else {
+                    // ... (Aquí sigue el código del else que ya tenías para el intento 1, 2, 3 y 4) ...
+                    $actualizar_intentos = $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = ? WHERE id_usuario = ?");
+                    $actualizar_intentos->execute([$intentos, $user['id_usuario']]);
+                    
+                    $intentos_restantes = 5 - $intentos;
+                    echo "<script>alert('Contraseña incorrecta. Te quedan $intentos_restantes intentos antes de bloquear la cuenta.'); window.history.back();</script>";
+                    exit;
+                }
+            } // <--- Esta es la llave que cerraba correctamente el if(password_verify). Borré la extra que tenías aquí.
 
         } else {
+            // El usuario no existe o su estado es 0 (Suspendido administrativamente). 
+            // Mensaje ambiguo a propósito para que el atacante no sepa si adivinó un correo válido.
             echo "<script>alert('Correo o contraseña incorrectos'); window.history.back();</script>";
             exit;
         }
@@ -160,6 +224,7 @@ class AuthController {
             echo "Error en el servidor: " . $e->getMessage();
         }
     }
+
     public function solicitar_recuperacion() {
         $email = $_POST['email'];
         
