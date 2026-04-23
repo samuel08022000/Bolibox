@@ -77,7 +77,10 @@
                 </div>
 
                 <div class="form-floating mb-4">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required
+                    minlength="8" 
+                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                    title="Por seguridad, tu contraseña debe contener al menos 8 caracteres, incluyendo un número, una letra mayúscula y una minúscula.">
                     <label for="password"><i class="bi bi-shield-lock me-2"></i>Contraseña</label>
                 </div>
 

@@ -174,54 +174,122 @@ class AuthController {
     }
 
     public function guardar() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $nombre = $_POST['nombre'];
+        $nit = $_POST['ci'];
+        $telefono = $_POST['telefono'];
+        $ciudad = $_POST['ciudad'];
+        $email = $_POST['email'];
+        $password_plana = $_POST['password'];
+
+        // 1. FILTRO BACKEND: Expresión Regular (Regex) para contraseñas fuertes
+        // Debe tener 8+ caracteres, 1 mayúscula, 1 minúscula y 1 número.
+        if (!preg_match('/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/', $password_plana)) {
+            echo "<script>alert('Error de seguridad: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'); window.history.back();</script>";
+            exit;
+        }
+
         try {
-            $this->conn->beginTransaction();
-
-            $nombre = $_POST['nombre'];
-            $nit = $_POST['ci'];
-            $telefono = $_POST['telefono'];
-            $ciudad = $_POST['ciudad'];
-            $email = $_POST['email'];
-
-            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $rol = 'cliente';
-            $estado = 1;
-
+            // 2. Verificar que el correo no esté robado o ya en uso
             $check = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
             $check->execute([$email]);
 
             if ($check->fetch()) {
-                echo "<script>alert('El correo ya está registrado'); window.history.back();</script>";
+                echo "<script>alert('El correo ya está registrado en el sistema.'); window.history.back();</script>";
                 exit;
             }
 
-            $username = explode("@", $email)[0];
+            // 3. BCRYPT DE ALTO COSTO: Encriptar la contraseña fuerte
+            $opciones = ['cost' => 12];
+            $password_hash = password_hash($password_plana, PASSWORD_BCRYPT, $opciones);
 
-            $sqlUsuario = $this->conn->prepare("
-                INSERT INTO usuarios (username, email, password_hash, rol, estado)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $sqlUsuario->execute([$username, $email, $password, $rol, $estado]);
+            // 4. GENERAR OTP DE REGISTRO
+            $otp = sprintf("%06d", mt_rand(1, 999999));
+            
+            // 5. CUARENTENA: Guardar datos en sesión temporal, NO en la base de datos
+            $_SESSION['temp_registro'] = [
+                'nombre' => $nombre,
+                'nit' => $nit,
+                'telefono' => $telefono,
+                'ciudad' => $ciudad,
+                'email' => $email,
+                'password_hash' => $password_hash, // Guardamos el hash, no la plana
+                'otp' => $otp
+            ];
 
-            $id_usuario_nuevo = $this->conn->lastInsertId();
+            // 6. Enviar el correo de validación
+            $asunto = "Verifica tu correo para crear tu cuenta - Bolibox";
+            $mensaje = "Hola $nombre,\n\nTu código de seguridad para completar el registro es: " . $otp . "\n\nSi no solicitaste crear una cuenta, puedes ignorar este correo.";
+            $cabeceras = "From: soportebolibox@gmail.com\r\n";
+            $cabeceras .= "Reply-To: soportebolibox@gmail.com\r\n";
+            $cabeceras .= "X-Mailer: PHP/" . phpversion();
 
-            $sqlCliente = $this->conn->prepare("
-                INSERT INTO clientes (id_usuario, nombre, nit, telefono, ciudad)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $sqlCliente->execute([$id_usuario_nuevo, $nombre, $nit, $telefono, $ciudad]);
+            mail($email, $asunto, $mensaje, $cabeceras);
 
-            $this->conn->commit();
-
-            echo "<script>
-                alert('Registro exitoso. Ya puedes iniciar sesión.');
-                window.location.href = '/BOLIBOX/login';
-            </script>";
+            // Redirigir a la nueva pantalla de validación
+            header("Location: " . url('verificar_registro_otp')); 
             exit;
 
         } catch (Exception $e) {
-            $this->conn->rollBack();
             echo "Error en el servidor: " . $e->getMessage();
+        }
+    }
+
+    // NUEVA FUNCIÓN: Solo inserta en MySQL si el correo es real
+    public function validar_registro_otp() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['temp_registro']) || !isset($_POST['otp'])) {
+            header("Location: " . url('registro'));
+            exit;
+        }
+
+        $datos = $_SESSION['temp_registro'];
+        $otp_ingresado = $_POST['otp'];
+
+        if ($otp_ingresado === $datos['otp']) {
+            try {
+                $this->conn->beginTransaction();
+
+                $rol = 'cliente';
+                $estado = 1; // Ahora sí le damos estado 1 porque demostró ser dueño del correo
+                $username = explode("@", $datos['email'])[0];
+
+                $sqlUsuario = $this->conn->prepare("
+                    INSERT INTO usuarios (username, email, password_hash, rol, estado)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $sqlUsuario->execute([$username, $datos['email'], $datos['password_hash'], $rol, $estado]);
+
+                $id_usuario_nuevo = $this->conn->lastInsertId();
+
+                $sqlCliente = $this->conn->prepare("
+                    INSERT INTO clientes (id_usuario, nombre, nit, telefono, ciudad)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $sqlCliente->execute([$id_usuario_nuevo, $datos['nombre'], $datos['nit'], $datos['telefono'], $datos['ciudad']]);
+
+                $this->conn->commit();
+                unset($_SESSION['temp_registro']); // Limpiar la memoria del servidor
+
+                echo "<script>
+                    alert('¡Registro exitoso y correo verificado! Ya puedes iniciar sesión.');
+                    window.location.href = '" . url('login') . "';
+                </script>";
+                exit;
+
+            } catch (Exception $e) {
+                $this->conn->rollBack();
+                echo "Error en el servidor: " . $e->getMessage();
+            }
+        } else {
+            echo "<script>alert('Código incorrecto. Verifica tu correo e intenta nuevamente.'); window.history.back();</script>";
+            exit;
         }
     }
 
@@ -275,13 +343,22 @@ class AuthController {
 
     public function actualizar_password() {
         $token = $_POST['token'];
-        $nueva_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $password_plana = $_POST['password'];
 
-        // 6. Cambio de credenciales (punto 7 de tu flujo)
+        // FILTRO BACKEND
+        if (!preg_match('/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/', $password_plana)) {
+            echo "<script>alert('Error de seguridad: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'); window.history.back();</script>";
+            exit;
+        }
+
+        // BCRYPT CON COSTO 12
+        $opciones = ['cost' => 12];
+        $nueva_password = password_hash($password_plana, PASSWORD_BCRYPT, $opciones);
+
         $sql = $this->conn->prepare("UPDATE usuarios SET password_hash = ?, reset_token = NULL, reset_expires_at = NULL WHERE reset_token = ?");
         $sql->execute([$nueva_password, $token]);
 
-        echo "<script>alert('Contraseña actualizada con éxito.'); window.location.href='/BOLIBOX/login';</script>";
+        echo "<script>alert('Contraseña actualizada con éxito de forma segura.'); window.location.href='" . url('login') . "';</script>";
         exit;
     }
 

@@ -54,6 +54,16 @@ switch ($path) {
         (new AuthController())->guardar();
         break;
 
+    case '/verificar_registro_otp':
+        // Esta ruta simplemente carga la vista del formulario para confirmar el correo
+        require_once __DIR__ . '/../views/verificar_registro_otp.php';
+        break;
+
+    case '/registro/validar':
+        require_once __DIR__ . '/../app/Controllers/AuthController.php';
+        (new AuthController())->validar_registro_otp();
+        break;
+
     case '/logout':
         require_once __DIR__ . '/../app/Controllers/AuthController.php';
         (new AuthController())->logout();

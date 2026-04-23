@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/BOLIBOX/public/css/style.css">
+    
+    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <style>
         body.login-page {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
@@ -42,17 +43,17 @@
             <h3 class="fw-bold mb-1" style="color: #111827;">Nueva Contraseña</h3>
             <p class="text-muted mb-4">Crea una nueva clave para tu cuenta.</p>
 
-            <form action="/BOLIBOX/reset-password/actualizar" method="POST">
+            <form action="<?= url('reset-password/actualizar') ?>" method="POST">
                 
                 <input type="hidden" name="token" value="<?php echo htmlspecialchars($_GET['token'] ?? ''); ?>">
 
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Nueva Contraseña" required minlength="8" autofocus>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Nueva Contraseña" required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Por seguridad, tu contraseña debe contener al menos 8 caracteres, incluyendo un número, una letra mayúscula y una minúscula." autofocus>
                     <label for="password"><i class="bi bi-shield-lock me-2"></i>Nueva Contraseña</label>
                 </div>
 
                 <div class="form-floating mb-4">
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirmar Contraseña" required minlength="8">
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirmar Contraseña" required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Por seguridad, tu contraseña debe contener al menos 8 caracteres, incluyendo un número, una letra mayúscula y una minúscula.">
                     <label for="confirm_password"><i class="bi bi-shield-check me-2"></i>Confirmar Contraseña</label>
                 </div>
 
