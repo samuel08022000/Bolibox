@@ -185,15 +185,14 @@ class AuthController {
         $email = $_POST['email'];
         $password_plana = $_POST['password'];
 
-        // 1. FILTRO BACKEND: Expresión Regular (Regex) para contraseñas fuertes
-        // Debe tener 8+ caracteres, 1 mayúscula, 1 minúscula y 1 número.
+        // 1. FILTRO BACKEND: Expresión Regular para contraseñas fuertes
         if (!preg_match('/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/', $password_plana)) {
             echo "<script>alert('Error de seguridad: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'); window.history.back();</script>";
             exit;
         }
 
         try {
-            // 2. Verificar que el correo no esté robado o ya en uso
+            // 2. Verificar que el correo no esté en uso
             $check = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
             $check->execute([$email]);
 
@@ -202,96 +201,93 @@ class AuthController {
                 exit;
             }
 
-            // 3. BCRYPT DE ALTO COSTO: Encriptar la contraseña fuerte
+            $this->conn->beginTransaction();
+
+            // 3. BCRYPT CON COSTO 12
             $opciones = ['cost' => 12];
             $password_hash = password_hash($password_plana, PASSWORD_BCRYPT, $opciones);
 
-            // 4. GENERAR OTP DE REGISTRO
-            $otp = sprintf("%06d", mt_rand(1, 999999));
-            
-            // 5. CUARENTENA: Guardar datos en sesión temporal, NO en la base de datos
-            $_SESSION['temp_registro'] = [
-                'nombre' => $nombre,
-                'nit' => $nit,
-                'telefono' => $telefono,
-                'ciudad' => $ciudad,
-                'email' => $email,
-                'password_hash' => $password_hash, // Guardamos el hash, no la plana
-                'otp' => $otp
-            ];
+            // 4. GENERAR MAGIC LINK (Reutilizamos la columna reset_token para la activación)
+            $token_activacion = bin2hex(random_bytes(32));
+            $rol = 'cliente';
+            $estado = 0; // ESTADO 0: La cuenta nace bloqueada hasta que verifique el correo
+            $username = explode("@", $email)[0];
 
-            // 6. Enviar el correo de validación
-            $asunto = "Verifica tu correo para crear tu cuenta - Bolibox";
-            $mensaje = "Hola $nombre,\n\nTu código de seguridad para completar el registro es: " . $otp . "\n\nSi no solicitaste crear una cuenta, puedes ignorar este correo.";
+            // Insertar Usuario
+            $sqlUsuario = $this->conn->prepare("
+                INSERT INTO usuarios (username, email, password_hash, rol, estado, reset_token)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            $sqlUsuario->execute([$username, $email, $password_hash, $rol, $estado, $token_activacion]);
+
+            $id_usuario_nuevo = $this->conn->lastInsertId();
+
+            // Insertar Cliente
+            $sqlCliente = $this->conn->prepare("
+                INSERT INTO clientes (id_usuario, nombre, nit, telefono, ciudad)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $sqlCliente->execute([$id_usuario_nuevo, $nombre, $nit, $telefono, $ciudad]);
+
+            $this->conn->commit();
+
+            // 5. ENVIAR CORREO DE ACTIVACIÓN
+            $enlace = "http://localhost/BOLIBOX/activar-cuenta?token=" . $token_activacion;
+            
+            $asunto = "Activa tu cuenta de Bolibox";
+            $mensaje = "Hola $nombre,\n\n";
+            $mensaje .= "Gracias por registrarte en Bolibox. Para activar tu cuenta y empezar a gestionar tus importaciones, haz clic en el siguiente enlace:\n\n";
+            $mensaje .= $enlace . "\n\n";
+            $mensaje .= "Si no fuiste tú quien creó esta cuenta, simplemente ignora este correo.\n";
+            
             $cabeceras = "From: soportebolibox@gmail.com\r\n";
             $cabeceras .= "Reply-To: soportebolibox@gmail.com\r\n";
             $cabeceras .= "X-Mailer: PHP/" . phpversion();
 
             mail($email, $asunto, $mensaje, $cabeceras);
 
-            // Redirigir a la nueva pantalla de validación
-            header("Location: " . url('verificar_registro_otp')); 
+            // Redirigir al login avisando que revise su correo
+            echo "<script>
+                alert('¡Casi listo! Hemos enviado un enlace de activación a tu correo. Haz clic en él para poder iniciar sesión.');
+                window.location.href = '" . url('login') . "';
+            </script>";
             exit;
 
         } catch (Exception $e) {
+            $this->conn->rollBack();
             echo "Error en el servidor: " . $e->getMessage();
         }
     }
 
-    // NUEVA FUNCIÓN: Solo inserta en MySQL si el correo es real
-    public function validar_registro_otp() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+    // NUEVA FUNCIÓN: Se ejecuta cuando el usuario hace clic en el correo
+    public function activar_cuenta() {
+        $token = $_GET['token'] ?? '';
 
-        if (!isset($_SESSION['temp_registro']) || !isset($_POST['otp'])) {
-            header("Location: " . url('registro'));
+        if (empty($token)) {
+            echo "<script>alert('Enlace no válido o dañado.'); window.location.href='" . url('login') . "';</script>";
             exit;
         }
 
-        $datos = $_SESSION['temp_registro'];
-        $otp_ingresado = $_POST['otp'];
+        // Buscar a un usuario que tenga estado 0 y que coincida con este token
+        $sql = $this->conn->prepare("SELECT id_usuario FROM usuarios WHERE reset_token = ? AND estado = 0");
+        $sql->execute([$token]);
+        $user = $sql->fetch(PDO::FETCH_ASSOC);
 
-        if ($otp_ingresado === $datos['otp']) {
-            try {
-                $this->conn->beginTransaction();
+        if ($user) {
+            // El usuario existe y el token es correcto. ¡Lo activamos!
+            $update = $this->conn->prepare("UPDATE usuarios SET estado = 1, reset_token = NULL WHERE id_usuario = ?");
+            $update->execute([$user['id_usuario']]);
 
-                $rol = 'cliente';
-                $estado = 1; // Ahora sí le damos estado 1 porque demostró ser dueño del correo
-                $username = explode("@", $datos['email'])[0];
-
-                $sqlUsuario = $this->conn->prepare("
-                    INSERT INTO usuarios (username, email, password_hash, rol, estado)
-                    VALUES (?, ?, ?, ?, ?)
-                ");
-                $sqlUsuario->execute([$username, $datos['email'], $datos['password_hash'], $rol, $estado]);
-
-                $id_usuario_nuevo = $this->conn->lastInsertId();
-
-                $sqlCliente = $this->conn->prepare("
-                    INSERT INTO clientes (id_usuario, nombre, nit, telefono, ciudad)
-                    VALUES (?, ?, ?, ?, ?)
-                ");
-                $sqlCliente->execute([$id_usuario_nuevo, $datos['nombre'], $datos['nit'], $datos['telefono'], $datos['ciudad']]);
-
-                $this->conn->commit();
-                unset($_SESSION['temp_registro']); // Limpiar la memoria del servidor
-
-                echo "<script>
-                    alert('¡Registro exitoso y correo verificado! Ya puedes iniciar sesión.');
-                    window.location.href = '" . url('login') . "';
-                </script>";
-                exit;
-
-            } catch (Exception $e) {
-                $this->conn->rollBack();
-                echo "Error en el servidor: " . $e->getMessage();
-            }
+            echo "<script>alert('¡Tu cuenta ha sido verificada y activada con éxito! Ya puedes iniciar sesión.'); window.location.href='" . url('login') . "';</script>";
+            exit;
         } else {
-            echo "<script>alert('Código incorrecto. Verifica tu correo e intenta nuevamente.'); window.history.back();</script>";
+            // Si el estado ya es 1, o el token no existe
+            echo "<script>alert('El enlace es inválido o esta cuenta ya fue activada anteriormente.'); window.location.href='" . url('login') . "';</script>";
             exit;
         }
     }
+    
+
 
     public function solicitar_recuperacion() {
         $email = $_POST['email'];
