@@ -65,5 +65,25 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (session_status() === PHP_SESSION_NONE) session_start(); ?>
+    <?php if (isset($_SESSION['flash'])): ?>
+    <script>
+        Swal.fire({
+            title: 'Atención',
+            text: "<?= $_SESSION['flash']['mensaje'] ?>",
+            icon: "<?= $_SESSION['flash']['tipo'] ?>",
+            confirmButtonColor: '#FF8C00',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                popup: 'rounded-4'
+            }
+        });
+    </script>
+    <?php 
+        unset($_SESSION['flash']); 
+    endif; ?>
 </body>
 </html>
