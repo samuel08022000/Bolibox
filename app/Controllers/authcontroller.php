@@ -7,6 +7,7 @@ class AuthController {
 
     private $conn;
     private $emailService;
+    private $captcha_secret = "6LckFcwsAAAAAGGyu_cMByV6-j3FdAXCaM91Gj4Z";
 
     public function __construct() {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -22,78 +23,125 @@ class AuthController {
         exit;
     }
 
-    public function login() {
+public function login() {
         $email = trim($_POST['email']);
         $password = trim($_POST['password']);
+        $ip_usuario = $_SERVER['REMOTE_ADDR'];
 
-        $sql = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ?");
+        // 1. LIMPIEZA Y CONTEO GLOBAL
+        $this->conn->query("DELETE FROM intentos_login WHERE fecha_intento < NOW() - INTERVAL 15 MINUTE");
+        
+        $sqlGlobal = $this->conn->prepare("SELECT COUNT(*) as total FROM intentos_login WHERE ip_address = ?");
+        $sqlGlobal->execute([$ip_usuario]);
+        $fallos_globales = $sqlGlobal->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // 2. ESCUDO DE GOOGLE (Si hay más de 20 fallos de esta IP en total)
+        if ($fallos_globales >= 20) {
+            $captcha_response = $_POST['g-recaptcha-response'] ?? '';
+            
+            if (empty($captcha_response)) {
+                $_SESSION['show_captcha'] = true;
+                $this->redirectConMensaje(url('login'), "Actividad sospechosa detectada. Por favor, verifica que eres humano.", "warning");
+            }
+
+            // Verificar con Google
+            $verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$this->captcha_secret}&response={$captcha_response}");
+            $responseKeys = json_decode($verify, true);
+            
+            if (!$responseKeys["success"]) {
+                $_SESSION['show_captcha'] = true;
+                $this->redirectConMensaje(url('login'), "Verificación de bot fallida. Inténtalo de nuevo.", "error");
+            }
+            // Si pasa, limpiamos la bandera de captcha para este intento
+            unset($_SESSION['show_captcha']);
+        }
+
+        // 3. LÓGICA INDIVIDUAL (5 intentos por cuenta)
+        $sqlIndividual = $this->conn->prepare("SELECT COUNT(*) as fallos FROM intentos_login WHERE ip_address = ? AND email_intento = ?");
+        $sqlIndividual->execute([$ip_usuario, $email]);
+        $ataques_cuenta = $sqlIndividual->fetch(PDO::FETCH_ASSOC)['fallos'];
+
+        if ($ataques_cuenta >= 10) {
+            $this->redirectConMensaje(url('login'), "Acceso bloqueado por seguridad. Revisa tu correo para entrar.", "error");
+        }
+
+        // 4. PROCESAR LOGIN
+        $sql = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ? AND estado = 1");
         $sql->execute([$email]);
         $user = $sql->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            if ($user['estado'] == 0) {
-                $this->redirectConMensaje(url('login'), "Tu cuenta no está activada. Revisa tu correo electrónico para activarla.", "warning");
-            }
-
-            $ahora = date("Y-m-d H:i:s");
-
-            // 1. Verificar si está bloqueado actualmente
-            if ($user['bloqueado_hasta'] != NULL && $user['bloqueado_hasta'] > $ahora) {
-                $fecha_bloqueo = new DateTime($user['bloqueado_hasta']);
-                $fecha_actual = new DateTime($ahora);
-                $minutos_restantes = $fecha_actual->diff($fecha_bloqueo)->i + ($fecha_actual->diff($fecha_bloqueo)->h * 60);
-                $this->redirectConMensaje(url('login'), "Cuenta bloqueada por seguridad. Intenta en $minutos_restantes minutos.", "error");
-            } 
-            // 2. NUEVO: Si tenía un bloqueo pero ya pasó el tiempo, lo "perdonamos" y limpiamos su historial ANTES de comprobar la contraseña
-            elseif ($user['bloqueado_hasta'] != NULL && $user['bloqueado_hasta'] <= $ahora) {
-                $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
-                $user['intentos_fallidos'] = 0; // Actualizamos la variable en memoria para que empiece desde cero
-            }
-
-            // 3. Comprobar la contraseña
             if (password_verify($password, $user['password_hash'])) {
-                // ACIERTO
-                $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
-
+                // ACIERTO: Limpiar ataques de esta IP para esta cuenta
+                $this->conn->prepare("DELETE FROM intentos_login WHERE ip_address = ? AND email_intento = ?")->execute([$ip_usuario, $email]);
+                
+                // Generar OTP (Paso 2FA normal)
                 $otp = sprintf("%06d", mt_rand(1, 999999));
                 $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
-
                 $this->conn->prepare("UPDATE usuarios SET otp_code = ?, otp_expires_at = ? WHERE id_usuario = ?")->execute([$otp, $expiry, $user['id_usuario']]);
-
-                // DELEGAMOS EL CORREO AL EMAILCONTROLLER
+                
                 $this->emailService->enviarOTP($email, $otp);
-
                 $_SESSION['temp_email'] = $email;
-                $this->redirectConMensaje(url('verificar_otp'), "Hemos enviado un código de seguridad a tu correo.", "info");
-
+                header("Location: " . url('verificar_otp'));
+                exit;
             } else {
-                // FALLO DE CONTRASEÑA
-                $intentos = $user['intentos_fallidos'] + 1;
+                // FALLO: Registrar en intentos_login
+                $this->conn->prepare("INSERT INTO intentos_login (ip_address, email_intento) VALUES (?, ?)")->execute([$ip_usuario, $email]);
+                $ataques_cuenta++;
 
-                if ($intentos >= 5) {
-                    $fecha_desbloqueo = date("Y-m-d H:i:s", strtotime("+15 minutes"));
-                    $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = ?, bloqueado_hasta = ? WHERE id_usuario = ?")->execute([$intentos, $fecha_desbloqueo, $user['id_usuario']]);
+                if ($ataques_cuenta >= 10) {
+                    $token = bin2hex(random_bytes(32));
+                    $expiracion = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+                    $this->conn->prepare("UPDATE usuarios SET magic_token = ?, magic_expires_at = ? WHERE id_usuario = ?")->execute([$token, $expiracion, $user['id_usuario']]);
                     
-                    $this->emailService->enviarAlertaBloqueo($email);
-
-                    // Este SÍ se queda como Modal porque es crítico (Nivel 3)
-                    $this->redirectConMensaje(url('login'), "Has fallado 5 veces. Cuenta bloqueada por 15 minutos por seguridad.", "error");
+                    $enlace = "http://localhost/BOLIBOX/magic-login?token=" . $token;
+                    $this->emailService->enviarMagicLinkSeguridad($email, $user['username'], $enlace);
+                    $this->redirectConMensaje(url('login'), "Demasiados intentos. Te enviamos un acceso directo a tu correo.", "error");
                 } else {
-                    $this->conn->prepare("UPDATE usuarios SET intentos_fallidos = ? WHERE id_usuario = ?")->execute([$intentos, $user['id_usuario']]);
-                    $restantes = 5 - $intentos;
-                    
-                    // NUEVO: Error sutil en línea (Nivel 1) - No lanza SweetAlert
-                    $_SESSION['error_password'] = "Contraseña incorrecta. Te quedan $restantes intentos.";
-                    $_SESSION['old_email'] = $email; // Guardamos el email para rellenar el input
+                    $_SESSION['error_password'] = "Contraseña incorrecta. Quedan " . (10 - $ataques_cuenta) . " intentos.";
+                    $_SESSION['old_email'] = $email;
                     header("Location: " . url('login'));
                     exit;
                 }
             }
         } else {
-            // NUEVO: Error de correo (Nivel 1) - No lanza SweetAlert
-            $_SESSION['error_email'] = "El correo ingresado no está registrado.";
+            // Usuario inexistente: Igual registramos el fallo para frenar escaneos globales
+            $this->conn->prepare("INSERT INTO intentos_login (ip_address, email_intento) VALUES (?, ?)")->execute([$ip_usuario, $email]);
+            $_SESSION['error_email'] = "El correo no está registrado.";
             header("Location: " . url('login'));
             exit;
+        }
+    }
+
+    // --- NUEVA FUNCIÓN PARA PROCESAR EL CLIC DEL CORREO ---
+    public function magic_login() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $token = $_GET['token'] ?? '';
+
+        if (empty($token)) {
+            $this->redirectConMensaje(url('login'), "Enlace de seguridad no válido.", "error");
+        }
+
+        $sql = $this->conn->prepare("SELECT * FROM usuarios WHERE magic_token = ? AND magic_expires_at > NOW() AND estado = 1");
+        $sql->execute([$token]);
+        $user = $sql->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            // ACIERTO TOTAL: Limpiamos el token y borramos todos los reportes de ataque de su correo
+            $this->conn->prepare("UPDATE usuarios SET magic_token = NULL, magic_expires_at = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
+            $this->conn->prepare("DELETE FROM intentos_login WHERE email_intento = ?")->execute([$user['email']]);
+
+            // No lo dejamos entrar de golpe, lo pasamos al paso 2FA (OTP) para mantener la muralla en alto
+            $otp = sprintf("%06d", mt_rand(1, 999999));
+            $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+            
+            $this->conn->prepare("UPDATE usuarios SET otp_code = ?, otp_expires_at = ? WHERE id_usuario = ?")->execute([$otp, $expiry, $user['id_usuario']]);
+            $this->emailService->enviarOTP($user['email'], $otp);
+            
+            $_SESSION['temp_email'] = $user['email'];
+            $this->redirectConMensaje(url('verificar_otp'), "Acceso seguro concedido. Te hemos enviado un OTP para confirmar tu identidad.", "success");
+        } else {
+            $this->redirectConMensaje(url('login'), "El enlace ha expirado o ya fue utilizado por seguridad.", "error");
         }
     }
 

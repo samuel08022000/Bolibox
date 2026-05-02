@@ -1,17 +1,13 @@
 <?php
-
 // =====================================================================
 // 1. CONFIGURACIÓN INICIAL (Sesiones y Helpers)
 // =====================================================================
-
 session_start();
 require_once __DIR__ . '/../app/helpers.php';
-
 
 // =====================================================================
 // 2. LIMPIEZA DE LA URL (Para que el enrutador entienda qué pedimos)
 // =====================================================================
-
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $basePath = str_replace('/public', '', dirname($_SERVER['SCRIPT_NAME']));
 
@@ -21,11 +17,9 @@ if ($basePath !== '/' && strpos($path, $basePath) === 0) {
 
 $path = rtrim($path, '/') ?: '/';
 
-
 // =====================================================================
 // 3. ENRUTADOR PRINCIPAL (Switch)
 // =====================================================================
-
 switch ($path) {
 
     // ---------------------------------------------------
@@ -96,8 +90,6 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/AuthController.php';
         (new AuthController())->actualizar_password();
         break;
-
-
     // ---------------------------------------------------
     // PORTAL CLIENTE
     // ---------------------------------------------------
@@ -127,7 +119,6 @@ switch ($path) {
         (new ClientePortalController())->chatbot();
         break;
 
-
     // ---------------------------------------------------
     // PANEL EMPLEADO
     // ---------------------------------------------------
@@ -152,16 +143,6 @@ switch ($path) {
         (new PedidoController())->guardar();
         break;
 
-    case '/empleado/clientes/actualizar':
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
-        (new PedidoController())->actualizarCliente();
-        break;
-
-    case '/empleado/clientes/eliminar':
-        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
-        (new PedidoController())->eliminarCliente();
-        break;
-
     case '/empleado/pedidos/editar':
         require_once __DIR__ . '/../app/Controllers/PedidoController.php';
         (new PedidoController())->editar();
@@ -172,11 +153,48 @@ switch ($path) {
         (new PedidoController())->actualizar();
         break;
 
-    case '/empleado/pedidos/eliminar':
+    case '/empleado/pedidos/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/PedidoController.php';
-        (new PedidoController())->eliminar();
+        (new PedidoController())->cambiarEstado();
         break;
 
+    case '/empleado/clientes/actualizar':
+        require_once __DIR__ . '/../app/Controllers/ClienteController.php';
+        (new ClienteController())->actualizar();
+        break;
+    case '/empleado/productos':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->productos();
+        break;
+
+    case '/empleado/productos/guardar':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->guardarProducto();
+        break;
+    case '/empleado/productos/actualizar':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->actualizarProducto();
+        break;
+
+    case '/empleado/productos/cambiar-estado':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->cambiarEstadoProducto();
+        break;
+    // --- RUTAS PARA CLIENTES (EMPLEADO) ---
+    case '/empleado/clientes/guardar':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->guardarCliente();
+        break;
+
+    case '/empleado/clientes/actualizar':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->actualizarCliente();
+        break;
+
+    case '/empleado/clientes/cambiar-estado':
+        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
+        (new EmpleadoPortalController())->cambiarEstadoCliente();
+        break;
 
     // ---------------------------------------------------
     // PANEL ADMINISTRADOR (Dashboard Principal)
@@ -186,7 +204,6 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/AdminController.php';
         (new AdminController())->index();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: PRODUCTOS
@@ -212,11 +229,10 @@ switch ($path) {
         (new ProductoController())->actualizar();
         break;
 
-    case '/admin/productos/eliminar':
+    case '/admin/productos/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/ProductoController.php';
-        (new ProductoController())->eliminar();
+        (new ProductoController())->cambiarEstado();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: PROVEEDORES
@@ -242,11 +258,10 @@ switch ($path) {
         (new ProveedorController())->actualizar();
         break;
 
-    case '/admin/proveedores/eliminar':
+    case '/admin/proveedores/cambiarEstado':
         require_once __DIR__ . '/../app/Controllers/ProveedorController.php';
-        (new ProveedorController())->eliminar();
+        (new ProveedorController())->cambiarEstado();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: CLIENTES
@@ -272,11 +287,10 @@ switch ($path) {
         (new ClienteController())->actualizar();
         break;
 
-    case '/admin/clientes/eliminar':
+    case '/admin/clientes/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/ClienteController.php';
-        (new ClienteController())->eliminar();
+        (new ClienteController())->cambiarEstado();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: PEDIDOS
@@ -302,11 +316,10 @@ switch ($path) {
         (new AdminPedidoController())->actualizar();
         break;
 
-    case '/admin/pedidos/eliminar':
+    case '/admin/pedidos/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
-        (new AdminPedidoController())->eliminar();
+        (new AdminPedidoController())->cambiarEstado();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: STOCK
@@ -332,11 +345,10 @@ switch ($path) {
         (new StockController())->actualizar();
         break;
 
-    case '/admin/stock/eliminar':
+    case '/admin/stock/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/StockController.php';
-        (new StockController())->eliminar();
+        (new StockController())->cambiarEstado();
         break;
-
 
     // ---------------------------------------------------
     // ADMIN: OTROS (Empleados y Bitácoras)
@@ -361,7 +373,6 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/BitacoraController.php';
         (new BitacoraController())->index();
         break;
-
 
     // ---------------------------------------------------
     // PÁGINA DE ERROR 404

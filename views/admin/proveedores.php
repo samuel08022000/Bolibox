@@ -5,17 +5,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/../../config/database.php';
-
-$db = new Database();
-$con = $db->conectar();
-
-$sql = $con->prepare("
-    SELECT id_proveedor, nombre, pais, contacto, correo, tipo_moneda 
-    FROM proveedor
-");
-$sql->execute();
-$resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -121,71 +110,91 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                 <th>Contacto</th>
                                 <th>Correo</th>
                                 <th>Tipo Moneda</th>
-                                <th class="text-end pe-4">Acciones</th>
+                                <th class="text-end pe-4">Editar</th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($resultado as $row) { ?>
+                            <?php foreach ($resultado as $row): ?>
                             <tr>
-                                <td><?php echo $row['id_proveedor']; ?></td>
-                                <td><?php echo $row['nombre']; ?></td>
-                                <td><?php echo $row['pais']; ?></td>
-                                <td><?php echo $row['contacto']; ?></td>
-                                <td><?php echo $row['correo']; ?></td>
-                                <td><?php echo $row['tipo_moneda']; ?></td>
+                                <td><?= $row['id_proveedor']; ?></td>
+                                <td><?= $row['nombre']; ?></td>
+                                <td><?= $row['pais']; ?></td>
+                                <td><?= $row['contacto']; ?></td>
+                                <td><?= $row['correo']; ?></td>
+                                <td><?= $row['tipo_moneda']; ?></td>
+
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarProv<?php echo $row['id_proveedor']; ?>" title="Editar">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarProv<?= $row['id_proveedor']; ?>">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    
-                                    <a href="<?= url('admin/proveedores/eliminar?id=' . $row['id_proveedor']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Estás seguro de eliminar este proveedor?');" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                </td>
+
+                                <td>
+                                    <form action="<?= url('admin/proveedores/cambiarEstado') ?>" method="POST">
+                                        <input type="hidden" name="id_proveedor" value="<?= $row['id_proveedor'] ?>">
+                                        <input type="hidden" name="estado_actual" value="<?= $row['estado'] ?>">
+
+                                        <?php if ($row['estado'] == 1): ?>
+                                            <button class="btn btn-sm btn-success">Activo</button>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-danger">Inactivo</button>
+                                        <?php endif; ?>
+                                    </form>
                                 </td>
                             </tr>
 
-                            <div class="modal fade" id="modalEditarProv<?php echo $row['id_proveedor']; ?>" tabindex="-1">
+                            <div class="modal fade" id="modalEditarProv<?= $row['id_proveedor']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content" style="border-radius: 12px; border: none;">
-                                        <div class="modal-header bg-negro text-white">
-                                            <h5 class="modal-title fw-bold">Editar Proveedor #<?php echo $row['id_proveedor']; ?></h5>
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title">Editar Proveedor</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
+
                                         <form action="<?= url('admin/proveedores/actualizar') ?>" method="POST">
-                                            <div class="modal-body p-4">
-                                                <input type="hidden" name="id_proveedor" value="<?php echo $row['id_proveedor']; ?>">
-                                                
+                                            <div class="modal-body">
+                                                <input type="hidden" name="id_proveedor" value="<?= $row['id_proveedor']; ?>">
+
                                                 <div class="mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">Empresa</label>
-                                                    <input type="text" name="nombre" class="form-control" value="<?php echo $row['nombre']; ?>" required>
+                                                    <label>Empresa</label>
+                                                    <input type="text" name="nombre" class="form-control" value="<?= $row['nombre']; ?>" required>
                                                 </div>
+
                                                 <div class="mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">Contacto</label>
-                                                    <input type="text" name="contacto" class="form-control" value="<?php echo $row['contacto']; ?>" required>
+                                                    <label>Contacto</label>
+                                                    <input type="text" name="contacto" class="form-control" value="<?= $row['contacto']; ?>" required>
                                                 </div>
+
                                                 <div class="mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">País</label>
-                                                    <input type="text" name="pais" class="form-control" value="<?php echo $row['pais']; ?>" required>
+                                                    <label>País</label>
+                                                    <input type="text" name="pais" class="form-control" value="<?= $row['pais']; ?>" required>
                                                 </div>
+
                                                 <div class="mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">Correo</label>
-                                                    <input type="email" name="correo" class="form-control" value="<?php echo $row['correo']; ?>" required>
+                                                    <label>Correo</label>
+                                                    <input type="email" name="correo" class="form-control" value="<?= $row['correo']; ?>" required>
                                                 </div>
+
                                                 <div class="mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">Tipo Moneda</label>
-                                                    <input type="text" name="tipo_moneda" class="form-control" value="<?php echo $row['tipo_moneda']; ?>" required>
+                                                    <label>Tipo Moneda</label>
+                                                    <input type="text" name="tipo_moneda" class="form-control" value="<?= $row['tipo_moneda']; ?>" required>
                                                 </div>
                                             </div>
-                                            <div class="modal-footer bg-light border-0">
-                                                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-primary fw-bold px-4">Actualizar</button>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary">Actualizar</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-                            <?php } ?>
-                        </tbody>
+
+                            <?php endforeach; ?>
+                            </tbody>
                     </table>
                 </div>
             </div>

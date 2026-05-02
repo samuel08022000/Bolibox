@@ -1,3 +1,6 @@
+/* ==========================================
+   1. RESETEO Y VARIABLES GLOBALES
+   ========================================== */
 * {
     margin: 0;
     padding: 0;
@@ -27,6 +30,9 @@ a {
     color: inherit;
 }
 
+/* ==========================================
+   2. CLASES UTILITARIAS
+   ========================================== */
 .text-naranja { color: var(--naranja) !important; }
 .bg-naranja { background-color: var(--naranja) !important; }
 .bg-negro { background-color: var(--negro) !important; }
@@ -65,7 +71,9 @@ a {
     background-color: var(--naranja);
 }
 
-
+/* ==========================================
+   3. BOTONES Y TARJETAS GLOBALES
+   ========================================== */
 .btn-naranja {
     background: var(--naranja);
     color: var(--blanco);
@@ -92,7 +100,9 @@ a {
     border-top: 4px solid var(--naranja);
 }
 
-
+/* ==========================================
+   4. VISTA PÚBLICA (INDEX)
+   ========================================== */
 header {
     position: fixed;
     top: 0;
@@ -211,6 +221,7 @@ nav a:hover, nav a.active {
     margin-bottom: 40px;
 }
 
+/* Secciones Nosotros, Servicios y Sucursales */
 .nosotros-texto-intro {
     text-align: center;
     max-width: 900px;
@@ -301,6 +312,9 @@ nav a:hover, nav a.active {
     color: var(--naranja);
 }
 
+/* ==========================================
+   5. AUTENTICACIÓN (LOGIN Y REGISTRO)
+   ========================================== */
 .login-card {
     background: var(--gris-oscuro);
     border-radius: 16px;
@@ -368,19 +382,7 @@ nav a:hover, nav a.active {
     color: var(--naranja);
     font-weight: 600;
 }
-body.login-page {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=2070&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 0;
-    margin: 0;
-}
+
 .registro-page {
     display: flex;
     align-items: center;
@@ -476,6 +478,9 @@ body.login-page {
     color: var(--naranja);
 }
 
+/* ==========================================
+   6. PANEL ADMINISTRADOR Y EMPLEADO
+   ========================================== */
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -494,6 +499,7 @@ body.login-page {
     z-index: 1000;
 }
 
+/* Novedad: Header del sidebar modificado para destacar el logo */
 .sidebar-header {
     padding: 40px 20px;
     text-align: center;
@@ -508,6 +514,7 @@ body.login-page {
     filter: drop-shadow(0 4px 8px rgba(255, 140, 0, 0.3));
 }
 
+/* Novedad: Enlaces flotantes con animación */
 .sidebar-link {
     color: #a0a0b5;
     padding: 16px 28px;
@@ -619,6 +626,9 @@ body.login-page {
     vertical-align: middle;
 }
 
+/* ==========================================
+   7. PORTAL DEL CLIENTE (VISTAS DE USUARIO)
+   ========================================== */
 .user-page {
     background-color: var(--bg-gris-claro);
     color: var(--gris-oscuro);
@@ -812,6 +822,9 @@ body.login-page {
     object-fit: contain;
 }
 
+/* ==========================================
+   8. CHATBOT Y SEGUIMIENTO DE PEDIDOS
+   ========================================== */
 .chatbot-page {
     display: flex;
     justify-content: center;
@@ -957,7 +970,9 @@ body.login-page {
     color: #666;
 }
 
-
+/* ==========================================
+   9. WHATSAPP FLOTANTE
+   ========================================== */
 .whatsapp-wrapper {
     position: fixed;
     top: 90px;
@@ -1024,6 +1039,9 @@ body.login-page {
     color: white;
 }
 
+/* ==========================================
+   10. ESTILOS DE FORMULARIOS (DASHBOARD)
+   ========================================== */
 .card-body form .form-label {
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -1067,6 +1085,9 @@ body.login-page {
     box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
 }
 
+/* ==========================================
+   11. MEDIA QUERIES (RESPONSIVE DESIGN)
+   ========================================== */
 @media (max-width: 900px) {
     .hero-content {
         grid-template-columns: 1fr;

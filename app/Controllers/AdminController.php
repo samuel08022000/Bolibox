@@ -3,44 +3,74 @@ require_once __DIR__ . "/../../config/database.php";
 
 class AdminController {
 
-    public function index() {
+    private $conn;
+
+    public function __construct() {
         $db = new Database();
-        $con = $db->conectar();
+        $this->conn = $db->conectar();
+    }
 
-        $sqlIngresos = $con->query("SELECT SUM(total) as ingresos FROM pedidos");
-        $ingresos = $sqlIngresos->fetch(PDO::FETCH_ASSOC)['ingresos'];
-        $ingresos = $ingresos ? $ingresos : 0;
+    public function index() {
 
-        $totalPedidos = $con->query("SELECT COUNT(*) as total FROM pedidos")->fetch(PDO::FETCH_ASSOC)['total'];
-        $totalClientes = $con->query("SELECT COUNT(*) as total FROM clientes")->fetch(PDO::FETCH_ASSOC)['total'];
-        $totalProductos = $con->query("SELECT COUNT(*) as total FROM producto")->fetch(PDO::FETCH_ASSOC)['total'];
-
-        $sqlGraficaActividad = $con->query("
-            SELECT fecha, COUNT(*) as cantidad 
+        $sql = $this->conn->query("
+            SELECT SUM(total) as ingresos 
             FROM pedidos 
-            GROUP BY fecha 
-            ORDER BY fecha ASC 
+            WHERE estado = 1
+        ");
+        $ingresos = $sql->fetch(PDO::FETCH_ASSOC)['ingresos'] ?? 0;
+
+        $totalPedidos = $this->conn->query("
+            SELECT COUNT(*) as total 
+            FROM pedidos 
+            WHERE estado = 1
+        ")->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $totalClientes = $this->conn->query("
+            SELECT COUNT(*) as total 
+            FROM clientes 
+            WHERE estado = 1
+        ")->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $totalProductos = $this->conn->query("
+            SELECT COUNT(*) as total 
+            FROM producto 
+            WHERE estado = 1
+        ")->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $sqlGrafica = $this->conn->query("
+            SELECT DATE(fecha) as fecha, COUNT(*) as cantidad 
+            FROM pedidos 
+            WHERE estado = 1
+            GROUP BY DATE(fecha)
+            ORDER BY fecha DESC 
             LIMIT 7
         ");
 
         $fechas = [];
         $cantidades = [];
 
-        while ($row = $sqlGraficaActividad->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $sqlGrafica->fetch(PDO::FETCH_ASSOC)) {
             $fechas[] = date('d/m', strtotime($row['fecha']));
             $cantidades[] = $row['cantidad'];
         }
 
-        $propio = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE id_producto IS NOT NULL")
-            ->fetch(PDO::FETCH_ASSOC)['total'];
+        $propio = $this->conn->query("
+            SELECT COUNT(*) as total 
+            FROM pedidos 
+            WHERE id_producto IS NOT NULL AND estado = 1
+        ")->fetch(PDO::FETCH_ASSOC)['total'];
 
-        $externo = $con->query("SELECT COUNT(*) as total FROM pedidos WHERE producto_importar IS NOT NULL")
-            ->fetch(PDO::FETCH_ASSOC)['total'];
+        $externo = $this->conn->query("
+            SELECT COUNT(*) as total 
+            FROM pedidos 
+            WHERE producto_importar IS NOT NULL AND estado = 1
+        ")->fetch(PDO::FETCH_ASSOC)['total'];
 
-        $sqlRecientes = $con->query("
+        $sqlRecientes = $this->conn->query("
             SELECT p.id_pedido, p.fecha, p.total, p.ubicacion_clientes, c.nombre as cliente_nombre 
             FROM pedidos p
             LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+            WHERE p.estado = 1
             ORDER BY p.fecha DESC 
             LIMIT 5
         ");

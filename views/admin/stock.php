@@ -113,7 +113,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 <th>Producto</th>
                                 <th>Almacén</th>
                                 <th>Cantidad</th>
-                                <th class="text-end pe-4">Acciones</th>
+                                <th class="text-end pe-4">Editar</th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -131,9 +132,18 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                     <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarStock<?= $row['id_stock']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <a href="<?= url('admin/stock/eliminar?id=' . $row['id_stock']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Estás seguro de eliminar este registro de stock?');" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                </td>
+                                <td>
+                                    <form action="<?= url('admin/stock/cambiar-estado') ?>" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id_stock" value="<?= $row['id_stock'] ?>">
+                                        <input type="hidden" name="estado_actual" value="<?= $row['estado'] ?>">
+
+                                        <?php if ($row['estado'] == 1): ?>
+                                            <button class="btn btn-sm btn-success">En stock</button>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-danger">Agotado</button>
+                                        <?php endif; ?>
+                                    </form>
                                 </td>
                             </tr>
 

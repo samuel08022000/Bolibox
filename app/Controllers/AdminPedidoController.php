@@ -21,11 +21,14 @@ class AdminPedidoController {
         $sql->execute();
         $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-        $sqlProd = $this->conn->prepare("SELECT id_producto, nombre, precio_unitario FROM producto");
+        $sqlProd = $this->conn->prepare("
+            SELECT id_producto, nombre, precio_unitario 
+            FROM producto
+        ");
         $sqlProd->execute();
         $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
 
-        require_once __DIR__ . '/../../views/admin/pedidos.php';
+        require __DIR__ . '/../../views/admin/pedidos.php';
     }
 
     public function guardar() {
@@ -40,11 +43,7 @@ class AdminPedidoController {
                     $_POST['ubicacion']
                 );
 
-                $id_usuario_sesion = $_SESSION['usuario']['id_usuario'];
-                $stmtEmp = $this->conn->prepare("SELECT id_empleado FROM empleados WHERE id_usuario = ?");
-                $stmtEmp->execute([$id_usuario_sesion]);
-                $emp = $stmtEmp->fetch();
-                $id_empleado = $emp ? $emp['id_empleado'] : 1;
+                $id_empleado = $_POST['id_empleado'] ?? 1;
 
                 $id_producto = !empty($_POST['id_producto']) ? $_POST['id_producto'] : null;
                 $producto_importar = !empty($_POST['producto_importar']) ? $_POST['producto_importar'] : null;
@@ -55,17 +54,19 @@ class AdminPedidoController {
                         total,
                         ubicacion_clientes,
                         nro_dui,
+                        cantidad,
                         id_cliente,
                         id_empleado,
                         id_producto,
                         producto_importar
-                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)
                 ");
 
                 $sql->execute([
                     $_POST['total'],
                     $_POST['ubicacion'],
                     $_POST['nro_dui'],
+                    $_POST['cantidad'],
                     $id_cliente,
                     $id_empleado,
                     $id_producto,
@@ -82,6 +83,7 @@ class AdminPedidoController {
 
                 $this->conn->commit();
                 header("Location: " . url('admin/pedidos'));
+
             } catch (Exception $e) {
                 $this->conn->rollBack();
                 die("Error: " . $e->getMessage());
@@ -98,7 +100,7 @@ class AdminPedidoController {
         }
 
         $sql = $this->conn->prepare("
-            SELECT p.*, c.nombre, c.nit, c.telefono 
+            SELECT p.*, c.nombre, c.nit, c.telefono, c.ciudad
             FROM pedidos p 
             JOIN clientes c ON p.id_cliente = c.id_cliente 
             WHERE p.id_pedido = ?
@@ -106,11 +108,14 @@ class AdminPedidoController {
         $sql->execute([$id]);
         $pedido = $sql->fetch(PDO::FETCH_ASSOC);
 
-        $sqlProd = $this->conn->prepare("SELECT id_producto, nombre FROM producto");
+        $sqlProd = $this->conn->prepare("
+            SELECT id_producto, nombre 
+            FROM producto
+        ");
         $sqlProd->execute();
         $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
 
-        require_once __DIR__ . '/../../views/admin/editar_pedido.php';
+        require __DIR__ . '/../../views/admin/editar_pedido.php';
     }
 
     public function actualizar() {
@@ -118,11 +123,14 @@ class AdminPedidoController {
             try {
                 $this->conn->beginTransaction();
 
+                $id_cliente = null;
+
                 $sql = $this->conn->prepare("
                     UPDATE pedidos 
                     SET total = ?, 
                         ubicacion_clientes = ?, 
-                        nro_dui = ?, 
+                        nro_dui = ?,
+                        cantidad =?,
                         id_producto = ?, 
                         producto_importar = ?
                     WHERE id_pedido = ?
@@ -132,12 +140,15 @@ class AdminPedidoController {
                     $_POST['total'],
                     $_POST['ubicacion'],
                     $_POST['nro_dui'],
+                    $_POST['cantidad'],
                     $_POST['id_producto'] ?: null,
                     $_POST['producto_importar'] ?: null,
                     $_POST['id_pedido']
+                    
                 ]);
 
                 $this->conn->commit();
+
             } catch (Exception $e) {
                 $this->conn->rollBack();
                 echo "Error: " . $e->getMessage();
@@ -147,9 +158,34 @@ class AdminPedidoController {
         header("Location: " . url('admin/pedidos'));
     }
 
+
+    public function cambiarEstado() {
+        if ($_POST) {
+            $id = $_POST['id_pedido'];
+            $estado_actual = $_POST['estado_actual'];
+
+            $nuevo_estado = ($estado_actual == 1) ? 0 : 1;
+
+            $sql = $this->conn->prepare("
+                UPDATE pedidos 
+                SET estado = ? 
+                WHERE id_pedido = ?
+            ");
+            $sql->execute([$nuevo_estado, $id]);
+        }
+
+        header("Location: " . url('admin/pedidos'));
+        exit;
+    }
+
     private function obtenerOCrearCliente($nombre, $nit, $tel, $ub) {
-        $stmt = $this->conn->prepare("SELECT id_cliente FROM clientes WHERE nit = ?");
+        $stmt = $this->conn->prepare("
+            SELECT id_cliente 
+            FROM clientes 
+            WHERE nit = ?
+        ");
         $stmt->execute([$nit]);
+
         $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($cliente) {
@@ -160,39 +196,13 @@ class AdminPedidoController {
             ")->execute([$nombre, $tel, $ub, $cliente['id_cliente']]);
 
             return $cliente['id_cliente'];
-        } else {
-            $this->conn->prepare("
-                INSERT INTO clientes (nombre, nit, telefono, ciudad) 
-                VALUES (?, ?, ?, ?)
-            ")->execute([$nombre, $nit, $tel, $ub]);
-
-            return $this->conn->lastInsertId();
-        }
-    }
-
-    public function eliminar() {
-        $id = $_GET['id'] ?? null;
-
-        if ($id) {
-            try {
-                $this->conn->beginTransaction();
-
-                $this->conn->prepare("
-                    DELETE FROM detalle_pedido 
-                    WHERE id_pedido = ?
-                ")->execute([$id]);
-
-                $this->conn->prepare("
-                    DELETE FROM pedidos 
-                    WHERE id_pedido = ?
-                ")->execute([$id]);
-
-                $this->conn->commit();
-            } catch (Exception $e) {
-                $this->conn->rollBack();
-            }
         }
 
-        header("Location: " . url('admin/pedidos'));
+        $this->conn->prepare("
+            INSERT INTO clientes (nombre, nit, telefono, ciudad) 
+            VALUES (?, ?, ?, ?)
+        ")->execute([$nombre, $nit, $tel, $ub]);
+
+        return $this->conn->lastInsertId();
     }
 }

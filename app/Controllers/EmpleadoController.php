@@ -12,7 +12,15 @@ class EmpleadoController {
 
     public function index() {
         $sql = $this->conn->prepare("
-            SELECT e.id_empleado, e.id_usuario, e.nombre, e.cargo, e.ci, e.celular, u.estado, u.email 
+            SELECT 
+                e.id_empleado,
+                e.id_usuario,
+                e.nombre,
+                e.cargo,
+                e.ci,
+                e.celular,
+                u.estado,
+                u.email
             FROM empleados e
             INNER JOIN usuarios u ON e.id_usuario = u.id_usuario
         ");
@@ -23,74 +31,71 @@ class EmpleadoController {
     }
 
     public function guardar() {
-        if ($_POST) {
-            try {
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->conn->beginTransaction();
+        if (!$_POST) return;
 
-                $nombre = $_POST['nombre'] ?? '';
-                $cargo = $_POST['cargo'] ?? '';
-                $ci = $_POST['ci'] ?? '';
-                $celular = $_POST['celular'] ?? '';
-                $email = $_POST['correo'] ?? '';
-                $password = $_POST['password'] ?? '';
+        try {
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->beginTransaction();
 
-                $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $nombre = $_POST['nombre'] ?? '';
+            $cargo = $_POST['cargo'] ?? '';
+            $ci = $_POST['ci'] ?? '';
+            $celular = $_POST['celular'] ?? '';
+            $email = $_POST['correo'] ?? '';
+            $password = $_POST['password'] ?? '';
 
-                $sqlUser = $this->conn->prepare("
-                    INSERT INTO usuarios (email, password_hash, rol, estado) 
-                    VALUES (?, ?, 'empleado', 1)
-                ");
-                $sqlUser->execute([$email, $password_hash]);
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-                $id_usuario_nuevo = $this->conn->lastInsertId();
+            $sqlUser = $this->conn->prepare("
+                INSERT INTO usuarios (email, password_hash, rol, estado)
+                VALUES (?, ?, 'empleado', 1)
+            ");
+            $sqlUser->execute([$email, $password_hash]);
 
-                $sqlEmp = $this->conn->prepare("
-                    INSERT INTO empleados (id_usuario, nombre, cargo, ci, celular) 
-                    VALUES (?, ?, ?, ?, ?)
-                ");
-                $sqlEmp->execute([$id_usuario_nuevo, $nombre, $cargo, $ci, $celular]);
+            $id_usuario_nuevo = $this->conn->lastInsertId();
 
-                $this->conn->commit();
+            $sqlEmp = $this->conn->prepare("
+                INSERT INTO empleados (id_usuario, nombre, cargo, ci, celular)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $sqlEmp->execute([
+                $id_usuario_nuevo,
+                $nombre,
+                $cargo,
+                $ci,
+                $celular
+            ]);
 
-                header("Location: " . url('admin/empleados'));
-                exit;
+            $this->conn->commit();
 
-            } catch (PDOException $e) {
-                $this->conn->rollBack();
+            header("Location: " . url('admin/empleados'));
+            exit;
 
-                die("
-                    <div style='background:#ffebee; color:#c62828; padding:20px; font-family:sans-serif; border-left:5px solid #c62828;'>
-                        <h3> ERROR EN LA BASE DE DATOS</h3>
-                        <p><b>Detalle técnico:</b> {$e->getMessage()}</p>
-                        <button onclick='history.back()' style='padding:10px; background:#c62828; color:white; border:none; border-radius:5px; cursor:pointer;'>
-                            Volver al formulario
-                        </button>
-                    </div>
-                ");
-            } catch (Exception $e) {
-                $this->conn->rollBack();
-                die("Error General: " . $e->getMessage());
-            }
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
+            die("Error DB: " . $e->getMessage());
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            die("Error: " . $e->getMessage());
         }
     }
 
     public function cambiarEstado() {
-        if ($_POST) {
-            $id_usuario = $_POST['id_usuario'];
-            $estado_actual = $_POST['estado_actual'];
+        if (!$_POST) return;
 
-            $nuevo_estado = ($estado_actual == 1) ? 0 : 1;
+        $id_usuario = $_POST['id_usuario'];
+        $estado_actual = $_POST['estado_actual'];
 
-            $sql = $this->conn->prepare("
-                UPDATE usuarios 
-                SET estado = ? 
-                WHERE id_usuario = ?
-            ");
+        $nuevo_estado = ($estado_actual == 1) ? 0 : 1;
 
-            $sql->execute([$nuevo_estado, $id_usuario]);
+        $sql = $this->conn->prepare("
+            UPDATE usuarios 
+            SET estado = ? 
+            WHERE id_usuario = ?
+        ");
+        $sql->execute([$nuevo_estado, $id_usuario]);
 
-            header("Location: " . url('admin/empleados'));
-        }
+        header("Location: " . url('admin/empleados'));
+        exit;
     }
 }

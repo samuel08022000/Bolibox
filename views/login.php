@@ -23,6 +23,7 @@
             margin: 0;
         }
     </style>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body class="login-page">
@@ -81,6 +82,12 @@
                 <div class="d-flex justify-content-end mb-4">
                     <a href="<?= url('recuperar') ?>" class="text-secondary text-decoration-none">¿Olvidaste tu contraseña?</a>
                 </div>
+
+                <?php if (isset($_SESSION['show_captcha']) && $_SESSION['show_captcha']): ?>
+                    <div class="mb-4 d-flex justify-content-center">
+                        <div class="g-recaptcha" data-sitekey="6LckFcwsAAAAABBXeMnEMsy1nhZTOFZ6lqS8z_VT"></div>
+                    </div>
+                <?php endif; ?>
 
                 <button type="submit" class="btn-submit py-3">Ingresar al Portal</button>
             </form>

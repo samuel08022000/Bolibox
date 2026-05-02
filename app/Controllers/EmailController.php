@@ -56,13 +56,18 @@ class EmailController {
         $this->enviarCorreo($email, $asunto, $html);
     }
 
-    public function enviarAlertaBloqueo($email) {
-        $asunto = "⚠️ Alerta de Seguridad: Cuenta bloqueada - Bolibox";
+    public function enviarMagicLinkSeguridad($email, $nombre, $enlace) {
+        $asunto = "⚠️ Acceso Protegido - Bolibox";
         $html = "
             <h3 style='color:#dc3545;'>Alerta de Seguridad</h3>
-            <p>Hemos detectado <strong>5 intentos de inicio de sesión fallidos</strong> en tu cuenta de Bolibox. Por tu protección, hemos bloqueado temporalmente el acceso por 15 minutos.</p>
-            <p><strong>¿Fuiste tú?</strong><br>No te preocupes, espera 15 minutos e intenta de nuevo, o utiliza la opción '¿Olvidaste tu contraseña?'.</p>
-            <p><strong>¿No fuiste tú?</strong><br>Alguien podría estar intentando acceder a tu cuenta. Te recomendamos cambiar tu contraseña una vez finalice el bloqueo.</p>";
+            <p>Hola $nombre,</p>
+            <p>Hemos bloqueado múltiples intentos de inicio de sesión fallidos dirigidos a tu cuenta desde una misma ubicación.</p>
+            <p>Por tu protección, el acceso con contraseña está pausado temporalmente. <strong>Entra de forma segura a tu cuenta haciendo clic en tu acceso directo:</strong></p>
+            <div style='text-align: center; margin: 30px 0;'>
+                <a href='$enlace' style='background-color: #111827; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Acceso Seguro Directo</a>
+            </div>
+            <p>Si el botón no funciona, copia este enlace en tu navegador:<br><small>$enlace</small></p>
+            <p>Este enlace expirará en 15 minutos por seguridad.</p>";
 
         $this->enviarCorreo($email, $asunto, $html);
     }

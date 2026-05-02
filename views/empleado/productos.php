@@ -1,59 +1,46 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
-if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
-    header("Location: " . url('login')); 
+$rol = $_SESSION['usuario']['rol'] ?? '';
+if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
+    header("Location: " . url('login'));
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Productos</title>
+    <title>BOLIBOX - Productos Empleado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>
-        body { padding-top: 0; }
-    </style>
+    <style>body { padding-top: 0; }</style>
 </head>
 <body>
-
 <div class="admin-layout">
     <div class="sidebar">
-            <div class="sidebar-header">
-            <i class="bi bi-person-circle display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
-            <small class="text-muted">Panel de Control</small>
+        <div class="sidebar-header">
+            <i class="bi bi-person-badge display-4 text-naranja"></i>
+            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
+            <small class="text-muted">Portal de Atención</small>
         </div>
-    
-    <div class="nav flex-column mb-auto mt-3">
-            <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
-            <a class="sidebar-link active" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-            <a class="sidebar-link" href="<?= url('admin/clientes') ?>"><i class="bi bi-people-fill"></i> Clientes</a>
-            <a class="sidebar-link" href="<?= url('admin/proveedores') ?>"><i class="bi bi-truck"></i> Proveedores</a>
-            <a class="sidebar-link" href="<?= url('admin/stock') ?>"><i class="bi bi-boxes"></i> Stock</a>
-            <a class="sidebar-link" href="<?= url('admin/empleados') ?>"><i class="bi bi-person-badge-fill"></i> Empleados</a>
-            <a class="sidebar-link" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
+        <div class="nav flex-column mb-auto">
+            <a class="sidebar-link" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
+            <a class="sidebar-link" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
+            <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
+            <a class="sidebar-link active" href="<?= url('empleado/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
         </div>
-        <div class="p-3 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
-                <i class="bi bi-box-arrow-left"></i> Salir
-            </a>
+        <div class="p-3 mt-auto border-top">
+            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
         </div>
     </div>
-
+    
     <div class="main-content">
         <div class="admin-topbar">
             <div>
-                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Catálogo de Productos Propios</h3>
-                <p class="text-muted small m-0">Gestión de artículos importados</p>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-light rounded-circle shadow-sm"><i class="bi bi-bell"></i></button>
+                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Catálogo de Productos</h3>
+                <p class="text-muted small m-0">Consulta y gestión de artículos</p>
             </div>
         </div>
 
@@ -64,9 +51,9 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
         </div>
 
         <div class="collapse mb-4" id="panelNuevoProducto">
-            <div class="card card-body border-top border-naranja border-4 shadow-sm" style="background-color: #fff;">
-                <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Nuevo Producto</h5>
-                <form action="<?= url('admin/productos/guardar') ?>" method="POST">
+            <div class="card card-body border-top border-naranja border-4 shadow-sm">
+                <h5 class="fw-bold mb-4">Nuevo Producto</h5>
+                <form action="<?= url('empleado/productos/guardar') ?>" method="POST">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
@@ -85,14 +72,12 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                             <input type="number" step="0.01" name="precio_unitario" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Nombre Proveedor</label>
+                            <label class="form-label text-muted small fw-bold text-uppercase">Proveedor</label>
                             <select name="id_proveedor" class="form-select" required>
                                 <option value="">Selecciona proveedor</option>
-                                    <?php foreach ($proveedores as $prov): ?>
-                                <option value="<?= $prov['id_proveedor'] ?>">
-                                    <?= $prov['nombre'] ?>
-                                </option>
-                                    <?php endforeach; ?>
+                                <?php foreach ($proveedores as $prov): ?>
+                                    <option value="<?= $prov['id_proveedor'] ?>"><?= $prov['nombre'] ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -104,15 +89,14 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
             </div>
         </div>
         
-        <div class="card">
+        <div class="card shadow-sm border-0">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead>
+                        <thead class="bg-negro text-white">
                             <tr>
-                                <th>ID</th>
+                                <th class="ps-4">ID</th>
                                 <th>Nombre</th>
-                                <th>Descripción</th>
                                 <th>Categoría</th>
                                 <th>Precio Unitario</th>
                                 <th>Proveedor</th>
@@ -123,34 +107,30 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                         <tbody>
                             <?php foreach ($resultado as $row) { ?>
                             <tr>
-                                <td><?php echo $row['id_producto']; ?></td>
+                                <td class="ps-4 text-muted">#<?php echo $row['id_producto']; ?></td>
                                 <td class="fw-bold"><?php echo $row['nombre']; ?></td>
-                                <td><?php echo $row['descripcion']; ?></td>
-                                <td><?php echo $row['categoria']; ?></td>
-                                <td>Bs <?php echo $row['precio_unitario']; ?></td>
+                                <td><span class="badge bg-light text-dark border"><?php echo $row['categoria']; ?></span></td>
+                                <td>Bs <?php echo number_format($row['precio_unitario'], 2); ?></td>
                                 <td><?php echo $row['proveedor']; ?></td>
                                 <td class="text-end pe-4">
                                     <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarProd<?php echo $row['id_producto']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+                                </td>
                                 <td>
-                                    <form action="<?= url('admin/productos/cambiar-estado') ?>" method="POST" style="display:inline;">
+                                    <form action="<?= url('empleado/productos/cambiar-estado') ?>" method="POST" style="display:inline;">
                                         <input type="hidden" name="id_producto" value="<?= $row['id_producto'] ?>">
                                         <input type="hidden" name="estado_actual" value="<?= $row['estado'] ?>">
-
                                         <?php if ($row['estado'] == 1): ?>
-                                            <button class="btn btn-sm btn-success">
-                                                Activo
-                                            </button>
+                                            <button class="btn btn-sm btn-success">Activo</button>
                                         <?php else: ?>
-                                            <button class="btn btn-sm btn-danger">
-                                                Inactivo
-                                            </button>
+                                            <button class="btn btn-sm btn-danger">Inactivo</button>
                                         <?php endif; ?>
                                     </form>
                                 </td>
                             </tr>
-
+                            
+                            <!-- MODAL DE EDICIÓN -->
                             <div class="modal fade" id="modalEditarProd<?php echo $row['id_producto']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content" style="border-radius: 12px; border: none;">
@@ -158,7 +138,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                             <h5 class="modal-title fw-bold">Editar Producto #<?php echo $row['id_producto']; ?></h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
-                                        <form action="<?= url('admin/productos/actualizar') ?>" method="POST">
+                                        <form action="<?= url('empleado/productos/actualizar') ?>" method="POST">
                                             <div class="modal-body p-4 text-start">
                                                 <input type="hidden" name="id_producto" value="<?php echo $row['id_producto']; ?>">
                                                 <div class="mb-3">
@@ -190,7 +170,6 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

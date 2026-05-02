@@ -14,6 +14,14 @@ if (!isset($_SESSION['usuario'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
+    <style>
+        
+    /* Esto le dice al navegador que respete los espacios y saltos de línea */
+    .chat-body .chat-message {
+        white-space: pre-wrap; 
+        word-wrap: break-word; /* Evita que el texto largo se salga de la burbuja */
+    }
+</style>
 </head>
 <body class="user-page chatbot-page user-dashboard">
 
@@ -84,19 +92,27 @@ if (!isset($_SESSION['usuario'])) {
             chatBody.scrollTop = chatBody.scrollHeight; 
         }
 
-        sendButton.addEventListener('click', () => {
-            const message = userInput.value;
-            if (message.trim() !== '') {
-                appendMessage(message, 'sent');
-                userInput.value = '';
+        sendButton.addEventListener('click', async () => {
+    const message = userInput.value;
+    if (message.trim() !== '') {
+        appendMessage(message, 'sent');
+        userInput.value = '';
 
-                setTimeout(() => {
-                    const botResponse = `¡Recibido! Estamos procesando tu mensaje: "${message}"... pronto un empleado te contactará por WhatsApp para darte detalles.`;
-                    appendMessage(botResponse, 'received');
-                }, 1000);
-            }
-        });
+        try {
+            const response = await fetch('http://127.0.0.1:5000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "message": message }) // Enviamos el mensaje a Python
+            });
 
+            const data = await response.json();
+            appendMessage(data.response, 'received'); // Mostramos la respuesta real de Python
+        } catch (error) {
+            appendMessage("❌ Error: No se pudo conectar con Bolibot.", 'received');
+        }
+    }
+});
+                
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendButton.click();

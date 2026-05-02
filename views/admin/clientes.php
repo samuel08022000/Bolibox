@@ -104,7 +104,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 <th>NIT</th>
                                 <th>Teléfono</th>
                                 <th>Ubicación</th>
-                                <th class="text-end pe-4">Acciones</th>
+                                <th class="text-end pe-4">Editar</th>
+                                <th> Estado </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,9 +120,22 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                     <button class="btn btn-sm btn-outline-primary rounded-circle me-1" data-bs-toggle="modal" data-bs-target="#modalEditarCliente<?php echo $row['id_cliente']; ?>" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <a href="<?= url('admin/clientes/eliminar?id=' . $row['id_cliente']) ?>" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                </td>
+                                <td>
+                                    <form action="<?= url('admin/clientes/cambiar-estado') ?>" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id_cliente" value="<?= $row['id_cliente'] ?>">
+                                        <input type="hidden" name="estado_actual" value="<?= $row['estado'] ?>">
+
+                                        <?php if ($row['estado'] == 1): ?>
+                                            <button class="btn btn-sm btn-success">
+                                                Activo
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-danger">
+                                                Inactivo
+                                            </button>
+                                        <?php endif; ?>
+                                    </form>
                                 </td>
                             </tr>
 
