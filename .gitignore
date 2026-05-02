@@ -1,0 +1,10 @@
+# Entornos virtuales (Tu famoso "Benz")
+venv/
+env/
+
+# Variables de entorno (Tu "punto B")
+.env
+
+# Archivos basura del sistema
+__pycache__/
+.DS_Store
