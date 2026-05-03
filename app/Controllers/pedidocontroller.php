@@ -62,8 +62,9 @@ class PedidoController {
                         id_cliente,
                         id_empleado,
                         id_producto,
-                        producto_importar
-                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?)
+                        producto_importar,
+                        tipo_pedido
+                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, 'Presencial')
                 ");
 
                 $sqlPedido->execute([
@@ -154,21 +155,6 @@ class PedidoController {
             }
         }
     }
-
-    public function eliminar() {
-        $id = $_GET['id'] ?? null;
-
-        if ($id) {
-            $this->conn->prepare("
-                UPDATE pedidos 
-                SET estado = 0 
-                WHERE id_pedido = ?
-            ")->execute([$id]);
-        }
-
-        header("Location: " . url('empleado/pedidos'));
-    }
-
     private function obtenerIdEmpleadoReal($id_usuario) {
         $stmt = $this->conn->prepare("
             SELECT id_empleado 

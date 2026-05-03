@@ -23,14 +23,16 @@ if (!isset($_SESSION['usuario'])) {
                 <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
             </a>
             <div class="nav-links">
-    <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
-    <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
-    <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>
-    <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
-</div>
-            <a href="<?= url('/') ?>" class="btn-logout">
-                <i class="bi bi-box-arrow-left"></i> Salir
+                <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
+                <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
+                <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>
+                <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
+            </div>
+            
+            <a href="<?= url('carrito') ?>" class="btn btn-outline-light rounded-pill px-3 me-2 ms-3 border-0">
+                <i class="bi bi-cart3"></i> Mi Carrito
             </a>
+            <a href="<?= url('/') ?>" class="btn-logout"><i class="bi bi-box-arrow-left"></i> Salir</a>
         </div>
     </nav>
 

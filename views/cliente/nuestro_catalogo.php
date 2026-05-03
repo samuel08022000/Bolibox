@@ -38,6 +38,9 @@ $productos = $sql->fetchAll(PDO::FETCH_ASSOC);
                 <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>
                 <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
             </div>
+            <a href="<?= url('carrito') ?>" class="btn btn-outline-light rounded-pill px-3 me-2 ms-3 border-0">
+                <i class="bi bi-cart3"></i> Mi Carrito
+            </a>
             <a href="<?= url('/') ?>" class="btn-logout"><i class="bi bi-box-arrow-left"></i> Salir</a>
         </div>
     </nav>
@@ -62,7 +65,15 @@ $productos = $sql->fetchAll(PDO::FETCH_ASSOC);
                             <p class="text-muted small" style="height: 40px; overflow: hidden;"><?php echo $prod['descripcion']; ?></p>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="fw-bold text-dark">Bs <?php echo number_format($prod['precio_unitario'], 2); ?></span>
-                                <a href="https://wa.me/59178778387?text=Hola, quiero pedir el producto: <?php echo $prod['nombre']; ?>" class="btn btn-sm btn-naranja rounded-pill px-3">Pedir</a>
+                                
+                                <form action="<?= url('carrito/agregar') ?>" method="POST" class="m-0">
+                                    <input type="hidden" name="id_producto" value="<?php echo $prod['id_producto']; ?>">
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button type="submit" class="btn btn-sm btn-naranja rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-cart-plus me-1"></i> Añadir
+                                    </button>
+                                </form>
+
                             </div>
                         </div>
                     </div>

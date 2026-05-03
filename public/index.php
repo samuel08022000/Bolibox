@@ -374,6 +374,29 @@ switch ($path) {
         (new BitacoraController())->index();
         break;
 
+    case '/carrito':
+        require '../app/Controllers/CarritoController.php';
+       $controller = new CarritoController();
+        $controller->verCarrito();
+        break;
+
+    case '/carrito/agregar':
+        require '../app/Controllers/CarritoController.php';
+        $controller = new CarritoController();
+        $controller->agregarAlCarrito();
+        break;
+
+    case '/carrito/eliminar':
+        require '../app/Controllers/CarritoController.php';
+        $controller = new CarritoController();
+        $controller->eliminarDelCarrito();
+        break;
+
+    case '/carrito/confirmar':
+        require '../app/Controllers/CarritoController.php';
+        $controller = new CarritoController();
+        $controller->confirmarCompra();
+        break;
     // ---------------------------------------------------
     // PÁGINA DE ERROR 404
     // ---------------------------------------------------

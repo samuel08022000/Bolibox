@@ -58,8 +58,9 @@ class AdminPedidoController {
                         id_cliente,
                         id_empleado,
                         id_producto,
-                        producto_importar
-                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)
+                        producto_importar,
+                        tipo_pedido
+                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 'Presencial')
                 ");
 
                 $sql->execute([

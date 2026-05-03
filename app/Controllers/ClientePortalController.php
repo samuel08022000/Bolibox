@@ -29,45 +29,35 @@ class ClientePortalController {
     public function catalogosAsociados() {
         require_once __DIR__ . '/../../views/cliente/catalogo.php';
     }
-
-    public function misPedidos() {
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $misPedidos = [];
-
-        try {
-            $id_usuario = $_SESSION['usuario']['id_usuario'] ?? 0;
-
-            $sqlCliente = $this->conn->prepare("
-                SELECT id_cliente 
-                FROM clientes 
-                WHERE id_usuario = ?
-            ");
-            $sqlCliente->execute([$id_usuario]);
-            $cliente = $sqlCliente->fetch(PDO::FETCH_ASSOC);
-
-            if ($cliente) {
-                $id_cliente = $cliente['id_cliente'];
-
-                $sqlPedidos = $this->conn->prepare("
-                    SELECT * 
-                    FROM pedidos 
-                    WHERE id_cliente = ?
-                ");
-                $sqlPedidos->execute([$id_cliente]);
-
-                $misPedidos = $sqlPedidos->fetchAll(PDO::FETCH_ASSOC);
-            }
-        } catch (Exception $e) {
-            $misPedidos = [];
-        }
-
-        require_once __DIR__ . '/../../views/cliente/pedidos.php';
-    }
-
     public function chatbot() {
         require_once __DIR__ . '/../../views/cliente/chatbot.php';
+    }
+    // Añade este método en tu controlador
+    public function misPedidos() {
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+        if (!isset($_SESSION['usuario'])) {
+            header("Location: " . url('login'));
+            exit;
+        }
+
+        require_once __DIR__ . '/../../config/database.php';
+        $db = new Database();
+        $con = $db->conectar();
+
+        // Obtener el ID del cliente desde la sesión
+        $idClienteLogueado = $_SESSION['id_usuario']; // Asegúrate de que así se llame tu variable
+
+        // Consulta actualizada con estado y tipo_pedido
+        $sql = $con->prepare("
+            SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar, estado, tipo_pedido 
+            FROM pedidos 
+            WHERE id_cliente = ?
+            ORDER BY fecha DESC
+        ");
+        $sql->execute([$idClienteLogueado]);
+        $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+        // Llamamos a la vista limpia (ajusta la ruta si es diferente)
+        require '../views/cliente/pedidos.php';
     }
 }
