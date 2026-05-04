@@ -66,20 +66,32 @@ if (!isset($_SESSION['usuario'])) {
                                     </thead>
                                     <tbody>
                                         <?php foreach ($productos_carrito as $item): ?>
-                                        <tr>
+                                        <?php 
+                                            $isPendiente = ($item['estado_carrito'] ?? '') === 'Pendiente Bot';
+                                            $isAprobado = ($item['estado_carrito'] ?? '') === 'Aprobado Bot';
+                                            $rowStyle = $isPendiente ? 'background-color: #f8f9fa; opacity: 0.8;' : '';
+                                        ?>
+                                        <tr style="<?= $rowStyle ?>">
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="p-2 bg-light rounded text-center me-3" style="width: 45px;">
-                                                        <i class="bi bi-box-seam text-naranja fs-4"></i>
+                                                        <i class="bi bi-box-seam <?= $isPendiente ? 'text-secondary' : 'text-naranja' ?> fs-4"></i>
                                                     </div>
-                                                    <span class="fw-bold text-dark"><?= htmlspecialchars($item['nombre']) ?></span>
+                                                    <div>
+                                                        <span class="fw-bold text-dark"><?= htmlspecialchars($item['nombre']) ?></span>
+                                                        <?php if ($isPendiente): ?>
+                                                            <br><span class="badge bg-secondary text-white mt-1"><i class="bi bi-hourglass-split"></i> En revisión</span>
+                                                        <?php elseif ($isAprobado): ?>
+                                                            <br><span class="badge bg-success text-white mt-1"><i class="bi bi-check-circle"></i> Aprobado</span>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td class="text-muted">Bs <?= number_format($item['precio_unitario'], 2) ?></td>
+                                            <td class="<?= $isPendiente ? 'text-muted' : 'text-dark' ?>">Bs <?= number_format($item['precio_unitario'], 2) ?></td>
                                             <td class="text-center fw-bold border-start border-end"><?= $item['cantidad'] ?></td>
-                                            <td class="fw-bold text-dark">Bs <?= number_format($item['precio_unitario'] * $item['cantidad'], 2) ?></td>
+                                            <td class="fw-bold <?= $isPendiente ? 'text-muted' : 'text-dark' ?>">Bs <?= number_format($item['precio_unitario'] * $item['cantidad'], 2) ?></td>
                                             <td class="text-center">
-                                                <a href="<?= url('carrito/eliminar?id=' . $item['id_carrito']) ?>" class="text-danger fs-5">
+                                                <a href="<?= url('carrito/eliminar?id=' . $item['id_carrito']) ?>" class="text-danger fs-5" title="Eliminar producto">
                                                     <i class="bi bi-x-circle-fill"></i>
                                                 </a>
                                             </td>
@@ -112,6 +124,10 @@ if (!isset($_SESSION['usuario'])) {
                         </div>
                         <?php if (!empty($productos_carrito)): ?>
                         <form action="<?= url('carrito/confirmar') ?>" method="POST">
+                            <div class="mb-3 text-start">
+                                <label for="ciudad" class="form-label text-muted small fw-bold">Lugar de Entrega</label>
+                                <textarea class="form-control" id="ciudad" name="ciudad" rows="2" placeholder="Ej: Av. La Paz #123, Zona Sur" required></textarea>
+                            </div>
                             <button type="submit" class="btn btn-naranja w-100 fw-bold rounded-pill py-2 shadow-sm">
                                 CONFIRMAR PEDIDO <i class="bi bi-check2-circle ms-1"></i>
                             </button>

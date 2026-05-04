@@ -102,13 +102,14 @@ def chat():
         datos_cliente = mensaje 
         user_state["step"] = "confirmado"
         
-        # En una fase futura, aquí guardarías 'datos_cliente' en tu base de datos [cite: 1]
-        
         return jsonify({
             "response": f"✅ *¡Pedido registrado con éxito!* \n\n"
                         f"Hemos recibido tus datos. Un asesor humano revisará la cotización de "
                         f"*{user_state['producto']}* por un total de {user_state['total_bs']:.2f} Bs "
-                        f"y te contactará de inmediato. ¡Gracias por elegir BoliBox! ✨"
+                        f"y te contactará de inmediato. ¡Gracias por elegir BoliBox! ✨",
+            "status": "success",
+            "producto": user_state["producto"],
+            "total": user_state["total_bs"]
         })
 
     # 🔥 CASO 4: SI DICE "SI" PERO NO HAY COTIZACIÓN

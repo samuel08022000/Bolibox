@@ -109,6 +109,28 @@ if (!isset($_SESSION['usuario'])) {
 
             const data = await response.json();
             appendMessage(data.response, 'received'); // Mostramos la respuesta real de Python
+
+            // Si el bot confirma el pedido, enviamos los datos al backend PHP
+            if (data.status === 'success') {
+                try {
+                    const phpResponse = await fetch('<?= url('chatbot/guardar_cotizacion') ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            producto: data.producto,
+                            total: data.total
+                        })
+                    });
+                    const phpData = await phpResponse.json();
+                    if (phpData.success) {
+                        console.log("Cotización guardada exitosamente en el carrito.");
+                    } else {
+                        console.error("Error al guardar la cotización:", phpData.message);
+                    }
+                } catch (phpError) {
+                    console.error("Error en la conexión con el servidor PHP:", phpError);
+                }
+            }
         } catch (error) {
             appendMessage("❌ Error: No se pudo conectar con Bolibot.", 'received');
         }

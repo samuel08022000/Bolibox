@@ -119,6 +119,11 @@ switch ($path) {
         (new ClientePortalController())->chatbot();
         break;
 
+    case '/chatbot/guardar_cotizacion':
+        require_once __DIR__ . '/../app/Controllers/ChatbotCotizacionController.php';
+        (new ChatbotCotizacionController())->guardarCotizacion();
+        break;
+
     // ---------------------------------------------------
     // PANEL EMPLEADO
     // ---------------------------------------------------
@@ -162,6 +167,20 @@ switch ($path) {
         require_once __DIR__ . '/../app/Controllers/ClienteController.php';
         (new ClienteController())->actualizar();
         break;
+
+    case '/empleado/aprobaciones_bot':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->listar('empleado');
+        break;
+    case '/empleado/aprobaciones_bot/aprobar':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->aprobar('empleado');
+        break;
+    case '/empleado/aprobaciones_bot/rechazar':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->rechazar('empleado');
+        break;
+        
     case '/empleado/productos':
         require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
         (new EmpleadoPortalController())->productos();
@@ -290,6 +309,19 @@ switch ($path) {
     case '/admin/clientes/cambiar-estado':
         require_once __DIR__ . '/../app/Controllers/ClienteController.php';
         (new ClienteController())->cambiarEstado();
+        break;
+
+    case '/admin/aprobaciones_bot':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->listar('admin');
+        break;
+    case '/admin/aprobaciones_bot/aprobar':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->aprobar('admin');
+        break;
+    case '/admin/aprobaciones_bot/rechazar':
+        require_once __DIR__ . '/../app/Controllers/AprobacionBotController.php';
+        (new AprobacionBotController())->rechazar('admin');
         break;
 
     // ---------------------------------------------------

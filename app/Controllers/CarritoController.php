@@ -44,10 +44,10 @@ class CarritoController {
             exit();
         }
 
-        $query = "SELECT c.id_carrito, p.id_producto, p.nombre, p.precio_unitario, c.cantidad 
+        $query = "SELECT c.id_carrito, p.id_producto, p.nombre, p.precio_unitario, c.cantidad, c.estado as estado_carrito 
                   FROM carrito c 
                   JOIN producto p ON c.id_producto = p.id_producto 
-                  WHERE c.id_cliente = :id_cliente AND c.estado = 'En Carrito'";
+                  WHERE c.id_cliente = :id_cliente AND c.estado IN ('En Carrito', 'Pendiente Bot', 'Aprobado Bot')";
         
         $stmt = $this->pdo->prepare($query);
         $stmt->execute(['id_cliente' => $id_cliente]);
@@ -55,7 +55,9 @@ class CarritoController {
 
         $total = 0;
         foreach ($productos_carrito as $prod) {
-            $total += $prod['precio_unitario'] * $prod['cantidad'];
+            if ($prod['estado_carrito'] !== 'Pendiente Bot') {
+                $total += $prod['precio_unitario'] * $prod['cantidad'];
+            }
         }
 
         require '../views/cliente/carrito.php';
@@ -99,9 +101,22 @@ class CarritoController {
             $id_cliente = $this->obtenerIdCliente();
 
             if ($id_cliente) {
-                $query = "DELETE FROM carrito WHERE id_carrito = :id_carrito AND id_cliente = :id_cliente";
-                $stmt = $this->pdo->prepare($query);
-                $stmt->execute(['id_carrito' => $id_carrito, 'id_cliente' => $id_cliente]);
+                $query_sel = "SELECT id_producto, estado FROM carrito WHERE id_carrito = :id_carrito AND id_cliente = :id_cliente";
+                $stmt_sel = $this->pdo->prepare($query_sel);
+                $stmt_sel->execute(['id_carrito' => $id_carrito, 'id_cliente' => $id_cliente]);
+                $item = $stmt_sel->fetch(PDO::FETCH_ASSOC);
+
+                if ($item) {
+                    $query = "DELETE FROM carrito WHERE id_carrito = :id_carrito AND id_cliente = :id_cliente";
+                    $stmt = $this->pdo->prepare($query);
+                    $stmt->execute(['id_carrito' => $id_carrito, 'id_cliente' => $id_cliente]);
+
+                    if ($item['estado'] === 'Pendiente Bot' || $item['estado'] === 'Aprobado Bot') {
+                        $query_prod = "DELETE FROM producto WHERE id_producto = :id_producto AND categoria = 'Cotizacion_Bot'";
+                        $stmt_prod = $this->pdo->prepare($query_prod);
+                        $stmt_prod->execute(['id_producto' => $item['id_producto']]);
+                    }
+                }
             }
         }
         header('Location: /BOLIBOX/carrito');
@@ -112,6 +127,7 @@ class CarritoController {
     public function confirmarCompra() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_cliente = $this->obtenerIdCliente();
+            $ciudad = $_POST['ciudad'] ?? null;
             
             if (!$id_cliente) {
                 header('Location: /BOLIBOX/login');
@@ -121,7 +137,7 @@ class CarritoController {
             $query_cart = "SELECT c.id_producto, c.cantidad, p.precio_unitario 
                           FROM carrito c 
                           JOIN producto p ON c.id_producto = p.id_producto
-                          WHERE c.id_cliente = :id AND c.estado = 'En Carrito'";
+                          WHERE c.id_cliente = :id AND c.estado IN ('En Carrito', 'Aprobado Bot')";
             $stmt_cart = $this->pdo->prepare($query_cart);
             $stmt_cart->execute(['id' => $id_cliente]);
             $productos = $stmt_cart->fetchAll(PDO::FETCH_ASSOC);
@@ -131,18 +147,19 @@ class CarritoController {
                     $subtotal = $prod['precio_unitario'] * $prod['cantidad'];
                     
                     // CORRECCIÓN: Tu tabla pedidos usa tinyint(1) para estado, así que insertamos 1 en lugar de texto
-                    $query_pedido = "INSERT INTO pedidos (fecha, total, id_cliente, id_producto, cantidad, estado, tipo_pedido) 
-                                     VALUES (NOW(), :total, :id_c, :id_p, :cant, 1, 'Web')";
+                    $query_pedido = "INSERT INTO pedidos (fecha, total, id_cliente, id_producto, cantidad, estado, tipo_pedido, ubicacion_clientes) 
+                                     VALUES (NOW(), :total, :id_c, :id_p, :cant, 1, 'Web', :ciudad)";
                     $stmt_ped = $this->pdo->prepare($query_pedido);
                     $stmt_ped->execute([
-                        'total' => $subtotal,
-                        'id_c'  => $id_cliente,
-                        'id_p'  => $prod['id_producto'],
-                        'cant'  => $prod['cantidad']
+                        'total'     => $subtotal,
+                        'id_c'      => $id_cliente,
+                        'id_p'      => $prod['id_producto'],
+                        'cant'      => $prod['cantidad'],
+                        'ciudad' => $ciudad
                     ]);
                 }
 
-                $query_clean = "UPDATE carrito SET estado = 'Procesado' WHERE id_cliente = :id AND estado = 'En Carrito'";
+                $query_clean = "UPDATE carrito SET estado = 'Procesado' WHERE id_cliente = :id AND estado IN ('En Carrito', 'Aprobado Bot')";
                 $stmt_clean = $this->pdo->prepare($query_clean);
                 $stmt_clean->execute(['id' => $id_cliente]);
             }
