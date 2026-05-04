@@ -88,20 +88,7 @@ class ProveedorController {
         header("Location: " . url('admin/proveedores'));
     }
 
-    public function eliminar() {
-        $id = $_GET['id'] ?? null;
-
-        if ($id) {
-            $sql = $this->conn->prepare("
-                UPDATE proveedor 
-                SET estado = 0 
-                WHERE id_proveedor = ?
-            ");
-            $sql->execute([$id]);
-        }
-
-        header("Location: " . url('admin/proveedores'));
-    }
+    
 
     public function cambiarEstado() {
         $id = $_POST['id_proveedor'];

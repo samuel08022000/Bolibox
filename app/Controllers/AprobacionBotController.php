@@ -17,7 +17,7 @@ class AprobacionBotController {
         // $rol puede ser 'admin' o 'empleado'
         if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== ucfirst($rol)) {
             // Permitir 'Administrador' o 'Empleado'
-            if ($_SESSION['usuario']['rol'] !== 'Administrador' && $_SESSION['usuario']['rol'] !== 'Empleado') {
+            if ($_SESSION['usuario']['rol'] !== 'admin' && $_SESSION['usuario']['rol'] !== 'empleado') {
                 header('Location: /BOLIBOX/login');
                 exit();
             }

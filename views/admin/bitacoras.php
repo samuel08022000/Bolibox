@@ -49,16 +49,40 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
 
     <div class="main-content">
 
-        <div class="admin-topbar">
-            <h3 class="fw-bold">Registro de Bitácoras</h3>
-            <small class="text-muted">Auditoria y Registro del sistema</small>
+        <div class="admin-topbar d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold">Registro de Bitácoras</h3>
+                <small class="text-muted">Auditoria y Registro del sistema</small>
+            </div>
+            <button class="btn btn-danger shadow-sm fw-bold" onclick="exportarPDF()">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Exportar a PDF
+            </button>
         </div>
+
+        <?php $current_tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'usuarios'; ?>
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link text-dark fw-bold <?= $current_tipo === 'usuarios' ? 'active border-top border-naranja border-3' : '' ?>" href="<?= url('admin/bitacoras?tipo=usuarios') ?>">Usuarios</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark fw-bold <?= $current_tipo === 'almacen' ? 'active border-top border-naranja border-3' : '' ?>" href="<?= url('admin/bitacoras?tipo=almacen') ?>">Almacén</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark fw-bold <?= $current_tipo === 'clientes' ? 'active border-top border-naranja border-3' : '' ?>" href="<?= url('admin/bitacoras?tipo=clientes') ?>">Clientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark fw-bold <?= $current_tipo === 'productos' ? 'active border-top border-naranja border-3' : '' ?>" href="<?= url('admin/bitacoras?tipo=productos') ?>">Productos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark fw-bold <?= $current_tipo === 'ventas' ? 'active border-top border-naranja border-3' : '' ?>" href="<?= url('admin/bitacoras?tipo=ventas') ?>">Ventas</a>
+            </li>
+        </ul>
 
         <div class="card border-top border-naranja border-4">
             <div class="card-body p-0">
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0" id="tablaBitacora">
 
                         <thead>
                             <tr>
@@ -84,15 +108,18 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                             case 'USUARIOS':
                                                 echo '<span class="badge bg-dark">Usuarios</span>';
                                                 break;
-
                                             case 'ALMACEN':
                                                 echo '<span class="badge bg-primary">Almacén</span>';
                                                 break;
-
-                                            case 'VENTA':
+                                            case 'VENTAS':
                                                 echo '<span class="badge bg-success">Ventas</span>';
                                                 break;
-
+                                            case 'CLIENTES':
+                                                echo '<span class="badge bg-info text-dark">Clientes</span>';
+                                                break;
+                                            case 'PRODUCTOS':
+                                                echo '<span class="badge bg-warning text-dark">Productos</span>';
+                                                break;
                                             default:
                                                 echo '<span class="badge bg-secondary">'.$row['tipo'].'</span>';
                                         }
@@ -144,6 +171,43 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
 
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+    const todasLasBitacoras = <?= json_encode($todas_las_bitacoras) ?>;
+
+    function exportarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.text(`Reporte General de Todas las Bitácoras - BOLIBOX`, 14, 15);
+        doc.setFontSize(10);
+        doc.text("Fecha de exportación: " + new Date().toLocaleString(), 14, 22);
+
+        // Preparamos los datos para la tabla
+        const bodyData = todasLasBitacoras.map(row => {
+            return [
+                row.tipo, 
+                row.accion, 
+                row.fecha, 
+                row.descripcion, 
+                row.id_empleado ? '#' + row.id_empleado : 'N/A', 
+                row.tabla
+            ];
+        });
+
+        doc.autoTable({
+            head: [['Tipo', 'Acción', 'Fecha', 'Descripción', 'Empleado', 'Tabla']],
+            body: bodyData,
+            startY: 28,
+            theme: 'grid',
+            styles: { fontSize: 8 }
+        });
+
+        doc.save(`bitacora_completa_bolibox_${new Date().getTime()}.pdf`);
+    }
+</script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 $rol = $_SESSION['usuario']['rol'] ?? '';
-if (!isset($_SESSION['usuario']) || ($rol !== 'Empleado' && $rol !== 'Administrador')) {
+if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
