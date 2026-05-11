@@ -44,10 +44,10 @@ class ClientePortalController {
         $db = new Database();
         $con = $db->conectar();
 
-        // Obtener el ID del cliente desde la sesión
-        $idClienteLogueado = $_SESSION['id_usuario']; // Asegúrate de que así se llame tu variable
+        
+        $idClienteLogueado = $_SESSION['id_usuario']; 
 
-        // Consulta actualizada con estado y tipo_pedido
+      
         $sql = $con->prepare("
             SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar, estado, tipo_pedido 
             FROM pedidos 
@@ -57,7 +57,7 @@ class ClientePortalController {
         $sql->execute([$idClienteLogueado]);
         $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-        // Llamamos a la vista limpia (ajusta la ruta si es diferente)
+        
         require '../views/cliente/pedidos.php';
     }
 }

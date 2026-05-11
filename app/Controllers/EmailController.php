@@ -12,7 +12,6 @@ class EmailController {
         $cabeceras .= "Reply-To: " . $this->from . "\r\n";
         $cabeceras .= "X-Mailer: PHP/" . phpversion();
 
-        // Envolvemos el mensaje en una plantilla básica y limpia
         $plantilla = "
         <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>
             <div style='max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 10px; border-top: 5px solid #FF8C00; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>

@@ -1,7 +1,7 @@
 <?php
-// app/Controllers/authcontroller.php
+
 require_once __DIR__ . "/../../config/database.php";
-require_once __DIR__ . "/EmailController.php"; // Incluimos el nuevo cartero
+require_once __DIR__ . "/EmailController.php"; 
 
 class AuthController {
 
@@ -28,14 +28,12 @@ public function login() {
         $password = trim($_POST['password']);
         $ip_usuario = $_SERVER['REMOTE_ADDR'];
 
-        // 1. LIMPIEZA Y CONTEO GLOBAL
         $this->conn->query("DELETE FROM intentos_login WHERE fecha_intento < NOW() - INTERVAL 15 MINUTE");
         
         $sqlGlobal = $this->conn->prepare("SELECT COUNT(*) as total FROM intentos_login WHERE ip_address = ?");
         $sqlGlobal->execute([$ip_usuario]);
         $fallos_globales = $sqlGlobal->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // 2. ESCUDO DE GOOGLE (Si hay más de 20 fallos de esta IP en total)
+       
         if ($fallos_globales >= 20) {
             $captcha_response = $_POST['g-recaptcha-response'] ?? '';
             
@@ -52,11 +50,9 @@ public function login() {
                 $_SESSION['show_captcha'] = true;
                 $this->redirectConMensaje(url('login'), "Verificación de bot fallida. Inténtalo de nuevo.", "error");
             }
-            // Si pasa, limpiamos la bandera de captcha para este intento
             unset($_SESSION['show_captcha']);
         }
 
-        // 3. LÓGICA INDIVIDUAL (5 intentos por cuenta)
         $sqlIndividual = $this->conn->prepare("SELECT COUNT(*) as fallos FROM intentos_login WHERE ip_address = ? AND email_intento = ?");
         $sqlIndividual->execute([$ip_usuario, $email]);
         $ataques_cuenta = $sqlIndividual->fetch(PDO::FETCH_ASSOC)['fallos'];
@@ -65,7 +61,6 @@ public function login() {
             $this->redirectConMensaje(url('login'), "Acceso bloqueado por seguridad. Revisa tu correo para entrar.", "error");
         }
 
-        // 4. PROCESAR LOGIN
         $sql = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ? AND estado = 1");
         $sql->execute([$email]);
         $user = $sql->fetch(PDO::FETCH_ASSOC);
@@ -85,7 +80,7 @@ public function login() {
                 header("Location: " . url('verificar_otp'));
                 exit;
             } else {
-                // FALLO: Registrar en intentos_login
+
                 $this->conn->prepare("INSERT INTO intentos_login (ip_address, email_intento) VALUES (?, ?)")->execute([$ip_usuario, $email]);
                 $ataques_cuenta++;
 
@@ -105,7 +100,7 @@ public function login() {
                 }
             }
         } else {
-            // Usuario inexistente: Igual registramos el fallo para frenar escaneos globales
+            
             $this->conn->prepare("INSERT INTO intentos_login (ip_address, email_intento) VALUES (?, ?)")->execute([$ip_usuario, $email]);
             $_SESSION['error_email'] = "El correo no está registrado.";
             header("Location: " . url('login'));
@@ -113,7 +108,6 @@ public function login() {
         }
     }
 
-    // --- NUEVA FUNCIÓN PARA PROCESAR EL CLIC DEL CORREO ---
     public function magic_login() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $token = $_GET['token'] ?? '';
@@ -256,12 +250,12 @@ public function login() {
 
             $this->conn->prepare("UPDATE usuarios SET reset_token = ?, reset_expires_at = ? WHERE id_usuario = ?")->execute([$token, $expiracion, $user['id_usuario']]);
 
-            // DELEGAMOS CORREO DE RECUPERACIÓN AL EMAILCONTROLLER
+      
             $enlace = "http://localhost/BOLIBOX/reset-password?token=" . $token;
             $this->emailService->enviarRecuperacion($email, $enlace);
         }
 
-        // Siempre mostramos éxito para evitar escaneo de correos
+
         $this->redirectConMensaje(url('login'), "Si el correo existe, te hemos enviado las instrucciones.", "info");
     }
 

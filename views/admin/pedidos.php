@@ -286,9 +286,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ================= SCRIPT ACTUALIZADO PARA ADMIN =================
 
-// Para el formulario de NUEVO PEDIDO
 function toggleProdAdmin() {
     let tipo = document.getElementById("tipoProdAdmin").value;
     let divPropio = document.getElementById("divPropioAdmin");
@@ -304,14 +302,14 @@ function toggleProdAdmin() {
         divExterno.style.display = "none";
         if(inputExterno) inputExterno.value = ""; 
         recalcularAdmin();
-        if(total) total.readOnly = true; // Bloquea el total
+        if(total) total.readOnly = true; 
     } else {
         divPropio.style.display = "none";
         divExterno.style.display = "block";
         if(selectPropio) selectPropio.value = ""; 
         if(total) {
             total.value = ""; 
-            total.readOnly = false; // Desbloquea el total para escribir manual
+            total.readOnly = false; 
         }
     }
 }
@@ -337,7 +335,6 @@ document.addEventListener("input", function (e) {
     if (e.target.id === "cantidad") recalcularAdmin();
 });
 
-// ================= EDIT =================
 function toggleEdit(id) {
     let tipo = document.getElementById("tipoEdit" + id).value;
     let divPropio = document.getElementById("divPropioEdit" + id);
@@ -388,7 +385,6 @@ document.addEventListener("input", function (e) {
     }
 });
 
-// Asegurarse de bloquear los totales correctos al cargar la página
 window.onload = function() {
     let totalAdmin = document.getElementById("total");
     if(totalAdmin && document.getElementById("tipoProdAdmin").value === "propio") {

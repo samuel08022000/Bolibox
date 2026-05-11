@@ -13,15 +13,12 @@ class CarritoController {
         }
     }
 
-    // --- LA FUNCIÓN DEFINITIVA ---
-    // Extrae tu id_usuario de la sesión y busca tu id_cliente real
     private function obtenerIdCliente() {
         if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
-            // Según tu captura, sacamos el id_usuario exacto
             $id_usuario = $_SESSION['usuario']['id_usuario'] ?? null;
             
             if ($id_usuario) {
-                // Buscamos el id_cliente (el 27 en tu caso) en la tabla clientes
+                
                 $stmt = $this->pdo->prepare("SELECT id_cliente FROM clientes WHERE id_usuario = ?");
                 $stmt->execute([$id_usuario]);
                 $id_cliente = $stmt->fetchColumn();
@@ -34,11 +31,9 @@ class CarritoController {
         return null;
     }
 
-    // Muestra la vista del carrito
     public function verCarrito() {
         $id_cliente = $this->obtenerIdCliente();
         
-        // Ahora sí, si de verdad no hay sesión, manda al login (ya no fallará)
         if (!$id_cliente) {
             header('Location: /BOLIBOX/login');
             exit();
@@ -63,7 +58,6 @@ class CarritoController {
         require '../views/cliente/carrito.php';
     }
 
-    // Añadir al carrito desde el catálogo
     public function agregarAlCarrito() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_cliente = $this->obtenerIdCliente();
@@ -94,7 +88,6 @@ class CarritoController {
         }
     }
 
-    // Eliminar un producto
     public function eliminarDelCarrito() {
         if (isset($_GET['id'])) {
             $id_carrito = $_GET['id'];
@@ -123,7 +116,6 @@ class CarritoController {
         exit();
     }
 
-    // Confirmar la compra (Pasa de carrito a la tabla pedidos)
     public function confirmarCompra() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_cliente = $this->obtenerIdCliente();
@@ -146,7 +138,6 @@ class CarritoController {
                 foreach ($productos as $prod) {
                     $subtotal = $prod['precio_unitario'] * $prod['cantidad'];
                     
-                    // CORRECCIÓN: Tu tabla pedidos usa tinyint(1) para estado, así que insertamos 1 en lugar de texto
                     $query_pedido = "INSERT INTO pedidos (fecha, total, id_cliente, id_producto, cantidad, estado, tipo_pedido, ubicacion_clientes) 
                                      VALUES (NOW(), :total, :id_c, :id_p, :cant, 1, 'Web', :ciudad)";
                     $stmt_ped = $this->pdo->prepare($query_pedido);

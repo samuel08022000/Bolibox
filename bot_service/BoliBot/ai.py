@@ -1,13 +1,12 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from mi_scraper import obtener_producto  # Importamos tu scraper [cite: 1]
+from mi_scraper import obtener_producto  
 
 load_dotenv()
 
-# Configuramos la llave jalándola del archivo oculto de forma segura
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-# Definimos la instrucción del sistema para darle personalidad y reglas
+
 SYSTEM_INSTRUCTION = """
 Identidad: Eres BoliBot, el asistente inteligente oficial de BoliBox, la importadora líder en Bolivia.
     Tu voz: Eres un experto en logística, amable, directo, boliviano (pero sin exagerar), y sobre todo, un cerrador de ventas.
@@ -40,7 +39,7 @@ Identidad: Eres BoliBot, el asistente inteligente oficial de BoliBox, la importa
     """
 
 model = genai.GenerativeModel(
-    model_name="gemini-3-flash-preview", # Te sugiero el 1.5 por ser más actual
+    model_name="gemini-3-flash-preview", 
     system_instruction=SYSTEM_INSTRUCTION
 )
 
@@ -50,7 +49,6 @@ def procesar_con_ia(mensaje, historial):
     response = chat.send_message(mensaje)
     texto = response.text.strip()
 
-    # Normalizamos respuesta
     if "ENTENDIDO_LINK" in texto:
         return "SOLICITUD_COTIZACION"
     

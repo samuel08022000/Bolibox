@@ -5,8 +5,6 @@ from bs4 import BeautifulSoup
 def limpiar_precio(texto):
     if not texto: return 0
     try:
-        # Extrae solo los números y el punto decimal
-        # Maneja casos como "US $25.00", "C $15.50", "1.200,50"
         texto = texto.replace(',', '')
         numeros = re.findall(r'\d+\.\d+|\d+', texto)
         if numeros:
@@ -32,14 +30,11 @@ def obtener_producto_ebay(url):
         title_tag = soup.find("h1", class_="x-item-title__mainTitle")
         nombre = title_tag.get_text(strip=True) if title_tag else "Producto de eBay"
         
-        # Intentar obtener el precio (eBay usa varias etiquetas, probamos las más comunes)
-        precio_texto = ""
-        # Selector 1: Precio principal
+        precio_texto = ""l
         price_tag = soup.select_one(".x-price-primary, .v-price-primary, #prcIsum")
         if price_tag:
             precio_texto = price_tag.get_text(strip=True)
         
-        # Selector 2: Si es subasta o tiene descuento
         if not precio_texto:
             price_tag = soup.select_one(".ux-textspans--BOLD")
             if price_tag and "$" in price_tag.text:
@@ -73,8 +68,6 @@ def obtener_producto_mercadolibre(url):
         precio = float(r.get("price", 0))
         moneda = r.get("currency_id", "USD")
 
-        # Si el precio no está en USD, podrías aplicar una conversión aquí
-        # Por ahora lo devolvemos tal cual.
         return {
             "nombre": titulo,
             "precio_usd": precio
@@ -91,7 +84,6 @@ def buscar_precio_google(nombre):
         r = requests.get(url, headers=headers, timeout=5)
         soup = BeautifulSoup(r.text, "html.parser")
         
-        # Intentar encontrar un patrón de precio ($XX.XX) en los resultados
         texto = soup.get_text()
         match = re.search(r'\$\s?(\d+[\.,]\d{2})', texto)
         if match:
@@ -111,11 +103,9 @@ def obtener_producto(url):
         print("🔍 Consultando API Mercado Libre...")
         res = obtener_producto_mercadolibre(url)
     else:
-        # Para Amazon o Alibaba, usamos búsqueda de emergencia
         print("⚠️ Tienda no soportada directamente, buscando en Google...")
         res = {"nombre": "Producto", "precio_usd": buscar_precio_google(url)}
 
-    # Si el precio dio 0, intentamos una última vez con Google usando el nombre que hayamos sacado
     if res and res["precio_usd"] == 0:
         res["precio_usd"] = buscar_precio_google(res["nombre"])
 

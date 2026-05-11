@@ -10,4 +10,4 @@ def obtener_dolar():
         return tasa
 
     except:
-        return 6.96  # fallback Bolivia
+        return 6.96  

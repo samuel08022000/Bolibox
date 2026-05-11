@@ -2,12 +2,12 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from mi_scraper import obtener_producto
 from currency import obtener_dolar
-from ai import procesar_con_ia # Nueva integración
+from ai import procesar_con_ia 
 
 app = Flask(__name__)
-CORS(app) # <--- ESTO ES VITAL: Permite que PHP se conecte a Python
+CORS(app) 
 
-# Diccionario para manejar estados (En producción se usa base de datos o sesiones)
+
 user_state = {"step": "inicio"}
 
 @app.route("/")
@@ -35,12 +35,12 @@ def chat():
         envio_local = 120 # 
         total_bs = ((precio_usd + comision) * tasa) + envio_local
 
-        # Actualizamos el estado para que el bot sepa qué se está cotizando
+   
         user_state["step"] = "cotizado"
         user_state["producto"] = "Producto (Ingreso manual)"
         user_state["total_bs"] = total_bs
 
-        # Construimos el detalle que el cliente verá
+     
         detalle_manual = (
             f"✅ ¡Entendido! Aquí tienes el detalle para tu cotización de ${precio_usd:.2f} USD:\n\n"
             f"💵 **Precio producto:** ${precio_usd:.2f} USD\n"
@@ -54,7 +54,7 @@ def chat():
 
     respuesta_ia = procesar_con_ia(mensaje, [])
 
-    # 🔥 CASO 1: EL USUARIO MANDA LINK
+  
     if respuesta_ia == "SOLICITUD_COTIZACION":
         data = obtener_producto(mensaje)
 
@@ -64,12 +64,12 @@ def chat():
             envio_local = 120 # 
             total_bs = ((data["precio_usd"] + comision) * tasa) + envio_local # [cite: 2]
 
-            # GUARDAMOS ESTADO [cite: 3]
+           
             user_state["step"] = "cotizado"
             user_state["producto"] = data["nombre"]
             user_state["total_bs"] = total_bs
 
-            # Respuesta detallada
+         
             detalle = (
                 f"📦 *{data['nombre']}*\n"
                 f"💵 Precio: ${data['precio_usd']:.2f} USD\n"
@@ -84,9 +84,8 @@ def chat():
         else:
             return jsonify({"response": "No encontré el precio 😢 ¿me lo pasas en USD?"})
 
-    # 🔥 CASO 2: EL CLIENTE ACEPTA LA COTIZACIÓN
     if respuesta_ia == "CONFIRMAR_PEDIDO" and user_state["step"] == "cotizado":
-        user_state["step"] = "esperando_datos" # Cambiamos el estado para bloquear el flujo hasta tener los datos
+        user_state["step"] = "esperando_datos" 
         
         return jsonify({
             "response": "¡Excelente! Para procesar tu pedido en BoliBox, por favor envíame los siguientes datos en un solo mensaje:\n\n"
@@ -96,9 +95,8 @@ def chat():
                         "📱 *Número de contacto*"
         })
 
-    # 🔥 CASO 3: REGISTRO DE DATOS Y FINALIZACIÓN
     if user_state["step"] == "esperando_datos":
-        # Aquí capturamos el mensaje que contiene sus datos
+        
         datos_cliente = mensaje 
         user_state["step"] = "confirmado"
         
@@ -112,13 +110,13 @@ def chat():
             "total": user_state["total_bs"]
         })
 
-    # 🔥 CASO 4: SI DICE "SI" PERO NO HAY COTIZACIÓN
+   
     if respuesta_ia == "CONFIRMAR_PEDIDO":
         return jsonify({
             "response": "Primero necesito el link del producto 📦"
         })
 
-    # 🔥 CASO NORMAL
+    
     return jsonify({"response": respuesta_ia})
 
 if __name__ == "__main__":
