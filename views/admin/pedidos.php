@@ -4,40 +4,14 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
+// Variables para el Layout
+$title = "BOLIBOX - Pedidos (Admin)";
+$current_page = "admin_pedidos";
+
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Pedidos (Admin)</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>body { padding-top: 0; }</style>
-</head>
-<body>
-<div class="admin-layout">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-person-circle display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
-            <small class="text-muted">Panel de Control</small>
-        </div>
-        <div class="nav flex-column mb-auto">
-            <a class="sidebar-link" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="sidebar-link active" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
-            <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-            <a class="sidebar-link" href="<?= url('admin/clientes') ?>"><i class="bi bi-people-fill"></i> Clientes</a>
-            <a class="sidebar-link" href="<?= url('admin/proveedores') ?>"><i class="bi bi-truck"></i> Proveedores</a>
-            <a class="sidebar-link" href="<?= url('admin/stock') ?>"><i class="bi bi-boxes"></i> Stock</a>
-            <a class="sidebar-link" href="<?= url('admin/empleados') ?>"><i class="bi bi-person-badge-fill"></i> Empleados</a>
-            <a class="sidebar-link" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
-        </div>
-        <div class="p-3 mt-auto border-top">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </div>
 
     <div class="main-content">
         <div class="admin-topbar">
@@ -110,10 +84,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                             <input type="number" id="cantidad" name="cantidad" class="form-control bg-light" value="1" min="1" required>
                         </div>
                         
-                        <div class="col-md-4 mb-4 mt-2">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
-                            <input type="text" name="nro_dui" class="form-control bg-light" required>
-                        </div>
+
                         
                         <div class="col-md-4 mb-4 mt-2">
                             <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
@@ -140,7 +111,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
-                                <th>DUI</th>
+                                <th>Rastreo</th>
+                                <th>PIN</th>
                                 <th>Cliente</th>
                                 <th>Ciudad</th>
                                 <th>Estado</th>
@@ -162,7 +134,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                     </td>
                                     <td><?= $row['cantidad'] ?? 1 ?></td>
                                     <td class="fw-bold">Bs <?= $row['total']; ?></td>
-                                    <td><?= $row['nro_dui']; ?></td>
+                                    <td><?= $row['codigo_rastreo']; ?></td>
+                                    <td><?= $row['pin_seguridad']; ?></td>
                                     <td><?= $row['cliente_nombre']; ?></td>
                                     <td><?= $row['ciudad_cliente'] ?? $row['ubicacion_clientes'] ?? 'Sin ciudad' ?></td>
                                     <td><?php if ($row['estado'] == 1): ?>
@@ -256,10 +229,8 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
                                                             required>
                                                     </div>
                                                     
-                                                    <div class="col-md-4 mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
-                                                        <input type="text" name="nro_dui" class="form-control" value="<?php echo $row['nro_dui']; ?>" required>
-                                                    </div>
+                                                    <input type="hidden" name="codigo_rastreo" value="<?php echo $row['codigo_rastreo']; ?>">
+                                                    <input type="hidden" name="pin_seguridad" value="<?php echo $row['pin_seguridad']; ?>">
                                                     
                                                     <div class="col-md-4 mb-3">
                                                         <label class="form-label text-muted small fw-bold text-uppercase">Ubicación</label>
@@ -282,115 +253,134 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php
+$extra_js = "
 <script>
 
 function toggleProdAdmin() {
-    let tipo = document.getElementById("tipoProdAdmin").value;
-    let divPropio = document.getElementById("divPropioAdmin");
-    let divExterno = document.getElementById("divExternoAdmin");
-    let inputExterno = document.getElementById("inputExternoAdmin");
-    let selectPropio = document.getElementById("selectPropioAdmin");
-    let total = document.getElementById("total");
+    let tipo = document.getElementById('tipoProdAdmin').value;
+    let divPropio = document.getElementById('divPropioAdmin');
+    let divExterno = document.getElementById('divExternoAdmin');
+    let inputExterno = document.getElementById('inputExternoAdmin');
+    let selectPropio = document.getElementById('selectPropioAdmin');
+    let total = document.getElementById('total');
 
     if (!divPropio || !divExterno) return;
 
-    if (tipo === "propio") {
-        divPropio.style.display = "block";
-        divExterno.style.display = "none";
-        if(inputExterno) inputExterno.value = ""; 
+    if (tipo === 'propio') {
+        divPropio.style.display = 'block';
+        divExterno.style.display = 'none';
+        if(inputExterno) inputExterno.value = ''; 
         recalcularAdmin();
         if(total) total.readOnly = true; 
     } else {
-        divPropio.style.display = "none";
-        divExterno.style.display = "block";
-        if(selectPropio) selectPropio.value = ""; 
+        divPropio.style.display = 'none';
+        divExterno.style.display = 'block';
+        if(selectPropio) selectPropio.value = ''; 
         if(total) {
-            total.value = ""; 
+            total.value = ''; 
             total.readOnly = false; 
         }
     }
 }
 
 function recalcularAdmin() {
-    let select = document.getElementById("selectPropioAdmin");
-    let cantidad = document.getElementById("cantidad");
-    let total = document.getElementById("total");
+    let select = document.getElementById('selectPropioAdmin');
+    let cantidad = document.getElementById('cantidad');
+    let total = document.getElementById('total');
     
     if (!select || !cantidad || !total) return;
 
-    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute("data-precio") || 0);
+    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-precio') || 0);
     let cant = parseFloat(cantidad.value || 0);
     
     total.value = (precio * cant).toFixed(2);
 }
 
-document.addEventListener("change", function (e) {
-    if (e.target.id === "selectPropioAdmin") recalcularAdmin();
+document.addEventListener('change', function (e) {
+    if (e.target.id === 'selectPropioAdmin') recalcularAdmin();
 });
 
-document.addEventListener("input", function (e) {
-    if (e.target.id === "cantidad") recalcularAdmin();
+document.addEventListener('input', function (e) {
+    if (e.target.id === 'cantidad') recalcularAdmin();
 });
 
 function toggleEdit(id) {
-    let tipo = document.getElementById("tipoEdit" + id).value;
-    let divPropio = document.getElementById("divPropioEdit" + id);
-    let divExterno = document.getElementById("divExternoEdit" + id);
-    let inputExterno = document.getElementById("inputExternoEdit" + id);
-    let selectPropio = document.getElementById("selectPropioEdit" + id);
-    let total = document.getElementById("totalEdit" + id);
+    let tipo = document.getElementById('tipoEdit' + id).value;
+    let divPropio = document.getElementById('divPropioEdit' + id);
+    let divExterno = document.getElementById('divExternoEdit' + id);
+    let inputExterno = document.getElementById('inputExternoEdit' + id);
+    let selectPropio = document.getElementById('selectPropioEdit' + id);
+    let total = document.getElementById('totalEdit' + id);
 
-    if (tipo === "propio") {
-        divPropio.style.display = "block";
-        divExterno.style.display = "none";
-        inputExterno.value = ""; 
+    if (tipo === 'propio') {
+        divPropio.style.display = 'block';
+        divExterno.style.display = 'none';
+        inputExterno.value = ''; 
         recalcularEdit(id);
         total.readOnly = true;
     } else {
-        divPropio.style.display = "none";
-        divExterno.style.display = "block";
-        selectPropio.value = ""; 
-        total.value = ""; 
+        divPropio.style.display = 'none';
+        divExterno.style.display = 'block';
+        selectPropio.value = ''; 
+        total.value = ''; 
         total.readOnly = false;
     }
 }
 
 function recalcularEdit(id) {
-    let select = document.getElementById("selectPropioEdit" + id);
-    let cantidad = document.getElementById("cantidadEdit" + id);
-    let total = document.getElementById("totalEdit" + id);
+    let select = document.getElementById('selectPropioEdit' + id);
+    let cantidad = document.getElementById('cantidadEdit' + id);
+    let total = document.getElementById('totalEdit' + id);
     
     if (!select || !cantidad || !total) return;
 
-    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute("data-precio") || 0);
+    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-precio') || 0);
     let cant = parseFloat(cantidad.value || 0);
     
     total.value = (precio * cant).toFixed(2);
 }
 
-document.addEventListener("change", function (e) {
-    if (e.target.id && e.target.id.startsWith("selectPropioEdit")) {
-        let id = e.target.id.replace(/\D/g, "");
+document.addEventListener('change', function (e) {
+    if (e.target.id && e.target.id.startsWith('selectPropioEdit')) {
+        let id = e.target.id.replace(/\D/g, '');
         recalcularEdit(id);
     }
 });
 
-document.addEventListener("input", function (e) {
-    if (e.target.id && e.target.id.startsWith("cantidadEdit")) {
-        let id = e.target.id.replace(/\D/g, "");
+document.addEventListener('input', function (e) {
+    if (e.target.id && e.target.id.startsWith('cantidadEdit')) {
+        let id = e.target.id.replace(/\D/g, '');
         recalcularEdit(id);
     }
 });
 
 window.onload = function() {
-    let totalAdmin = document.getElementById("total");
-    if(totalAdmin && document.getElementById("tipoProdAdmin").value === "propio") {
+    let totalAdmin = document.getElementById('total');
+    if(totalAdmin && document.getElementById('tipoProdAdmin').value === 'propio') {
         totalAdmin.readOnly = true;
     }
 };
 </script>
-</body>
-</html>
+";
+
+if (isset($_SESSION['flash'])) {
+    $extra_js .= "
+    <script>
+        Swal.fire({
+            title: '¡Pedido Generado con Éxito!',
+            html: `<strong>Código de Rastreo:</strong> " . $_SESSION['flash']['codigo_rastreo'] . "<br>
+                   <strong>PIN de Seguridad:</strong> " . $_SESSION['flash']['pin_seguridad'] . "`,
+            icon: '" . $_SESSION['flash']['tipo'] . "',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#ff6600'
+        });
+    </script>
+    ";
+    unset($_SESSION['flash']);
+}
+
+require_once __DIR__ . '/../layouts/footer.php';
+?>

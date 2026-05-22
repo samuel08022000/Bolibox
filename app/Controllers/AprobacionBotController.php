@@ -24,11 +24,10 @@ class AprobacionBotController {
         }
 
         // Obtener todos los carritos en estado 'Pendiente Bot'
-        $query = "SELECT c.id_carrito, c.cantidad, c.fecha_agregado, p.nombre as producto, p.precio_unitario, cl.id_cliente, u.nombres, u.apellidos
+        $query = "SELECT c.id_carrito, c.cantidad, c.fecha_agregado, p.nombre as producto, p.precio_unitario, cl.id_cliente, cl.nombre as cliente_nombre
                   FROM carrito c
                   JOIN producto p ON c.id_producto = p.id_producto
                   JOIN clientes cl ON c.id_cliente = cl.id_cliente
-                  JOIN usuarios u ON cl.id_usuario = u.id_usuario
                   WHERE c.estado = 'Pendiente Bot'
                   ORDER BY c.fecha_agregado DESC";
         $stmt = $this->pdo->prepare($query);
@@ -43,9 +42,25 @@ class AprobacionBotController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_carrito = $_POST['id_carrito'] ?? null;
             if ($id_carrito) {
-                $query = "UPDATE carrito SET estado = 'Aprobado Bot' WHERE id_carrito = :id";
-                $stmt = $this->pdo->prepare($query);
-                $stmt->execute(['id' => $id_carrito]);
+                $this->pdo->beginTransaction();
+                try {
+                    $query = "UPDATE carrito SET estado = 'Aprobado Bot' WHERE id_carrito = :id";
+                    $stmt = $this->pdo->prepare($query);
+                    $stmt->execute(['id' => $id_carrito]);
+
+                    $query_sel = "SELECT id_producto FROM carrito WHERE id_carrito = :id";
+                    $stmt_sel = $this->pdo->prepare($query_sel);
+                    $stmt_sel->execute(['id' => $id_carrito]);
+                    $id_producto = $stmt_sel->fetchColumn();
+
+                    $query_upd_p = "UPDATE producto SET estado_cotizacion = 'Aprobado Bot' WHERE id_producto = :id_p";
+                    $stmt_upd_p = $this->pdo->prepare($query_upd_p);
+                    $stmt_upd_p->execute(['id_p' => $id_producto]);
+                    
+                    $this->pdo->commit();
+                } catch (Exception $e) {
+                    $this->pdo->rollBack();
+                }
             }
         }
         header("Location: /BOLIBOX/{$rol}/aprobaciones_bot");
@@ -55,9 +70,11 @@ class AprobacionBotController {
     public function rechazar($rol) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id_carrito = $_POST['id_carrito'] ?? null;
-            if ($id_carrito) {
-                // Primero obtenemos el id_producto asociado para eliminarlo de la tabla producto también (es temporal)
-                $query_sel = "SELECT id_producto FROM carrito WHERE id_carrito = :id AND estado = 'Pendiente Bot'";
+            $comentario = $_POST['comentario_asesor'] ?? null;
+
+            if ($id_carrito && $comentario) {
+                // Obtenemos el id_producto asociado
+                $query_sel = "SELECT id_producto FROM carrito WHERE id_carrito = :id";
                 $stmt_sel = $this->pdo->prepare($query_sel);
                 $stmt_sel->execute(['id' => $id_carrito]);
                 $id_producto = $stmt_sel->fetchColumn();
@@ -65,15 +82,15 @@ class AprobacionBotController {
                 if ($id_producto) {
                     $this->pdo->beginTransaction();
                     try {
-                        // Eliminar de carrito
-                        $query_del_c = "DELETE FROM carrito WHERE id_carrito = :id";
-                        $stmt_del_c = $this->pdo->prepare($query_del_c);
-                        $stmt_del_c->execute(['id' => $id_carrito]);
+                        // Cambiar estado en carrito
+                        $query_upd_c = "UPDATE carrito SET estado = 'Rechazado Bot' WHERE id_carrito = :id";
+                        $stmt_upd_c = $this->pdo->prepare($query_upd_c);
+                        $stmt_upd_c->execute(['id' => $id_carrito]);
 
-                        // Eliminar de producto
-                        $query_del_p = "DELETE FROM producto WHERE id_producto = :id";
-                        $stmt_del_p = $this->pdo->prepare($query_del_p);
-                        $stmt_del_p->execute(['id' => $id_producto]);
+                        // Guardar comentario y estado en producto
+                        $query_upd_p = "UPDATE producto SET estado_cotizacion = 'Rechazado Bot', comentario_asesor = :comentario WHERE id_producto = :id";
+                        $stmt_upd_p = $this->pdo->prepare($query_upd_p);
+                        $stmt_upd_p->execute(['comentario' => $comentario, 'id' => $id_producto]);
 
                         $this->pdo->commit();
                     } catch (Exception $e) {

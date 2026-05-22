@@ -49,7 +49,7 @@ class ClientePortalController {
 
       
         $sql = $con->prepare("
-            SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar, estado, tipo_pedido 
+            SELECT id_pedido, fecha, total, ubicacion_clientes, codigo_rastreo, pin_seguridad, id_producto, producto_importar, estado, tipo_pedido 
             FROM pedidos 
             WHERE id_cliente = ?
             ORDER BY fecha DESC

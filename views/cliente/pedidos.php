@@ -25,7 +25,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 $misPedidos = [];
 if ($id_cliente) {
     $sql = $con->prepare("
-        SELECT id_pedido, fecha, total, ubicacion_clientes, nro_dui, id_producto, producto_importar, estado, tipo_pedido 
+        SELECT id_pedido, fecha, total, ubicacion_clientes, codigo_rastreo, pin_seguridad, id_producto, producto_importar, estado, tipo_pedido 
         FROM pedidos 
         WHERE id_cliente = ?
         ORDER BY fecha DESC
@@ -33,57 +33,32 @@ if ($id_cliente) {
     $sql->execute([$id_cliente]);
     $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
 }
+// Variables para el Layout
+$title = "BOLIBOX - Mis Pedidos";
+$current_page = "pedidos";
+$extra_css = '
+<style>
+    .order-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 20px;
+        background: #fff;
+    }
+    .order-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(255, 140, 0, 0.15);
+    }
+    .bg-naranja-header {
+        background: linear-gradient(135deg, #FF8C00 0%, #e67e00 100%);
+        color: white;
+        border-radius: 20px;
+    }
+</style>
+';
+
+// Cargar Layout (Header y Navbar)
+require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Mis Pedidos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/BOLIBOX/public/css/style.css">
-    <style>
-        .order-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 20px;
-            background: #fff;
-        }
-        .order-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(255, 140, 0, 0.15);
-        }
-        .bg-naranja-header {
-            background: linear-gradient(135deg, #FF8C00 0%, #e67e00 100%);
-            color: white;
-            border-radius: 20px;
-        }
-    </style>
-</head>
-<body class="user-page">
-
-    <nav class="top-navbar">
-        <div class="nav-inner">
-            <a href="/BOLIBOX/cliente" class="logo">
-                <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
-            </a>
-            <div class="nav-links">
-                <a class="nav-link" href="/BOLIBOX/nuestro-catalogo">Nuestro Catálogo</a>
-                <a class="nav-link" href="/BOLIBOX/catalogos-asociados">Catálogos Asociados</a>
-                <a class="nav-link active" href="/BOLIBOX/pedidos">Mis Pedidos</a>
-                <a class="nav-link" href="/BOLIBOX/chatbot">Bolibot</a>
-            </div>
-            <!-- Botón de Mi Carrito -->
-            <a href="/BOLIBOX/carrito" class="btn btn-outline-light rounded-pill px-3 me-2 ms-3 border-0">
-                <i class="bi bi-cart3"></i> Mi Carrito
-            </a>
-            <a href="/BOLIBOX/logout" class="btn-logout">
-                <i class="bi bi-box-arrow-left"></i> Salir
-            </a>
-        </div>
-    </nav>
 
     <div class="container user-dashboard" style="margin-top: 40px;">
         
@@ -133,11 +108,15 @@ if ($id_cliente) {
                             </h5>
 
                             <div class="row mb-4">
-                                <div class="col-6 border-end">
-                                    <label class="text-muted small fw-bold text-uppercase d-block">Número DUI</label>
-                                    <span class="fw-bold text-naranja"><?php echo !empty($pedido['nro_dui']) ? htmlspecialchars($pedido['nro_dui']) : 'Pendiente'; ?></span>
+                                <div class="col-5 border-end">
+                                    <label class="text-muted small fw-bold text-uppercase d-block">Código Rastreo</label>
+                                    <span class="fw-bold text-naranja"><?php echo !empty($pedido['codigo_rastreo']) ? htmlspecialchars($pedido['codigo_rastreo']) : 'Pendiente'; ?></span>
                                 </div>
-                                <div class="col-6 ps-3">
+                                <div class="col-3 border-end ps-3">
+                                    <label class="text-muted small fw-bold text-uppercase d-block">PIN</label>
+                                    <span class="fw-bold text-dark"><?php echo !empty($pedido['pin_seguridad']) ? htmlspecialchars($pedido['pin_seguridad']) : '-'; ?></span>
+                                </div>
+                                <div class="col-4 ps-3">
                                     <label class="text-muted small fw-bold text-uppercase d-block">Monto Invertido</label>
                                     <span class="fw-bold text-dark">Bs <?php echo isset($pedido['total']) ? number_format($pedido['total'], 2) : '0.00'; ?></span>
                                 </div>
@@ -186,6 +165,6 @@ if ($id_cliente) {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php
+require_once __DIR__ . '/../layouts/footer_cliente.php';
+?>

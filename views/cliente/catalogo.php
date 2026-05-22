@@ -4,38 +4,13 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
+// Variables para el Layout
+$title = "Catálogos - BOLIBOX";
+$current_page = "asociados";
+
+// Cargar Layout (Header y Navbar)
+require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogos - BOLIBOX</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-</head>
-<body class="user-page catalogs-page user-dashboard">
-
-    <nav class="top-navbar">
-        <div class="nav-inner">
-            <a href="<?= url('cliente') ?>" class="logo">
-                <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
-            </a>
-            <div class="nav-links">
-                <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
-                <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
-                <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>
-                <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
-            </div>
-            
-            <a href="<?= url('carrito') ?>" class="btn btn-outline-light rounded-pill px-3 me-2 ms-3 border-0">
-                <i class="bi bi-cart3"></i> Mi Carrito
-            </a>
-            <a href="<?= url('/') ?>" class="btn-logout"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </nav>
-
     <div class="whatsapp-wrapper">
         <div class="whatsapp-tooltip">
             Empiece con su primer pedido aquí
@@ -97,6 +72,6 @@ if (!isset($_SESSION['usuario'])) {
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php
+require_once __DIR__ . '/../layouts/footer_cliente.php';
+?>

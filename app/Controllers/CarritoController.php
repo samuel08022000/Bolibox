@@ -42,7 +42,7 @@ class CarritoController {
         $query = "SELECT c.id_carrito, p.id_producto, p.nombre, p.precio_unitario, c.cantidad, c.estado as estado_carrito 
                   FROM carrito c 
                   JOIN producto p ON c.id_producto = p.id_producto 
-                  WHERE c.id_cliente = :id_cliente AND c.estado IN ('En Carrito', 'Pendiente Bot', 'Aprobado Bot')";
+                  WHERE c.id_cliente = :id_cliente AND c.estado IN ('En Carrito', 'Aprobado Bot')";
         
         $stmt = $this->pdo->prepare($query);
         $stmt->execute(['id_cliente' => $id_cliente]);
@@ -56,6 +56,26 @@ class CarritoController {
         }
 
         require '../views/cliente/carrito.php';
+    }
+
+    public function verCotizaciones() {
+        $id_cliente = $this->obtenerIdCliente();
+        
+        if (!$id_cliente) {
+            header('Location: /BOLIBOX/login');
+            exit();
+        }
+
+        $query = "SELECT c.id_carrito, p.id_producto, p.nombre, p.precio_unitario, c.cantidad, c.estado as estado_carrito, p.comentario_asesor 
+                  FROM carrito c 
+                  JOIN producto p ON c.id_producto = p.id_producto 
+                  WHERE c.id_cliente = :id_cliente AND c.estado IN ('Pendiente Bot', 'Rechazado Bot')";
+        
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute(['id_cliente' => $id_cliente]);
+        $cotizaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        require '../views/cliente/cotizaciones.php';
     }
 
     public function agregarAlCarrito() {
@@ -118,6 +138,12 @@ class CarritoController {
 
     public function confirmarCompra() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // VERIFICAR PAGO CON STRIPE
+            if (empty($_POST['stripeToken'])) {
+                header('Location: /BOLIBOX/carrito?error=pago_fallido');
+                exit();
+            }
+
             $id_cliente = $this->obtenerIdCliente();
             $ciudad = $_POST['ciudad'] ?? null;
             
@@ -138,8 +164,8 @@ class CarritoController {
                 foreach ($productos as $prod) {
                     $subtotal = $prod['precio_unitario'] * $prod['cantidad'];
                     
-                    $query_pedido = "INSERT INTO pedidos (fecha, total, id_cliente, id_producto, cantidad, estado, tipo_pedido, ubicacion_clientes) 
-                                     VALUES (NOW(), :total, :id_c, :id_p, :cant, 1, 'Web', :ciudad)";
+                    $query_pedido = "INSERT INTO pedidos (fecha, total, id_cliente, id_producto, cantidad, estado, tipo_pedido, origen_pedido, ubicacion_clientes) 
+                                     VALUES (NOW(), :total, :id_c, :id_p, :cant, 1, 'Web', 'COMPRA WEB', :ciudad)";
                     $stmt_ped = $this->pdo->prepare($query_pedido);
                     $stmt_ped->execute([
                         'total'     => $subtotal,

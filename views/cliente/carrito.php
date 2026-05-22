@@ -4,38 +4,13 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
+// Variables para el Layout
+$title = "BOLIBOX - Mi Carrito";
+$current_page = "carrito";
+
+// Cargar Layout (Header y Navbar)
+require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Mi Carrito</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-</head>
-<body class="user-page">
-
-    <nav class="top-navbar">
-        <div class="nav-inner">
-            <a href="<?= url('cliente') ?>" class="logo">
-                <i class="bi bi-box-seam"></i> BOLIBOX<span>.</span>
-            </a>
-            <div class="nav-links">
-                <a class="nav-link" href="<?= url('nuestro-catalogo') ?>">Nuestro Catálogo</a>
-                <a class="nav-link" href="<?= url('catalogos-asociados') ?>">Catálogos Asociados</a>
-                <a class="nav-link" href="<?= url('pedidos') ?>">Mis Pedidos</a>
-                <a class="nav-link" href="<?= url('chatbot') ?>">Bolibot</a>
-            </div>
-            
-            <a href="<?= url('carrito') ?>" class="btn btn-outline-light rounded-pill px-3 me-2 ms-3 border-0">
-                <i class="bi bi-cart3"></i> Mi Carrito
-            </a>
-            <a href="<?= url('/') ?>" class="btn-logout"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </nav>
-
     <div class="container user-dashboard" style="margin-top: 40px;">
         <div class="section-header-user">
             <h1 class="section-title-user"><i class="bi bi-cart3"></i> Mi Carrito de Compras</h1>
@@ -67,29 +42,26 @@ if (!isset($_SESSION['usuario'])) {
                                     <tbody>
                                         <?php foreach ($productos_carrito as $item): ?>
                                         <?php 
-                                            $isPendiente = ($item['estado_carrito'] ?? '') === 'Pendiente Bot';
                                             $isAprobado = ($item['estado_carrito'] ?? '') === 'Aprobado Bot';
-                                            $rowStyle = $isPendiente ? 'background-color: #f8f9fa; opacity: 0.8;' : '';
+                                            $iconColor = $isAprobado ? 'style="color: #6f42c1;"' : 'class="text-naranja"';
                                         ?>
-                                        <tr style="<?= $rowStyle ?>">
+                                        <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="p-2 bg-light rounded text-center me-3" style="width: 45px;">
-                                                        <i class="bi bi-box-seam <?= $isPendiente ? 'text-secondary' : 'text-naranja' ?> fs-4"></i>
+                                                        <i class="bi bi-box-seam fs-4" <?= $iconColor ?>></i>
                                                     </div>
                                                     <div>
                                                         <span class="fw-bold text-dark"><?= htmlspecialchars($item['nombre']) ?></span>
-                                                        <?php if ($isPendiente): ?>
-                                                            <br><span class="badge bg-secondary text-white mt-1"><i class="bi bi-hourglass-split"></i> En revisión</span>
-                                                        <?php elseif ($isAprobado): ?>
-                                                            <br><span class="badge bg-success text-white mt-1"><i class="bi bi-check-circle"></i> Aprobado</span>
+                                                        <?php if ($isAprobado): ?>
+                                                            <br><span class="badge text-white mt-1" style="background-color: #6f42c1;"><i class="bi bi-robot"></i> Cotización Bot</span>
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="<?= $isPendiente ? 'text-muted' : 'text-dark' ?>">Bs <?= number_format($item['precio_unitario'], 2) ?></td>
+                                            <td class="text-dark">Bs <?= number_format($item['precio_unitario'], 2) ?></td>
                                             <td class="text-center fw-bold border-start border-end"><?= $item['cantidad'] ?></td>
-                                            <td class="fw-bold <?= $isPendiente ? 'text-muted' : 'text-dark' ?>">Bs <?= number_format($item['precio_unitario'] * $item['cantidad'], 2) ?></td>
+                                            <td class="fw-bold text-dark">Bs <?= number_format($item['precio_unitario'] * $item['cantidad'], 2) ?></td>
                                             <td class="text-center">
                                                 <a href="<?= url('carrito/eliminar?id=' . $item['id_carrito']) ?>" class="text-danger fs-5" title="Eliminar producto">
                                                     <i class="bi bi-x-circle-fill"></i>
@@ -123,13 +95,24 @@ if (!isset($_SESSION['usuario'])) {
                             <span class="fs-5 fw-bold text-naranja">Bs <?= number_format($total, 2) ?></span>
                         </div>
                         <?php if (!empty($productos_carrito)): ?>
-                        <form action="<?= url('carrito/confirmar') ?>" method="POST">
+                        <form action="<?= url('carrito/confirmar') ?>" method="POST" id="payment-form">
                             <div class="mb-3 text-start">
                                 <label for="ciudad" class="form-label text-muted small fw-bold">Lugar de Entrega</label>
                                 <textarea class="form-control" id="ciudad" name="ciudad" rows="2" placeholder="Ej: Av. La Paz #123, Zona Sur" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-naranja w-100 fw-bold rounded-pill py-2 shadow-sm">
-                                CONFIRMAR PEDIDO <i class="bi bi-check2-circle ms-1"></i>
+                            
+                            <div class="mb-3 text-start">
+                                <label class="form-label text-muted small fw-bold">Tarjeta de Crédito o Débito</label>
+                                <div id="card-element" class="form-control p-3 bg-white border">
+                                  <!-- A Stripe Element will be inserted here. -->
+                                </div>
+                                <!-- Used to display form errors. -->
+                                <div id="card-errors" role="alert" class="text-danger mt-2 small fw-bold"></div>
+                            </div>
+                            <input type="hidden" name="stripeToken" id="stripeToken">
+
+                            <button type="submit" id="submit-button" class="btn btn-naranja w-100 fw-bold rounded-pill py-2 shadow-sm">
+                                PAGAR Y CONFIRMAR <i class="bi bi-credit-card ms-1"></i>
                             </button>
                         </form>
                         <?php endif; ?>
@@ -138,5 +121,68 @@ if (!isset($_SESSION['usuario'])) {
             </div>
         </div>
     </div>
-</body>
-</html>
+    
+<?php
+$extra_js = "
+<script src=\"https://js.stripe.com/v3/\"></script>
+<script>
+    var stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Test key
+    var elements = stripe.elements();
+    var style = {
+      base: {
+        color: '#32325d',
+        fontFamily: '\"Inter\", Helvetica, sans-serif',
+        fontSmoothing: 'antialiased',
+        fontSize: '16px',
+        '::placeholder': {
+          color: '#aab7c4'
+        }
+      },
+      invalid: {
+        color: '#fa755a',
+        iconColor: '#fa755a'
+      }
+    };
+    var card = elements.create('card', {style: style});
+    
+    var cardElement = document.getElementById('card-element');
+    if (cardElement) {
+        card.mount('#card-element');
+
+        card.on('change', function(event) {
+          var displayError = document.getElementById('card-errors');
+          if (event.error) {
+            displayError.textContent = event.error.message;
+          } else {
+            displayError.textContent = '';
+          }
+        });
+
+        var form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          document.getElementById('submit-button').disabled = true;
+          document.getElementById('submit-button').innerHTML = 'PROCESANDO...';
+
+          stripe.createToken(card).then(function(result) {
+            if (result.error) {
+              var errorElement = document.getElementById('card-errors');
+              errorElement.textContent = result.error.message;
+              document.getElementById('submit-button').disabled = false;
+              document.getElementById('submit-button').innerHTML = 'PAGAR Y CONFIRMAR <i class=\"bi bi-credit-card ms-1\"></i>';
+            } else {
+              stripeTokenHandler(result.token);
+            }
+          });
+        });
+    }
+
+    function stripeTokenHandler(token) {
+      var form = document.getElementById('payment-form');
+      document.getElementById('stripeToken').value = token.id;
+      form.submit();
+    }
+</script>
+";
+require_once __DIR__ . '/../layouts/footer_cliente.php';
+?>

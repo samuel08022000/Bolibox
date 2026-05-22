@@ -68,9 +68,10 @@
                     <?php endif; ?>
                 </div>
 
-                <div class="form-floating mb-3">
-                    <input type="password" class="form-control <?= $error_password ? 'is-invalid' : '' ?>" id="password" name="password" placeholder="Contraseña" required>
+                <div class="form-floating mb-3 position-relative">
+                    <input type="password" class="form-control <?= $error_password ? 'is-invalid' : '' ?>" id="password" name="password" placeholder="Contraseña" required style="padding-right: 2.5rem;">
                     <label for="password"><i class="bi bi-shield-lock me-2"></i>Contraseña</label>
+                    <i class="bi bi-eye position-absolute top-50 end-0 translate-middle-y me-3 toggle-password" style="cursor: pointer; z-index: 10; color: #6b7280;"></i>
                     
                     <?php if ($error_password): ?>
                         <div class="invalid-feedback text-start ms-1 mt-1" style="font-size: 0.85rem; font-weight: 500;">
@@ -102,6 +103,20 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const input = this.previousElementSibling.previousElementSibling; // El input está 2 hermanos antes (antes de label)
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    this.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    this.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
+        });
+    </script>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

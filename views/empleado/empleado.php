@@ -5,41 +5,15 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
+// Variables para el Layout
+$title = "BOLIBOX - Panel Empleado";
+$current_page = "empleado_registrar";
+
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Panel Empleado</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>body { padding-top: 0; background-color: #f8f9fa; }</style>
-</head>
-<body>
 
-<div class="admin-layout">
-    <!-- BARRA LATERAL -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-person-badge display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
-            <small class="text-muted">Portal de Atención</small>
-        </div>
-        <div class="nav flex-column mb-auto">
-            <a class="sidebar-link active" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
-            <a class="sidebar-link" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
-            <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
-            <a class="sidebar-link" href="<?= url('empleado/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-            <a class="sidebar-link" href="<?= url('empleado/aprobaciones_bot') ?>"><i class="bi bi-robot"></i> Cotizaciones Bot</a>
-        </div>
-        <div class="p-3 mt-auto border-top">
-            <a href="<?= url('logout') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </div>
-
-    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content">
         <div class="admin-topbar">
             <div>
@@ -107,11 +81,7 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                 <input type="number" id="cantidad" name="cantidad" class="form-control bg-light" value="1" min="1" required>
                             </div>
                             
-                            <div class="col-md-4 mb-4 mt-2">
-                                <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
-                                <input type="text" name="nro_dui" class="form-control bg-light" required>
-                            </div>
-                            
+                            <!-- El Código de Rastreo se genera automáticamente en el controlador -->
                             <div class="col-md-4 mb-4 mt-2">
                                 <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
                                 <!-- Campo bloqueado por defecto igual que en el admin -->
@@ -132,61 +102,64 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php
+$extra_js = "
 <script>
 // Lógica JS idéntica a la del Administrador
 function toggleProdEmpleado() {
-    let tipo = document.getElementById("tipoProdEmpleado").value;
-    let divPropio = document.getElementById("divPropioEmpleado");
-    let divExterno = document.getElementById("divExternoEmpleado");
-    let inputExterno = document.getElementById("inputExternoEmpleado");
-    let selectPropio = document.getElementById("selectPropioEmpleado");
-    let total = document.getElementById("total");
+    let tipo = document.getElementById('tipoProdEmpleado').value;
+    let divPropio = document.getElementById('divPropioEmpleado');
+    let divExterno = document.getElementById('divExternoEmpleado');
+    let inputExterno = document.getElementById('inputExternoEmpleado');
+    let selectPropio = document.getElementById('selectPropioEmpleado');
+    let total = document.getElementById('total');
 
     if (!divPropio || !divExterno) return;
 
-    if (tipo === "propio") {
-        divPropio.style.display = "block";
-        divExterno.style.display = "none";
-        inputExterno.value = ""; 
+    if (tipo === 'propio') {
+        divPropio.style.display = 'block';
+        divExterno.style.display = 'none';
+        inputExterno.value = ''; 
         recalcularEmpleado();
         total.readOnly = true; 
     } else {
-        divPropio.style.display = "none";
-        divExterno.style.display = "block";
-        selectPropio.value = ""; 
-        total.value = ""; 
+        divPropio.style.display = 'none';
+        divExterno.style.display = 'block';
+        selectPropio.value = ''; 
+        total.value = ''; 
         total.readOnly = false; 
     }
 }
 
 function recalcularEmpleado() {
-    let select = document.getElementById("selectPropioEmpleado");
-    let cantidad = document.getElementById("cantidad");
-    let total = document.getElementById("total");
+    let select = document.getElementById('selectPropioEmpleado');
+    let cantidad = document.getElementById('cantidad');
+    let total = document.getElementById('total');
     
     if (!select || !cantidad || !total) return;
 
-    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute("data-precio") || 0);
+    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-precio') || 0);
     let cant = parseFloat(cantidad.value || 0);
     
     total.value = (precio * cant).toFixed(2);
 }
 
 // Escuchadores de eventos para recálculo en tiempo real
-document.addEventListener("change", function (e) {
-    if (e.target.id === "selectPropioEmpleado") {
+document.addEventListener('change', function (e) {
+    if (e.target.id === 'selectPropioEmpleado') {
         recalcularEmpleado();
     }
 });
 
-document.addEventListener("input", function (e) {
-    if (e.target.id === "cantidad") {
+document.addEventListener('input', function (e) {
+    if (e.target.id === 'cantidad') {
         recalcularEmpleado();
     }
 });
 </script>
-</body>
-</html>
+";
+
+require_once __DIR__ . '/../layouts/footer.php';
+?>

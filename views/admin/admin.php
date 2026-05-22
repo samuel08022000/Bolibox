@@ -4,54 +4,20 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Dashboard Admin</title>
+// Variables para el Layout
+$title = "BOLIBOX - Dashboard Admin";
+$current_page = "admin_dashboard";
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
+// Scripts y estilos específicos de esta vista
+$extra_css = '
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>.chart-container { position: relative; height: 300px; width: 100%; }</style>
+';
 
-    <style>
-        body { padding-top: 0; background-color: #f8f9fa; }
-        .chart-container { position: relative; height: 300px; width: 100%; }
-    </style>
-</head>
-
-<body>
-
-<div class="admin-layout">
-
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-person-circle display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Admin Bolibox</h5>
-            <small class="text-muted">Panel de Control</small>
-        </div>
-
-        <div class="nav flex-column mb-auto">
-            <a class="sidebar-link active" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="sidebar-link" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
-            <a class="sidebar-link" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-            <a class="sidebar-link" href="<?= url('admin/clientes') ?>"><i class="bi bi-people-fill"></i> Clientes</a>
-            <a class="sidebar-link" href="<?= url('admin/proveedores') ?>"><i class="bi bi-truck"></i> Proveedores</a>
-            <a class="sidebar-link" href="<?= url('admin/stock') ?>"><i class="bi bi-boxes"></i> Stock</a>
-            <a class="sidebar-link" href="<?= url('admin/empleados') ?>"><i class="bi bi-person-badge-fill"></i> Empleados</a>
-            <a class="sidebar-link" href="<?= url('admin/aprobaciones_bot') ?>"><i class="bi bi-robot"></i> Cotizaciones Bot</a>
-            <a class="sidebar-link" href="<?= url('admin/bitacoras') ?>"><i class="bi bi-journal-text"></i> Bitácora</a>
-        </div>
-
-        <div class="p-3 mt-auto border-top">
-            <a href="<?= url('logout') ?>" class="btn btn-outline-danger w-100 fw-bold">
-                <i class="bi bi-box-arrow-left"></i> Salir
-            </a>
-        </div>
-    </div>
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
+?>
 
     <div class="main-content">
 
@@ -242,15 +208,18 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     </div>
 </div>
 
+<?php
+// Scripts específicos del final
+$extra_js = "
 <script>
 const ctxLine = document.getElementById('lineChart').getContext('2d');
 new Chart(ctxLine, {
     type: 'line',
     data: {
-        labels: <?= json_encode($fechas) ?>,
+        labels: " . json_encode($fechas) . ",
         datasets: [{
             label: 'Pedidos por día',
-            data: <?= json_encode($cantidades) ?>,
+            data: " . json_encode($cantidades) . ",
             borderColor: '#FF8C00',
             backgroundColor: 'rgba(255, 140, 0, 0.1)',
             fill: true,
@@ -275,7 +244,7 @@ new Chart(ctxDoughnut, {
     data: {
         labels: ['Propio', 'Externo'],
         datasets: [{
-            data: [<?= $propio ?>, <?= $externo ?>],
+            data: [" . $propio . ", " . $externo . "],
             backgroundColor: ['#FF8C00', '#111827'],
             hoverOffset: 4
         }]
@@ -287,8 +256,7 @@ new Chart(ctxDoughnut, {
     }
 });
 </script>
+";
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+require_once __DIR__ . '/../layouts/footer.php';
+?>

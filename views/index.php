@@ -66,6 +66,29 @@
     </div>
   </section>
 
+  <section id="rastreo" class="section-pad" style="background-color: #f3f4f6;">
+    <div class="container" style="max-width: 600px; margin: 0 auto; text-align: center;">
+      <div class="section-header">
+        <h2 class="section-title">Rastrea tu Pedido</h2>
+        <p style="color: #6b7280;">Ingresa tu código de rastreo y PIN de seguridad para conocer el estado de tu pedido sin necesidad de iniciar sesión.</p>
+      </div>
+      
+      <form action="<?= url('rastreo') ?>" method="GET" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="margin-bottom: 1rem; text-align: left;">
+          <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 0.5rem;">Código de Rastreo</label>
+          <input type="text" name="codigo" placeholder="Ej: BOL-1A2B" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div style="margin-bottom: 1.5rem; text-align: left;">
+          <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 0.5rem;">PIN de Seguridad</label>
+          <input type="text" name="pin" placeholder="Ej: A1B2" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <button type="submit" style="width: 100%; background-color: #FF8C00; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+          <i class="bi bi-search"></i> Rastrear Pedido
+        </button>
+      </form>
+    </div>
+  </section>
+
   <section id="nosotros" class="section-pad">
     <div class="container">
       <div class="section-header">

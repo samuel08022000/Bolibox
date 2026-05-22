@@ -70,6 +70,28 @@ public function login() {
                 // ACIERTO: Limpiar ataques de esta IP para esta cuenta
                 $this->conn->prepare("DELETE FROM intentos_login WHERE ip_address = ? AND email_intento = ?")->execute([$ip_usuario, $email]);
                 
+                // VERIFICAR DISPOSITIVO DE CONFIANZA
+                $salt = "B0liB0x_S3cr3t_2026!";
+                $is_trusted = false;
+                if (isset($_COOKIE['trusted_device'])) {
+                    $cookie_parts = explode('|', $_COOKIE['trusted_device']);
+                    if (count($cookie_parts) === 2) {
+                        $cookie_email = $cookie_parts[0];
+                        $cookie_hash = $cookie_parts[1];
+                        if ($cookie_email === $email && $cookie_hash === hash('sha256', $email . $salt)) {
+                            $is_trusted = true;
+                        }
+                    }
+                }
+
+                if ($is_trusted) {
+                    $_SESSION['usuario'] = $user;
+                    if ($user['rol'] == 'admin') header("Location: " . url('admin'));
+                    elseif ($user['rol'] == 'empleado') header("Location: " . url('empleado'));
+                    else header("Location: " . url('cliente'));
+                    exit;
+                }
+
                 // Generar OTP (Paso 2FA normal)
                 $otp = sprintf("%06d", mt_rand(1, 999999));
                 $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
@@ -158,6 +180,11 @@ public function login() {
             }
 
             $this->conn->prepare("UPDATE usuarios SET otp_code = NULL, otp_expires_at = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
+
+            // ESTABLECER DISPOSITIVO DE CONFIANZA POR 30 DÍAS
+            $salt = "B0liB0x_S3cr3t_2026!";
+            $cookie_value = $email . '|' . hash('sha256', $email . $salt);
+            setcookie('trusted_device', $cookie_value, time() + (30 * 24 * 60 * 60), "/");
 
             $_SESSION['usuario'] = $user;
             unset($_SESSION['temp_email']); 

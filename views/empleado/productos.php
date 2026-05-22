@@ -5,37 +5,15 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
+// Variables para el Layout
+$title = "BOLIBOX - Productos Empleado";
+$current_page = "empleado_productos";
+
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Productos Empleado</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>body { padding-top: 0; }</style>
-</head>
-<body>
-<div class="admin-layout">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-person-badge display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
-            <small class="text-muted">Portal de Atención</small>
-        </div>
-        <div class="nav flex-column mb-auto">
-            <a class="sidebar-link" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
-            <a class="sidebar-link" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
-            <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
-            <a class="sidebar-link active" href="<?= url('empleado/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-        </div>
-        <div class="p-3 mt-auto border-top">
-            <a href="<?= url('/') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </div>
-    
+
     <div class="main-content">
         <div class="admin-topbar">
             <div>
@@ -169,7 +147,8 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
             </div>
         </div>
     </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+
+<?php
+require_once __DIR__ . '/../layouts/footer.php';
+?>

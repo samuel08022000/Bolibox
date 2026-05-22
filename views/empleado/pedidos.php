@@ -5,36 +5,14 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
+// Variables para el Layout
+$title = "BOLIBOX - Mis Pedidos";
+$current_page = "empleado_pedidos";
+
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOLIBOX - Mis Pedidos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>body { padding-top: 0; background-color: #f8f9fa; }</style>
-</head>
-<body>
-<div class="admin-layout">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-person-badge display-4 text-naranja"></i>
-            <h5 class="mt-3 fw-bold mb-0">Bolibox</h5>
-            <small class="text-muted">Portal de Atención</small>
-        </div>
-        <div class="nav flex-column mb-auto">
-            <a class="sidebar-link" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
-            <a class="sidebar-link active" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
-            <a class="sidebar-link" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
-            <a class="sidebar-link" href="<?= url('empleado/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
-        </div>
-        <div class="p-3 mt-auto border-top">
-            <a href="<?= url('logout') ?>" class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-box-arrow-left"></i> Salir</a>
-        </div>
-    </div>
 
     <div class="main-content">
         <div class="admin-topbar mb-4">
@@ -54,7 +32,7 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
-                                <th>DUI</th>
+                                <th>Código Rastreo</th>
                                 <th>Cliente</th>
                                 <th>Ciudad</th>
                                 <th>Estado</th>
@@ -78,7 +56,7 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                             </td>
                             <td><?= $row['cantidad'] ?? 1 ?></td>
                             <td class="fw-bold">Bs <?= $row['total']; ?></td>
-                            <td><?= $row['nro_dui']; ?></td>
+                            <td class="fw-bold text-primary"><?= $row['codigo_rastreo']; ?></td>
                             <td><?= $row['cliente_nombre']; ?></td>
                             <td><?= $row['ubicacion_clientes'] ?? 'Sin ciudad' ?></td>
                             <td>
@@ -156,8 +134,7 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
                                                     <input type="number" name="cantidad" id="cantidadEdit<?= $row['id_pedido']; ?>" class="form-control" value="<?= $row['cantidad'] ?? 1 ?>" min="1" required>
                                                 </div>
                                                 <div class="col-md-4 mb-3">
-                                                    <label class="form-label text-muted small fw-bold text-uppercase">Nro DUI</label>
-                                                    <input type="text" name="nro_dui" class="form-control" value="<?= $row['nro_dui']; ?>" required>
+                                                    <input type="hidden" name="codigo_rastreo" value="<?= $row['codigo_rastreo']; ?>">
                                                 </div>
                                                 <div class="col-md-4 mb-3">
                                                     <label class="form-label text-muted small fw-bold text-uppercase">Total (Bs)</label>
@@ -184,59 +161,78 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php
+$extra_js = "
 <script>
 function toggleEdit(id) {
-    let tipo = document.getElementById("tipoEdit" + id).value;
-    let divPropio = document.getElementById("divPropioEdit" + id);
-    let divExterno = document.getElementById("divExternoEdit" + id);
-    let inputExterno = document.getElementById("inputExternoEdit" + id);
-    let selectPropio = document.getElementById("selectPropioEdit" + id);
-    let total = document.getElementById("totalEdit" + id);
+    let tipo = document.getElementById('tipoEdit' + id).value;
+    let divPropio = document.getElementById('divPropioEdit' + id);
+    let divExterno = document.getElementById('divExternoEdit' + id);
+    let inputExterno = document.getElementById('inputExternoEdit' + id);
+    let selectPropio = document.getElementById('selectPropioEdit' + id);
+    let total = document.getElementById('totalEdit' + id);
 
-    if (tipo === "propio") {
-        divPropio.style.display = "block";
-        divExterno.style.display = "none";
-        inputExterno.value = ""; 
+    if (tipo === 'propio') {
+        divPropio.style.display = 'block';
+        divExterno.style.display = 'none';
+        inputExterno.value = ''; 
         recalcularEdit(id); 
         total.readOnly = true; 
     } else {
-        divPropio.style.display = "none";
-        divExterno.style.display = "block";
-        selectPropio.value = ""; 
-        total.value = ""; 
+        divPropio.style.display = 'none';
+        divExterno.style.display = 'block';
+        selectPropio.value = ''; 
+        total.value = ''; 
         total.readOnly = false; 
     }
 }
 
 function recalcularEdit(id) {
-    let select = document.getElementById("selectPropioEdit" + id);
-    let cantidad = document.getElementById("cantidadEdit" + id);
-    let total = document.getElementById("totalEdit" + id);
+    let select = document.getElementById('selectPropioEdit' + id);
+    let cantidad = document.getElementById('cantidadEdit' + id);
+    let total = document.getElementById('totalEdit' + id);
     
     if (!select || !cantidad || !total) return;
 
-    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute("data-precio") || 0);
+    let precio = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-precio') || 0);
     let cant = parseFloat(cantidad.value || 0);
     
     total.value = (precio * cant).toFixed(2);
 }
 
-document.addEventListener("change", function (e) {
-    if (e.target.id && e.target.id.startsWith("selectPropioEdit")) {
-        let id = e.target.id.replace(/\D/g, ""); 
+document.addEventListener('change', function (e) {
+    if (e.target.id && e.target.id.startsWith('selectPropioEdit')) {
+        let id = e.target.id.replace(/\D/g, ''); 
         recalcularEdit(id);
     }
 });
 
-document.addEventListener("input", function (e) {
-    if (e.target.id && e.target.id.startsWith("cantidadEdit")) {
-        let id = e.target.id.replace(/\D/g, ""); 
+document.addEventListener('input', function (e) {
+    if (e.target.id && e.target.id.startsWith('cantidadEdit')) {
+        let id = e.target.id.replace(/\D/g, ''); 
         recalcularEdit(id);
     }
 });
 </script>
-</body>
-</html>
+";
+
+if (isset($_SESSION['flash'])) {
+    $extra_js .= "
+    <script>
+        Swal.fire({
+            title: '¡Pedido Generado con Éxito!',
+            html: `<strong>Código de Rastreo:</strong> " . $_SESSION['flash']['codigo_rastreo'] . "<br>
+                   <strong>PIN de Seguridad:</strong> " . $_SESSION['flash']['pin_seguridad'] . "`,
+            icon: '" . $_SESSION['flash']['tipo'] . "',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#ff6600'
+        });
+    </script>
+    ";
+    unset($_SESSION['flash']);
+}
+
+require_once __DIR__ . '/../layouts/footer.php';
+?>

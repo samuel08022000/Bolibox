@@ -48,25 +48,31 @@ class AdminPedidoController {
                 $id_producto = !empty($_POST['id_producto']) ? $_POST['id_producto'] : null;
                 $producto_importar = !empty($_POST['producto_importar']) ? $_POST['producto_importar'] : null;
 
+                // Generar Código de Rastreo y PIN
+                $codigo_rastreo = 'BOL-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 4));
+                $pin_seguridad = strtoupper(substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 4));
+
                 $sql = $this->conn->prepare("
                     INSERT INTO pedidos (
                         fecha,
                         total,
                         ubicacion_clientes,
-                        nro_dui,
+                        codigo_rastreo,
+                        pin_seguridad,
                         cantidad,
                         id_cliente,
                         id_empleado,
                         id_producto,
                         producto_importar,
                         tipo_pedido
-                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 'Presencial')
+                    ) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Presencial')
                 ");
 
                 $sql->execute([
                     $_POST['total'],
                     $_POST['ubicacion'],
-                    $_POST['nro_dui'],
+                    $codigo_rastreo,
+                    $pin_seguridad,
                     $_POST['cantidad'],
                     $id_cliente,
                     $id_empleado,
@@ -83,6 +89,15 @@ class AdminPedidoController {
                 }
 
                 $this->conn->commit();
+                
+                // Guardar en sesión para mostrar el SweetAlert
+                $_SESSION['flash'] = [
+                    'mensaje' => "El código de rastreo es: $codigo_rastreo y el PIN es: $pin_seguridad",
+                    'tipo' => 'success',
+                    'codigo_rastreo' => $codigo_rastreo,
+                    'pin_seguridad' => $pin_seguridad
+                ];
+
                 header("Location: " . url('admin/pedidos'));
 
             } catch (Exception $e) {
@@ -130,7 +145,8 @@ class AdminPedidoController {
                     UPDATE pedidos 
                     SET total = ?, 
                         ubicacion_clientes = ?, 
-                        nro_dui = ?,
+                        codigo_rastreo = ?,
+                        pin_seguridad = ?,
                         cantidad =?,
                         id_producto = ?, 
                         producto_importar = ?
@@ -140,7 +156,8 @@ class AdminPedidoController {
                 $sql->execute([
                     $_POST['total'],
                     $_POST['ubicacion'],
-                    $_POST['nro_dui'],
+                    $_POST['codigo_rastreo'],
+                    $_POST['pin_seguridad'],
                     $_POST['cantidad'],
                     $_POST['id_producto'] ?: null,
                     $_POST['producto_importar'] ?: null,

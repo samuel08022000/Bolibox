@@ -58,6 +58,11 @@ switch ($path) {
         (new AuthController())->logout();
         break;
         
+    case '/rastreo':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->rastreoPublico();
+        break;
+        
     case '/verificar_otp':
         // Esta ruta simplemente carga la vista del formulario
         require_once __DIR__ . '/../views/verificar_otp.php';
@@ -410,6 +415,12 @@ switch ($path) {
         require '../app/Controllers/CarritoController.php';
        $controller = new CarritoController();
         $controller->verCarrito();
+        break;
+
+    case '/cotizaciones':
+        require '../app/Controllers/CarritoController.php';
+        $controller = new CarritoController();
+        $controller->verCotizaciones();
         break;
 
     case '/carrito/agregar':

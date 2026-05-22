@@ -1,17 +1,17 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
+    header("Location: " . url('login')); 
+    exit;
+}
+// Variables para el Layout
+$title = "BOLIBOX - Editar Pedido";
+$current_page = "admin_pedidos";
+
+// Cargar Layout (Header y Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>BOLIBOX - Editar Pedido</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-</head>
-
-<body>
 
     <div class="main-content">
 
@@ -46,12 +46,8 @@
                                         class="form-control" required>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Nro DUI</label>
-                                    <input type="text" name="dui"
-                                        value="<?= $pedido['nro_dui'] ?>"
-                                        class="form-control">
-                                </div>
+                                <input type="hidden" name="codigo_rastreo" value="<?= $pedido['codigo_rastreo'] ?>">
+                                <input type="hidden" name="pin_seguridad" value="<?= $pedido['pin_seguridad'] ?>">
 
                             </div>
 
@@ -78,9 +74,7 @@
         </div>
 
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+<?php
+require_once __DIR__ . '/../layouts/footer.php';
+?>
