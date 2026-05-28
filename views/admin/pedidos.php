@@ -4,11 +4,10 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Pedidos (Admin)";
 $current_page = "admin_pedidos";
 
-// Cargar Layout (Header y Sidebar)
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -73,7 +72,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             </select>
                         </div>
 
-                        <!-- ESTE ES EL BLOQUE QUE FALTABA -->
                         <div id="divExternoAdmin" class="col-md-12 mb-3" style="display:none;">
                             <label class="form-label text-muted small fw-bold text-uppercase">Producto a Importar</label>
                             <input type="text" name="producto_importar" id="inputExternoAdmin" class="form-control bg-light">
@@ -100,7 +98,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
         
-        <!-- TABLA DE PEDIDOS -->
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -166,7 +163,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     </td>
                                 </tr>
                             
-                            <!-- MODAL EDICION ADMIN -->
+
                             <div class="modal fade" id="modalEditarPedido<?php echo $row['id_pedido']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <div class="modal-content" style="border-radius: 12px; border: none;">

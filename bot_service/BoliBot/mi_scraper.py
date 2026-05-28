@@ -1,6 +1,12 @@
 import re
+import os
+import json  
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+
+load_dotenv()
+SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
 
 def limpiar_precio(texto):
     if not texto: return 0
@@ -13,100 +19,100 @@ def limpiar_precio(texto):
     except:
         return 0
 
-def obtener_producto_ebay(url):
-    """Scraper de eBay sin usar Selenium (mucho más rápido y estable)"""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9"
+def obtener_producto(url):
+    payload = {
+        'api_key': SCRAPER_API_KEY, 
+        'url': url,
+        'render': 'true' 
     }
+    
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code != 200:
+        print("BoliBot: Solicitando acceso a la tienda vía ScraperAPI...")
+        
+        response = requests.get('http://api.scraperapi.com', params=payload)
+        
+        if response.status_code == 200:
+            print("BoliBot: ¡Acceso concedido! HTML limpio recibido.")
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            url_min = url.lower()
+            nombre = "Producto no encontrado"
+            precio = 0
+            
+            if 'amazon' in url_min:
+                nombre_el = soup.find(id='productTitle')
+                if nombre_el: nombre = nombre_el.text.strip()
+                precio_el = soup.find('span', class_='a-price-whole')
+                if precio_el: precio = limpiar_precio(precio_el.text)
+                
+            elif 'ebay' in url_min:
+                nombre_el = soup.find('div', class_='vim x-item-title')
+                if nombre_el: nombre = nombre_el.text.strip()
+                precio_el = soup.find('div', class_='x-price-primary')
+                if precio_el: precio = limpiar_precio(precio_el.text)
+                
+            elif 'aliexpress' in url_min:
+                nombre_el = soup.find('h1', class_='product-title-text')
+                if nombre_el: nombre = nombre_el.text.strip()
+                precio_el = soup.find('span', class_='product-price-value')
+                if precio_el: precio = limpiar_precio(precio_el.text)
+                
+                # Si la lógica original falla, buscamos en el JSON Oculto (Táctica 2)
+                if precio == 0:
+                    scripts = soup.find_all('script', type='application/ld+json')
+                    for script in scripts:
+                        try:
+                            data = json.loads(script.string)
+                            # Buscamos la oferta ('offers') dentro del JSON
+                            if isinstance(data, dict) and 'offers' in data:
+                                if 'price' in data['offers']:
+                                    precio = float(data['offers']['price'])
+                                    break
+                            elif isinstance(data, list):
+                                for item in data:
+                                    if 'offers' in item and 'price' in item['offers']:
+                                        precio = float(item['offers']['price'])
+                                        break
+                        except:
+                            continue
+
+            elif 'alibaba' in url_min:
+                # 1. Buscar el título
+                nombre_el = soup.find('h1')
+                if nombre_el: nombre = nombre_el.text.strip()
+                
+                # 2. Buscar el precio exacto de la captura (span con clase 'price-val')
+                precio_el = soup.find('span', class_='price-val')
+                
+                # Respaldos por si la página de Alibaba tiene otro diseño
+                if not precio_el:
+                    precio_el = soup.find('span', class_='promotion-price')
+                if not precio_el:
+                    precio_el = soup.find('span', class_='price')
+                    
+                # 3. Limpiar y guardar el precio
+                if precio_el: 
+                    # Sacamos el texto o el atributo 'title' que vimos en tu captura (ej. title="$14.39")
+                    texto_precio = precio_el.get('title') if precio_el.get('title') else precio_el.text
+                    precio = limpiar_precio(texto_precio)
+            else:
+                nombre_el = soup.find('h1')
+                if nombre_el: nombre = nombre_el.text.strip()
+            
+            if precio == 0:
+                texto_pagina = soup.get_text()
+                # Busca cosas como "$15.99" o "US $15.99" en toda la página
+                posibles_precios = re.findall(r'(?:US\s*\$|\$)\s*(\d+[.,]?\d*)', texto_pagina)
+                if posibles_precios:
+                    # Toma el primer precio que encuentre y lo limpia
+                    precio = float(posibles_precios[0].replace(',', ''))
+                
+            return {"precio": precio, "nombre": nombre}
+            
+        else:
+            print(f"🚨 Error de ScraperAPI: Código {response.status_code}")
             return None
             
-        soup = BeautifulSoup(response.content, "html.parser")
-        
-        # Intentar obtener el título
-        title_tag = soup.find("h1", class_="x-item-title__mainTitle")
-        nombre = title_tag.get_text(strip=True) if title_tag else "Producto de eBay"
-        
-        precio_texto = ""l
-        price_tag = soup.select_one(".x-price-primary, .v-price-primary, #prcIsum")
-        if price_tag:
-            precio_texto = price_tag.get_text(strip=True)
-        
-        if not precio_texto:
-            price_tag = soup.select_one(".ux-textspans--BOLD")
-            if price_tag and "$" in price_tag.text:
-                precio_texto = price_tag.text
-
-        precio_usd = limpiar_precio(precio_texto)
-        
-        return {
-            "nombre": nombre,
-            "precio_usd": precio_usd
-        }
     except Exception as e:
-        print(f"Error Scraper eBay: {e}")
+        print(f"💀 BoliBot detectó un error al hacer scraping: {e}")
         return None
-
-def obtener_producto_mercadolibre(url):
-    """Uso de la API de Mercado Libre (la forma más profesional)"""
-    try:
-        # Extraemos el ID del producto (MLA123456)
-        match = re.search(r'M[A-Z]{2}-?(\d+)', url, re.IGNORECASE)
-        if not match: return None
-        
-        # Formato de ID para la API (ML + Prefijo Pais + Numero)
-        item_id_raw = re.search(r'(M[A-Z]{2})(\d+)', url.replace("-", ""), re.IGNORECASE)
-        item_id = item_id_raw.group(0)
-
-        api_url = f"https://api.mercadolibre.com/items/{item_id}"
-        r = requests.get(api_url).json()
-        
-        titulo = r.get("title", "Producto Mercado Libre")
-        precio = float(r.get("price", 0))
-        moneda = r.get("currency_id", "USD")
-
-        return {
-            "nombre": titulo,
-            "precio_usd": precio
-        }
-    except:
-        return None
-
-def buscar_precio_google(nombre):
-    """Búsqueda de emergencia en Google si el link falla"""
-    try:
-        query = f"{nombre} price usd"
-        url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(url, headers=headers, timeout=5)
-        soup = BeautifulSoup(r.text, "html.parser")
-        
-        texto = soup.get_text()
-        match = re.search(r'\$\s?(\d+[\.,]\d{2})', texto)
-        if match:
-            return limpiar_precio(match.group(0))
-        return 0
-    except:
-        return 0
-
-def obtener_producto(url):
-    """Función principal que decide qué scraper usar"""
-    url_lower = url.lower()
-    
-    if "ebay" in url_lower:
-        print("🔍 Scrapeando eBay (Modo Ligero)...")
-        res = obtener_producto_ebay(url)
-    elif "mercadolibre" in url_lower:
-        print("🔍 Consultando API Mercado Libre...")
-        res = obtener_producto_mercadolibre(url)
-    else:
-        print("⚠️ Tienda no soportada directamente, buscando en Google...")
-        res = {"nombre": "Producto", "precio_usd": buscar_precio_google(url)}
-
-    if res and res["precio_usd"] == 0:
-        res["precio_usd"] = buscar_precio_google(res["nombre"])
-
-    return res if res else {"nombre": "Producto no identificado", "precio_usd": 0}

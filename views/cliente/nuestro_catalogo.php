@@ -13,11 +13,10 @@ $con = $db->conectar();
 $sql = $con->prepare("SELECT id_producto, nombre, descripcion, categoria, precio_unitario FROM producto");
 $sql->execute();
 $productos = $sql->fetchAll(PDO::FETCH_ASSOC);
-// Variables para el Layout
+
 $title = "BOLIBOX - Nuestro Catálogo";
 $current_page = "catalogo";
 
-// Cargar Layout (Header y Navbar)
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
 

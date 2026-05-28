@@ -4,11 +4,11 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Bitácoras";
 $current_page = "admin_bitacoras";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>

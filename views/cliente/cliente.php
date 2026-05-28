@@ -4,11 +4,11 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Mi Portal";
 $current_page = "cliente";
 
-// Cargar Layout (Header y Navbar)
+
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
 

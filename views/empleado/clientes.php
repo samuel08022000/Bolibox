@@ -5,16 +5,16 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Clientes Empleado";
 $current_page = "empleado_clientes";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
-    <!-- CONTENIDO PRINCIPAL -->
+
     <div class="main-content">
         <div class="admin-topbar">
             <div>
@@ -23,14 +23,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
 
-        <!-- BOTÓN NUEVO CLIENTE -->
+
         <div class="d-flex justify-content-end mb-4">
             <button class="btn btn-naranja text-white fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelNuevoCliente">
                 <i class="bi bi-person-plus"></i> Nuevo Cliente
             </button>
         </div>
 
-        <!-- PANEL DESPLEGABLE NUEVO CLIENTE -->
+
         <div class="collapse mb-4" id="panelNuevoCliente">
             <div class="card card-body border-top border-naranja border-4 shadow-sm" style="background-color: #fff;">
                 <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Registrar Cliente</h5>
@@ -61,7 +61,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
         
-        <!-- TABLA DE CLIENTES -->
         <div class="card shadow-sm border-0">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -103,7 +102,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                             </tr>
                             
-                            <!-- MODAL DE EDICIÓN -->
                             <div class="modal fade" id="modalEditC<?php echo $row['id_cliente']; ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0" style="border-radius: 12px;">

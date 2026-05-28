@@ -5,11 +5,11 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Panel Empleado";
 $current_page = "empleado_registrar";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- FORMULARIO IDÉNTICO AL ADMIN -->
+
                 <div class="card card-body border-top border-naranja border-4 shadow-sm bg-white mt-4">
                     <h5 class="fw-bold mb-4" style="color: var(--gris-oscuro);">Registrar Pedido</h5>
                     
@@ -81,14 +81,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <input type="number" id="cantidad" name="cantidad" class="form-control bg-light" value="1" min="1" required>
                             </div>
                             
-                            <!-- El Código de Rastreo se genera automáticamente en el controlador -->
                             <div class="col-md-4 mb-4 mt-2">
                                 <label class="form-label text-naranja small fw-bold text-uppercase">Total ($us/Bs)</label>
-                                <!-- Campo bloqueado por defecto igual que en el admin -->
+
                                 <input type="number" id="total" step="0.01" name="total" class="form-control border-naranja" style="background-color: #fffaf0;" readonly required>
                             </div>
                             
-                            <!-- Importante: Conservamos el envío del empleado que lo registra -->
+
                             <input type="hidden" name="id_empleado" value="<?= $_SESSION['usuario']['id_usuario'] ?>">
                         </div>
 
@@ -107,7 +106,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <?php
 $extra_js = "
 <script>
-// Lógica JS idéntica a la del Administrador
+
 function toggleProdEmpleado() {
     let tipo = document.getElementById('tipoProdEmpleado').value;
     let divPropio = document.getElementById('divPropioEmpleado');
@@ -146,7 +145,7 @@ function recalcularEmpleado() {
     total.value = (precio * cant).toFixed(2);
 }
 
-// Escuchadores de eventos para recálculo en tiempo real
+
 document.addEventListener('change', function (e) {
     if (e.target.id === 'selectPropioEmpleado') {
         recalcularEmpleado();

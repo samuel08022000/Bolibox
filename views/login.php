@@ -49,11 +49,9 @@
             <form action="<?= url('login/ingresar') ?>" method="POST">
                 
                 <?php 
-                    // Leemos los errores y el correo anterior si existen
                     $old_email = $_SESSION['old_email'] ?? '';
                     $error_email = $_SESSION['error_email'] ?? '';
                     $error_password = $_SESSION['error_password'] ?? '';
-                    // Limpiamos las variables para que no aparezcan si recarga la página
                     unset($_SESSION['old_email'], $_SESSION['error_email'], $_SESSION['error_password']);
                 ?>
 
@@ -106,7 +104,7 @@
     <script>
         document.querySelectorAll('.toggle-password').forEach(icon => {
             icon.addEventListener('click', function() {
-                const input = this.previousElementSibling.previousElementSibling; // El input está 2 hermanos antes (antes de label)
+                const input = this.previousElementSibling.previousElementSibling;
                 if (input.type === 'password') {
                     input.type = 'text';
                     this.classList.replace('bi-eye', 'bi-eye-slash');

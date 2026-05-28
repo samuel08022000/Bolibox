@@ -5,11 +5,11 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     exit;
 }
 
-// Variables para el Layout
+
 $title = "BOLIBOX - Proveedores";
 $current_page = "admin_proveedores";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>

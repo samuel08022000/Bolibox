@@ -7,18 +7,16 @@ from ai import procesar_con_ia
 app = Flask(__name__)
 CORS(app) 
 
-
-user_state = {"step": "inicio"}
-
-@app.route("/")
-def index():
-    return render_template("chat.html")
-
+# Declaramos el estado del usuario una sola vez
 user_state = {
     "step": "inicio",
     "producto": None,
     "total_bs": 0
 }
+
+@app.route("/")
+def index():
+    return render_template("chat.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -30,17 +28,15 @@ def chat():
 
     if es_numero:
         precio_usd = float(mensaje)
-        tasa = obtener_dolar() # 
-        comision = precio_usd * 0.10 # 
-        envio_local = 120 # 
+        tasa = obtener_dolar() 
+        comision = precio_usd * 0.10 
+        envio_local = 120 
         total_bs = ((precio_usd + comision) * tasa) + envio_local
 
-   
         user_state["step"] = "cotizado"
         user_state["producto"] = "Producto (Ingreso manual)"
         user_state["total_bs"] = total_bs
 
-     
         detalle_manual = (
             f"✅ ¡Entendido! Aquí tienes el detalle para tu cotización de ${precio_usd:.2f} USD:\n\n"
             f"💵 **Precio producto:** ${precio_usd:.2f} USD\n"
@@ -54,25 +50,41 @@ def chat():
 
     respuesta_ia = procesar_con_ia(mensaje, [])
 
-  
     if respuesta_ia == "SOLICITUD_COTIZACION":
         data = obtener_producto(mensaje)
 
-        if data["precio_usd"] > 0:
-            tasa = obtener_dolar() # [cite: 2]
-            comision = data["precio_usd"] * 0.10 # 
-            envio_local = 120 # 
-            total_bs = ((data["precio_usd"] + comision) * tasa) + envio_local # [cite: 2]
+        # 1. EL ESCUDO: Verificamos si data falló o viene vacío
+        if data is None:
+            return jsonify({
+                "response": "Lo siento, la tienda bloqueó temporalmente la lectura del enlace o hubo un error de conexión. 😥 ¿Podrías darme el precio estimado manualmente en dólares para hacerte la cotización?"
+            })
 
-           
+        # --- NUEVO: Identificar la tienda ---
+        url_min = mensaje.lower()
+        tienda = "la tienda"
+        if "ebay" in url_min: tienda = "eBay"
+        elif "amazon" in url_min: tienda = "Amazon"
+        elif "aliexpress" in url_min: tienda = "AliExpress"
+
+        # --- CORRECCIÓN DEL BUG: Usar "precio" en lugar de "precio_usd" ---
+        nombre_extraido = data.get("nombre", "Producto desconocido")
+        precio_extraido = data.get("precio", 0) 
+
+        # 2. Si pasamos el escudo y tenemos un precio mayor a 0
+        if precio_extraido > 0: 
+            tasa = obtener_dolar() 
+            comision = precio_extraido * 0.10 
+            envio_local = 120 
+            total_bs = ((precio_extraido + comision) * tasa) + envio_local 
+
             user_state["step"] = "cotizado"
-            user_state["producto"] = data["nombre"]
+            user_state["producto"] = nombre_extraido
             user_state["total_bs"] = total_bs
 
-         
             detalle = (
-                f"📦 *{data['nombre']}*\n"
-                f"💵 Precio: ${data['precio_usd']:.2f} USD\n"
+                f"📦 *{nombre_extraido}*\n"
+                f"🏪 Tienda: {tienda}\n"
+                f"💵 Precio: ${precio_extraido:.2f} USD\n"
                 f"📈 Tasa: {tasa:.2f} Bs/USD\n"
                 f"⚙️ Comisión (10%): ${(comision):.2f} USD\n"
                 f"🚚 Envío: {envio_local} Bs\n"
@@ -82,7 +94,13 @@ def chat():
             return jsonify({"response": detalle})
 
         else:
-            return jsonify({"response": "No encontré el precio 😢 ¿me lo pasas en USD?"})
+            # 3. EL NUEVO MENSAJE DETALLADO QUE PEDISTE (Si entra a la página pero no halla el precio)
+            return jsonify({
+                "response": f"✅ Logré entrar a **{tienda}** y encontré tu producto:\n"
+                            f"📦 _{nombre_extraido}_\n\n"
+                            f"❌ Sin embargo, la tienda tiene el precio en un formato oculto y no pude extraerlo exacto. 😢\n"
+                            f"¿Podrías enviarme el precio estimado en USD de forma manual (ej. 15.99) para hacerte la cotización?"
+            })
 
     if respuesta_ia == "CONFIRMAR_PEDIDO" and user_state["step"] == "cotizado":
         user_state["step"] = "esperando_datos" 
@@ -96,7 +114,6 @@ def chat():
         })
 
     if user_state["step"] == "esperando_datos":
-        
         datos_cliente = mensaje 
         user_state["step"] = "confirmado"
         
@@ -110,13 +127,11 @@ def chat():
             "total": user_state["total_bs"]
         })
 
-   
     if respuesta_ia == "CONFIRMAR_PEDIDO":
         return jsonify({
             "response": "Primero necesito el link del producto 📦"
         })
 
-    
     return jsonify({"response": respuesta_ia})
 
 if __name__ == "__main__":

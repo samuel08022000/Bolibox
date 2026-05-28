@@ -102,7 +102,7 @@
     <script>
         document.querySelectorAll('.toggle-password').forEach(icon => {
             icon.addEventListener('click', function() {
-                const input = this.previousElementSibling.previousElementSibling; // El input está 2 hermanos antes
+                const input = this.previousElementSibling.previousElementSibling; 
                 if (input.type === 'password') {
                     input.type = 'text';
                     this.classList.replace('bi-eye', 'bi-eye-slash');

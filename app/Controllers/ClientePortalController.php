@@ -32,7 +32,6 @@ class ClientePortalController {
     public function chatbot() {
         require_once __DIR__ . '/../../views/cliente/chatbot.php';
     }
-    // Añade este método en tu controlador
     public function misPedidos() {
         if (session_status() == PHP_SESSION_NONE) { session_start(); }
         if (!isset($_SESSION['usuario'])) {

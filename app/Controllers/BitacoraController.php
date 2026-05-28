@@ -26,7 +26,6 @@ class BitacoraController {
         $sql->execute();
         $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-        // Fetch all bitacoras for PDF export
         $sql_all = $con->prepare("
             SELECT 'USUARIOS' AS tipo, accion, fecha, descripcion, IFNULL(id_empleado, 0) AS id_empleado, 'bitacora_usuarios' AS tabla FROM bitacora_usuarios
             UNION ALL

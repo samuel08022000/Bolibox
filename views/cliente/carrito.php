@@ -4,11 +4,11 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Mi Carrito";
 $current_page = "carrito";
 
-// Cargar Layout (Header y Navbar)
+
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
     <div class="container user-dashboard" style="margin-top: 40px;">
@@ -104,9 +104,7 @@ require_once __DIR__ . '/../layouts/header_cliente.php';
                             <div class="mb-3 text-start">
                                 <label class="form-label text-muted small fw-bold">Tarjeta de Crédito o Débito</label>
                                 <div id="card-element" class="form-control p-3 bg-white border">
-                                  <!-- A Stripe Element will be inserted here. -->
                                 </div>
-                                <!-- Used to display form errors. -->
                                 <div id="card-errors" role="alert" class="text-danger mt-2 small fw-bold"></div>
                             </div>
                             <input type="hidden" name="stripeToken" id="stripeToken">

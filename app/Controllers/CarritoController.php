@@ -138,7 +138,6 @@ class CarritoController {
 
     public function confirmarCompra() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // VERIFICAR PAGO CON STRIPE
             if (empty($_POST['stripeToken'])) {
                 header('Location: /BOLIBOX/carrito?error=pago_fallido');
                 exit();

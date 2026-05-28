@@ -4,11 +4,10 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Mis Cotizaciones";
 $current_page = "cotizaciones";
 
-// Cargar Layout (Header y Navbar)
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
     <div class="container user-dashboard" style="margin-top: 40px;">

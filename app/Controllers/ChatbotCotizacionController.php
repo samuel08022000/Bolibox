@@ -34,7 +34,6 @@ class ChatbotCotizacionController {
                 exit();
             }
 
-            // Obtener el JSON de la solicitud
             $json = file_get_contents('php://input');
             $data = json_decode($json, true);
 
@@ -44,8 +43,6 @@ class ChatbotCotizacionController {
             try {
                 $this->pdo->beginTransaction();
 
-                // 1. Crear el producto en la base de datos como inactivo y de categoría Cotizacion_Bot
-                // Necesitamos un id_proveedor que exista o permitir NULL. Supondremos NULL o dejamos sin enviar.
                 $query_prod = "INSERT INTO producto (nombre, descripcion, categoria, precio_unitario, estado) 
                                VALUES (:nombre, 'Generado automáticamente por Bolibot', 'Cotizacion_Bot', :precio, 0)";
                 $stmt_prod = $this->pdo->prepare($query_prod);
@@ -55,7 +52,6 @@ class ChatbotCotizacionController {
                 ]);
                 $id_producto = $this->pdo->lastInsertId();
 
-                // 2. Insertarlo en el carrito del usuario con estado Pendiente Bot
                 $query_cart = "INSERT INTO carrito (id_cliente, id_producto, cantidad, estado) 
                                VALUES (:id_cliente, :id_producto, 1, 'Pendiente Bot')";
                 $stmt_cart = $this->pdo->prepare($query_cart);

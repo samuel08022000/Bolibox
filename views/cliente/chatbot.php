@@ -4,7 +4,7 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "Chatbot - BOLIBOT";
 $current_page = "chatbot";
 $extra_css = '
@@ -12,22 +12,13 @@ $extra_css = '
     /* Esto le dice al navegador que respete los espacios y saltos de línea */
     .chat-body .chat-message {
         white-space: pre-wrap; 
-        word-wrap: break-word; /* Evita que el texto largo se salga de la burbuja */
+        word-wrap: break-word; 
     }
 </style>
 ';
 
-// Cargar Layout (Header y Navbar)
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
-    <div class="whatsapp-wrapper">
-        <div class="whatsapp-tooltip">
-            Empiece con su primer pedido aquí
-        </div>
-        <a href="https://wa.me/59178778387" target="_blank" class="whatsapp-float" title="Contactar con Empleado">
-            <i class="bi bi-whatsapp"></i>
-        </a>
-    </div>
 
     <div class="container" style="margin-top: 40px;">
         

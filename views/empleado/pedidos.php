@@ -5,11 +5,11 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Mis Pedidos";
 $current_page = "empleado_pedidos";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -88,7 +88,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             </td>
                         </tr>
                         
-                        <!-- MODAL DE EDICIÓN -->
+
                         <div class="modal fade" id="modalEditarPedido<?= $row['id_pedido']; ?>" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content" style="border-radius: 12px; border: none;">

@@ -4,21 +4,13 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "Catálogos - BOLIBOX";
 $current_page = "asociados";
 
-// Cargar Layout (Header y Navbar)
+
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
-    <div class="whatsapp-wrapper">
-        <div class="whatsapp-tooltip">
-            Empiece con su primer pedido aquí
-        </div>
-        <a href="https://wa.me/59178778387" target="_blank" class="whatsapp-float" title="Contactar con Empleado">
-            <i class="bi bi-whatsapp"></i>
-        </a>
-    </div>
 
     <div class="container" style="margin-top: 40px;">
         

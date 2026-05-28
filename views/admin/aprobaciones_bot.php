@@ -4,11 +4,11 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Aprobaciones Bolibot (Admin)";
 $current_page = "admin_aprobaciones_bot";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -63,7 +63,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                 </button>
                                             </div>
 
-                                            <!-- Modal Rechazar -->
                                             <div class="modal fade" id="modalRechazar<?= $p['id_carrito'] ?>" tabindex="-1" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered text-start">
                                                     <div class="modal-content border-0" style="border-radius: 12px;">

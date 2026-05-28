@@ -13,10 +13,9 @@ class AuthController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $db = new Database();
         $this->conn = $db->conectar();
-        $this->emailService = new EmailController(); // Instanciamos el cartero
+        $this->emailService = new EmailController(); 
     }
 
-    // Helper para guardar mensajes y redirigir
     private function redirectConMensaje($url, $mensaje, $tipo = 'error') {
         $_SESSION['flash'] = ['mensaje' => $mensaje, 'tipo' => $tipo];
         header("Location: " . $url);
@@ -42,7 +41,6 @@ public function login() {
                 $this->redirectConMensaje(url('login'), "Actividad sospechosa detectada. Por favor, verifica que eres humano.", "warning");
             }
 
-            // Verificar con Google
             $verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$this->captcha_secret}&response={$captcha_response}");
             $responseKeys = json_decode($verify, true);
             
@@ -67,10 +65,8 @@ public function login() {
 
         if ($user) {
             if (password_verify($password, $user['password_hash'])) {
-                // ACIERTO: Limpiar ataques de esta IP para esta cuenta
                 $this->conn->prepare("DELETE FROM intentos_login WHERE ip_address = ? AND email_intento = ?")->execute([$ip_usuario, $email]);
                 
-                // VERIFICAR DISPOSITIVO DE CONFIANZA
                 $salt = "B0liB0x_S3cr3t_2026!";
                 $is_trusted = false;
                 if (isset($_COOKIE['trusted_device'])) {
@@ -92,7 +88,6 @@ public function login() {
                     exit;
                 }
 
-                // Generar OTP (Paso 2FA normal)
                 $otp = sprintf("%06d", mt_rand(1, 999999));
                 $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
                 $this->conn->prepare("UPDATE usuarios SET otp_code = ?, otp_expires_at = ? WHERE id_usuario = ?")->execute([$otp, $expiry, $user['id_usuario']]);
@@ -143,11 +138,9 @@ public function login() {
         $user = $sql->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // ACIERTO TOTAL: Limpiamos el token y borramos todos los reportes de ataque de su correo
             $this->conn->prepare("UPDATE usuarios SET magic_token = NULL, magic_expires_at = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
             $this->conn->prepare("DELETE FROM intentos_login WHERE email_intento = ?")->execute([$user['email']]);
 
-            // No lo dejamos entrar de golpe, lo pasamos al paso 2FA (OTP) para mantener la muralla en alto
             $otp = sprintf("%06d", mt_rand(1, 999999));
             $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
             
@@ -181,7 +174,6 @@ public function login() {
 
             $this->conn->prepare("UPDATE usuarios SET otp_code = NULL, otp_expires_at = NULL WHERE id_usuario = ?")->execute([$user['id_usuario']]);
 
-            // ESTABLECER DISPOSITIVO DE CONFIANZA POR 30 DÍAS
             $salt = "B0liB0x_S3cr3t_2026!";
             $cookie_value = $email . '|' . hash('sha256', $email . $salt);
             setcookie('trusted_device', $cookie_value, time() + (30 * 24 * 60 * 60), "/");
@@ -234,7 +226,6 @@ public function login() {
 
             $this->conn->commit();
 
-            // DELEGAMOS CORREO DE ACTIVACIÓN AL EMAILCONTROLLER
             $enlace = "http://localhost/BOLIBOX/activar-cuenta?token=" . $token_activacion;
             $this->emailService->enviarActivacion($email, $nombre, $enlace);
 

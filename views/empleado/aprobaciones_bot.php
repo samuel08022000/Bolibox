@@ -5,16 +5,16 @@ if (!isset($_SESSION['usuario']) || ($rol !== 'empleado' && $rol !== 'admin')) {
     header("Location: " . url('login'));
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Aprobaciones Bolibot (Empleado)";
 $current_page = "empleado_aprobaciones_bot";
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
-    <!-- CONTENIDO PRINCIPAL -->
+
     <div class="main-content">
         <div class="admin-topbar">
             <div>

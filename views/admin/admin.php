@@ -4,17 +4,16 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Dashboard Admin";
 $current_page = "admin_dashboard";
 
-// Scripts y estilos específicos de esta vista
 $extra_css = '
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>.chart-container { position: relative; height: 300px; width: 100%; }</style>
 ';
 
-// Cargar Layout (Header y Sidebar)
+
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -209,7 +208,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <?php
-// Scripts específicos del final
 $extra_js = "
 <script>
 const ctxLine = document.getElementById('lineChart').getContext('2d');

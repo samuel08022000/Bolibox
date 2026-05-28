@@ -4,11 +4,10 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'admin') {
     header("Location: " . url('login')); 
     exit;
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Productos";
 $current_page = "admin_productos";
 
-// Cargar Layout (Header y Sidebar)
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
@@ -16,7 +15,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="main-content">
         <div class="admin-topbar">
             <div>
-                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Catálogo de Productos Propios</h3>
+                <h3 class="fw-bold m-0" style="color: #1a1a2e;">Catálogo de Productos</h3>
                 <p class="text-muted small m-0">Gestión de artículos importados</p>
             </div>
             <div class="d-flex align-items-center gap-3">

@@ -48,7 +48,6 @@ class AdminPedidoController {
                 $id_producto = !empty($_POST['id_producto']) ? $_POST['id_producto'] : null;
                 $producto_importar = !empty($_POST['producto_importar']) ? $_POST['producto_importar'] : null;
 
-                // Generar Código de Rastreo y PIN
                 $codigo_rastreo = 'BOL-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 4));
                 $pin_seguridad = strtoupper(substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 4));
 
@@ -89,8 +88,7 @@ class AdminPedidoController {
                 }
 
                 $this->conn->commit();
-                
-                // Guardar en sesión para mostrar el SweetAlert
+
                 $_SESSION['flash'] = [
                     'mensaje' => "El código de rastreo es: $codigo_rastreo y el PIN es: $pin_seguridad",
                     'tipo' => 'success',

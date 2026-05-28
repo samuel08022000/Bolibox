@@ -10,7 +10,6 @@ require_once __DIR__ . '/../../config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-// 1. Obtener ID del cliente (igual que en el carrito para que no falle)
 $id_cliente = null;
 if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     $id_usuario = $_SESSION['usuario']['id_usuario'] ?? null;
@@ -21,7 +20,6 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     }
 }
 
-// 2. Traer los pedidos (AHORA SÍ TRAEMOS 'estado' y 'tipo_pedido')
 $misPedidos = [];
 if ($id_cliente) {
     $sql = $con->prepare("
@@ -33,7 +31,7 @@ if ($id_cliente) {
     $sql->execute([$id_cliente]);
     $misPedidos = $sql->fetchAll(PDO::FETCH_ASSOC);
 }
-// Variables para el Layout
+
 $title = "BOLIBOX - Mis Pedidos";
 $current_page = "pedidos";
 $extra_css = '
@@ -56,7 +54,6 @@ $extra_css = '
 </style>
 ';
 
-// Cargar Layout (Header y Navbar)
 require_once __DIR__ . '/../layouts/header_cliente.php';
 ?>
 
@@ -93,7 +90,6 @@ require_once __DIR__ . '/../layouts/header_cliente.php';
                                 <div>
                                     <span class="badge bg-dark rounded-pill px-3 shadow-sm">ID #<?php echo $pedido['id_pedido']; ?></span>
                                     
-                                    <!-- Insignia dinámica: Web o Presencial -->
                                     <?php if(isset($pedido['tipo_pedido']) && $pedido['tipo_pedido'] == 'Web'): ?>
                                         <span class="badge bg-primary rounded-pill px-3 shadow-sm ms-1"><i class="bi bi-globe"></i> Web</span>
                                     <?php else: ?>
@@ -133,18 +129,16 @@ require_once __DIR__ . '/../layouts/header_cliente.php';
                                 </div>
                             </div>
 
-                            <!-- ESTADO DINÁMICO LEYENDO LA BD -->
                             <div class="d-flex align-items-center justify-content-between pt-3 border-top">
                                 <span class="small fw-bold text-muted">ESTADO ACTUAL:</span>
                                 
                                 <?php if ($pedido['estado'] == 1): ?>
-                                    <!-- Si es 1 (Aprobado), mostramos que ya está pagado -->
+
                                     <div class="d-flex align-items-center gap-2 text-success fw-bold">
                                         <i class="bi bi-check-circle-fill fs-5"></i>
                                         ¡Aprobado / Pagado!
                                     </div>
                                 <?php else: ?>
-                                    <!-- Si es 0 (u otro), mostramos que está procesando -->
                                     <div class="d-flex align-items-center gap-2 text-warning fw-bold">
                                         <span class="spinner-grow spinner-grow-sm" role="status"></span>
                                         En Proceso de Aduana
