@@ -22,7 +22,8 @@ $current_page = $current_page ?? '';
     <div class="nav flex-column mb-auto">
         <?php if ($rol === 'admin'): ?>
             <a class="sidebar-link <?= $current_page === 'admin_dashboard' ? 'active' : '' ?>" href="<?= url('admin') ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-            <a class="sidebar-link <?= $current_page === 'admin_pedidos' ? 'active' : '' ?>" href="<?= url('admin/pedidos') ?>"><i class="bi bi-box-seam"></i> Pedidos</a>
+            <a class="sidebar-link <?= $current_page === 'admin_pedidos_locales' ? 'active' : '' ?>" href="<?= url('admin/pedidos_locales') ?>"><i class="bi bi-box-seam"></i> 📦 Pedidos Locales</a>
+            <a class="sidebar-link <?= $current_page === 'admin_pedidos_externos' ? 'active' : '' ?>" href="<?= url('admin/pedidos_externos') ?>"><i class="bi bi-globe"></i> 🌐 Pedidos Externos</a>
             <a class="sidebar-link <?= $current_page === 'admin_productos' ? 'active' : '' ?>" href="<?= url('admin/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
             <a class="sidebar-link <?= $current_page === 'admin_clientes' ? 'active' : '' ?>" href="<?= url('admin/clientes') ?>"><i class="bi bi-people-fill"></i> Clientes</a>
             <a class="sidebar-link <?= $current_page === 'admin_proveedores' ? 'active' : '' ?>" href="<?= url('admin/proveedores') ?>"><i class="bi bi-truck"></i> Proveedores</a>
@@ -33,7 +34,8 @@ $current_page = $current_page ?? '';
         
         <?php elseif ($rol === 'empleado'): ?>
             <a class="sidebar-link <?= $current_page === 'empleado_registrar' ? 'active' : '' ?>" href="<?= url('empleado') ?>"><i class="bi bi-house-door"></i> Registrar Pedido</a>
-            <a class="sidebar-link <?= $current_page === 'empleado_pedidos' ? 'active' : '' ?>" href="<?= url('empleado/pedidos') ?>"><i class="bi bi-clipboard-data"></i> Pedidos</a>
+            <a class="sidebar-link <?= $current_page === 'empleado_pedidos_locales' ? 'active' : '' ?>" href="<?= url('empleado/pedidos_locales') ?>"><i class="bi bi-box-seam"></i> 📦 Pedidos Locales</a>
+            <a class="sidebar-link <?= $current_page === 'empleado_pedidos_externos' ? 'active' : '' ?>" href="<?= url('empleado/pedidos_externos') ?>"><i class="bi bi-globe"></i> 🌐 Pedidos Externos</a>
             <a class="sidebar-link <?= $current_page === 'empleado_clientes' ? 'active' : '' ?>" href="<?= url('empleado/clientes') ?>"><i class="bi bi-people"></i> Clientes</a>
             <a class="sidebar-link <?= $current_page === 'empleado_productos' ? 'active' : '' ?>" href="<?= url('empleado/productos') ?>"><i class="bi bi-tag-fill"></i> Productos</a>
             <a class="sidebar-link <?= $current_page === 'empleado_bot' ? 'active' : '' ?>" href="<?= url('empleado/aprobaciones_bot') ?>"><i class="bi bi-robot"></i> Cotizaciones Bot</a>

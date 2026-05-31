@@ -129,6 +129,11 @@ switch ($path) {
         (new ChatbotCotizacionController())->guardarCotizacion();
         break;
 
+    case '/chatbot/resumen_cotizacion':
+        require_once __DIR__ . '/../app/Controllers/ChatbotCotizacionController.php';
+        (new ChatbotCotizacionController())->resumenCotizacion();
+        break;
+
     // ---------------------------------------------------
     // PANEL EMPLEADO
     // ---------------------------------------------------
@@ -143,9 +148,14 @@ switch ($path) {
         (new EmpleadoPortalController())->clientes();
         break;
 
-    case '/empleado/pedidos':
-        require_once __DIR__ . '/../app/Controllers/EmpleadoPortalController.php';
-        (new EmpleadoPortalController())->pedidos();
+    case '/empleado/pedidos_locales':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->locales();
+        break;
+
+    case '/empleado/pedidos_externos':
+        require_once __DIR__ . '/../app/Controllers/PedidoController.php';
+        (new PedidoController())->externos();
         break;
 
     case '/empleado/pedidos/nuevo':
@@ -333,9 +343,14 @@ switch ($path) {
     // ADMIN: PEDIDOS
     // ---------------------------------------------------
 
-    case '/admin/pedidos':
+    case '/admin/pedidos_locales':
         require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
-        (new AdminPedidoController())->index();
+        (new AdminPedidoController())->locales();
+        break;
+
+    case '/admin/pedidos_externos':
+        require_once __DIR__ . '/../app/Controllers/AdminPedidoController.php';
+        (new AdminPedidoController())->externos();
         break;
 
     case '/admin/pedidos/guardar':
@@ -421,6 +436,11 @@ switch ($path) {
         require '../app/Controllers/CarritoController.php';
         $controller = new CarritoController();
         $controller->verCotizaciones();
+        break;
+
+    case '/cotizaciones/eliminar':
+        require_once __DIR__ . '/../app/Controllers/CarritoController.php';
+        (new CarritoController())->eliminarCotizacion();
         break;
 
     case '/carrito/agregar':

@@ -11,7 +11,9 @@ CORS(app)
 user_state = {
     "step": "inicio",
     "producto": None,
-    "total_bs": 0
+    "total_bs": 0,
+    "link": None,
+    "precio_usd": 0
 }
 
 @app.route("/")
@@ -36,6 +38,8 @@ def chat():
         user_state["step"] = "cotizado"
         user_state["producto"] = "Producto (Ingreso manual)"
         user_state["total_bs"] = total_bs
+        user_state["link"] = "Ingreso Manual"
+        user_state["precio_usd"] = precio_usd
 
         detalle_manual = (
             f"✅ ¡Entendido! Aquí tienes el detalle para tu cotización de ${precio_usd:.2f} USD:\n\n"
@@ -80,6 +84,8 @@ def chat():
             user_state["step"] = "cotizado"
             user_state["producto"] = nombre_extraido
             user_state["total_bs"] = total_bs
+            user_state["link"] = mensaje
+            user_state["precio_usd"] = precio_extraido
 
             detalle = (
                 f"📦 *{nombre_extraido}*\n"
@@ -124,7 +130,9 @@ def chat():
                         f"y te contactará de inmediato. ¡Gracias por elegir BoliBox! ✨",
             "status": "success",
             "producto": user_state["producto"],
-            "total": user_state["total_bs"]
+            "total": user_state["total_bs"],
+            "link": user_state["link"],
+            "precio_usd": user_state["precio_usd"]
         })
 
     if respuesta_ia == "CONFIRMAR_PEDIDO":

@@ -20,12 +20,11 @@ class AprobacionBotController {
                 exit();
             }
         }
-        $query = "SELECT c.id_carrito, c.cantidad, c.fecha_agregado, p.nombre as producto, p.precio_unitario, cl.id_cliente, cl.nombre as cliente_nombre
-                  FROM carrito c
-                  JOIN producto p ON c.id_producto = p.id_producto
-                  JOIN clientes cl ON c.id_cliente = cl.id_cliente
-                  WHERE c.estado = 'Pendiente Bot'
-                  ORDER BY c.fecha_agregado DESC";
+        $query = "SELECT cb.id_cotizacion, cb.nombre_producto, cb.link_origen, cb.precio_usd, cb.fecha, cb.data_json, cl.id_cliente, cl.nombre as cliente_nombre
+                  FROM cotizaciones_bot cb
+                  JOIN clientes cl ON cb.id_cliente = cl.id_cliente
+                  WHERE cb.estado = 'Pendiente Bot'
+                  ORDER BY cb.fecha DESC";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute();
         $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -35,24 +34,47 @@ class AprobacionBotController {
 
     public function aprobar($rol) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id_carrito = $_POST['id_carrito'] ?? null;
-            if ($id_carrito) {
+            $id_cotizacion = $_POST['id_cotizacion'] ?? null;
+            $comentario = $_POST['comentario_asesor'] ?? '';
+            $precio_final_bs = $_POST['precio_final_bs'] ?? null;
+
+            if ($id_cotizacion) {
                 $this->pdo->beginTransaction();
                 try {
-                    $query = "UPDATE carrito SET estado = 'Aprobado Bot' WHERE id_carrito = :id";
-                    $stmt = $this->pdo->prepare($query);
-                    $stmt->execute(['id' => $id_carrito]);
+                    // Obtener la cotización original
+                    $stmt_cot = $this->pdo->prepare("SELECT * FROM cotizaciones_bot WHERE id_cotizacion = ?");
+                    $stmt_cot->execute([$id_cotizacion]);
+                    $cotizacion = $stmt_cot->fetch(PDO::FETCH_ASSOC);
 
-                    $query_sel = "SELECT id_producto FROM carrito WHERE id_carrito = :id";
-                    $stmt_sel = $this->pdo->prepare($query_sel);
-                    $stmt_sel->execute(['id' => $id_carrito]);
-                    $id_producto = $stmt_sel->fetchColumn();
+                    if ($cotizacion) {
+                        // Insertar en producto
+                        $precio_bs = $precio_final_bs ?: (json_decode($cotizacion['data_json'], true)['total'] ?? 0);
+                        $query_prod = "INSERT INTO producto (nombre, descripcion, categoria, precio_unitario, estado) 
+                                       VALUES (:nombre, :descripcion, 'Cotizacion_Bot', :precio, 0)";
+                        $stmt_prod = $this->pdo->prepare($query_prod);
+                        $stmt_prod->execute([
+                            'nombre' => $cotizacion['nombre_producto'],
+                            'descripcion' => "Link: " . $cotizacion['link_origen'] . " | Comentario: " . $comentario,
+                            'precio' => $precio_bs
+                        ]);
+                        $id_producto = $this->pdo->lastInsertId();
 
-                    $query_upd_p = "UPDATE producto SET estado_cotizacion = 'Aprobado Bot' WHERE id_producto = :id_p";
-                    $stmt_upd_p = $this->pdo->prepare($query_upd_p);
-                    $stmt_upd_p->execute(['id_p' => $id_producto]);
-                    
-                    $this->pdo->commit();
+                        // Insertar en carrito
+                        $query_cart = "INSERT INTO carrito (id_cliente, id_producto, cantidad, estado) 
+                                       VALUES (:id_cliente, :id_producto, 1, 'Aprobado Bot')";
+                        $stmt_cart = $this->pdo->prepare($query_cart);
+                        $stmt_cart->execute([
+                            'id_cliente' => $cotizacion['id_cliente'],
+                            'id_producto' => $id_producto
+                        ]);
+
+                        // Actualizar cotizaciones_bot
+                        $query_upd = "UPDATE cotizaciones_bot SET estado = 'Aprobado Bot', comentario_asesor = :comentario WHERE id_cotizacion = :id";
+                        $stmt_upd = $this->pdo->prepare($query_upd);
+                        $stmt_upd->execute(['comentario' => $comentario, 'id' => $id_cotizacion]);
+                        
+                        $this->pdo->commit();
+                    }
                 } catch (Exception $e) {
                     $this->pdo->rollBack();
                 }
@@ -64,31 +86,16 @@ class AprobacionBotController {
 
     public function rechazar($rol) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id_carrito = $_POST['id_carrito'] ?? null;
+            $id_cotizacion = $_POST['id_cotizacion'] ?? null;
             $comentario = $_POST['comentario_asesor'] ?? null;
 
-            if ($id_carrito && $comentario) {
-                $query_sel = "SELECT id_producto FROM carrito WHERE id_carrito = :id";
-                $stmt_sel = $this->pdo->prepare($query_sel);
-                $stmt_sel->execute(['id' => $id_carrito]);
-                $id_producto = $stmt_sel->fetchColumn();
-
-                if ($id_producto) {
-                    $this->pdo->beginTransaction();
-                    try {
-                        $query_upd_c = "UPDATE carrito SET estado = 'Rechazado Bot' WHERE id_carrito = :id";
-                        $stmt_upd_c = $this->pdo->prepare($query_upd_c);
-                        $stmt_upd_c->execute(['id' => $id_carrito]);
-
-                        // Guardar comentario y estado en producto
-                        $query_upd_p = "UPDATE producto SET estado_cotizacion = 'Rechazado Bot', comentario_asesor = :comentario WHERE id_producto = :id";
-                        $stmt_upd_p = $this->pdo->prepare($query_upd_p);
-                        $stmt_upd_p->execute(['comentario' => $comentario, 'id' => $id_producto]);
-
-                        $this->pdo->commit();
-                    } catch (Exception $e) {
-                        $this->pdo->rollBack();
-                    }
+            if ($id_cotizacion && $comentario) {
+                try {
+                    $query_upd = "UPDATE cotizaciones_bot SET estado = 'Rechazado Bot', comentario_asesor = :comentario WHERE id_cotizacion = :id";
+                    $stmt_upd = $this->pdo->prepare($query_upd);
+                    $stmt_upd->execute(['comentario' => $comentario, 'id' => $id_cotizacion]);
+                } catch (Exception $e) {
+                    // Log error
                 }
             }
         }

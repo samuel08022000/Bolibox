@@ -85,12 +85,15 @@ $extra_js = "
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
                                 producto: data.producto,
-                                total: data.total
+                                total: data.total,
+                                link: data.link,
+                                precio_usd: data.precio_usd
                             })
                         });
                         const phpData = await phpResponse.json();
                         if (phpData.success) {
                             console.log(\"Cotización guardada exitosamente en el carrito.\");
+                            window.location.href = \"" . url('chatbot/resumen_cotizacion?id=') . "\" + phpData.id_carrito;
                         } else {
                             console.error(\"Error al guardar la cotización:\", phpData.message);
                         }

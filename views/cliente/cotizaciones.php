@@ -45,15 +45,22 @@ require_once __DIR__ . '/../layouts/header_cliente.php';
                                             <div class="p-2 bg-light rounded text-center me-3" style="width: 45px;">
                                                 <i class="bi bi-robot text-primary fs-4"></i>
                                             </div>
-                                            <span class="fw-bold text-dark"><?= htmlspecialchars($item['nombre']) ?></span>
+                                            <span class="fw-bold text-dark"><?= htmlspecialchars($item['nombre_producto']) ?></span>
                                         </div>
                                     </td>
-                                    <td class="text-dark">Bs <?= number_format($item['precio_unitario'], 2) ?></td>
-                                    <td class="text-center fw-bold border-start border-end"><?= $item['cantidad'] ?></td>
+                                    <?php 
+                                        $total_bs = 0;
+                                        if (!empty($item['data_json'])) {
+                                            $data = json_decode($item['data_json'], true);
+                                            $total_bs = $data['total'] ?? 0;
+                                        }
+                                    ?>
+                                    <td class="text-dark">Bs <?= number_format($total_bs, 2) ?></td>
+                                    <td class="text-center fw-bold border-start border-end">1</td>
                                     <td>
-                                        <?php if ($item['estado_carrito'] === 'Pendiente Bot'): ?>
+                                        <?php if ($item['estado'] === 'Pendiente Bot'): ?>
                                             <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> En Revisión</span>
-                                        <?php elseif ($item['estado_carrito'] === 'Rechazado Bot'): ?>
+                                        <?php elseif ($item['estado'] === 'Rechazado Bot'): ?>
                                             <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rechazado</span>
                                         <?php endif; ?>
                                     </td>
@@ -61,7 +68,7 @@ require_once __DIR__ . '/../layouts/header_cliente.php';
                                         <?= !empty($item['comentario_asesor']) ? htmlspecialchars($item['comentario_asesor']) : '<i>Sin comentarios</i>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= url('carrito/eliminar?id=' . $item['id_carrito']) ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Cancelar Cotización">
+                                        <a href="<?= url('cotizaciones/eliminar?id=' . $item['id_cotizacion']) ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Cancelar Cotización">
                                             <i class="bi bi-trash3"></i> Cancelar
                                         </a>
                                     </td>

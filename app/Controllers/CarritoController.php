@@ -66,10 +66,9 @@ class CarritoController {
             exit();
         }
 
-        $query = "SELECT c.id_carrito, p.id_producto, p.nombre, p.precio_unitario, c.cantidad, c.estado as estado_carrito, p.comentario_asesor 
-                  FROM carrito c 
-                  JOIN producto p ON c.id_producto = p.id_producto 
-                  WHERE c.id_cliente = :id_cliente AND c.estado IN ('Pendiente Bot', 'Rechazado Bot')";
+        $query = "SELECT id_cotizacion, nombre_producto, precio_usd, estado, comentario_asesor, data_json 
+                  FROM cotizaciones_bot 
+                  WHERE id_cliente = :id_cliente AND estado IN ('Pendiente Bot', 'Rechazado Bot')";
         
         $stmt = $this->pdo->prepare($query);
         $stmt->execute(['id_cliente' => $id_cliente]);
@@ -124,7 +123,7 @@ class CarritoController {
                     $stmt = $this->pdo->prepare($query);
                     $stmt->execute(['id_carrito' => $id_carrito, 'id_cliente' => $id_cliente]);
 
-                    if ($item['estado'] === 'Pendiente Bot' || $item['estado'] === 'Aprobado Bot') {
+                    if ($item['estado'] === 'Aprobado Bot') {
                         $query_prod = "DELETE FROM producto WHERE id_producto = :id_producto AND categoria = 'Cotizacion_Bot'";
                         $stmt_prod = $this->pdo->prepare($query_prod);
                         $stmt_prod->execute(['id_producto' => $item['id_producto']]);
@@ -133,6 +132,21 @@ class CarritoController {
             }
         }
         header('Location: /BOLIBOX/carrito');
+        exit();
+    }
+
+    public function eliminarCotizacion() {
+        if (isset($_GET['id'])) {
+            $id_cotizacion = $_GET['id'];
+            $id_cliente = $this->obtenerIdCliente();
+
+            if ($id_cliente) {
+                $query = "DELETE FROM cotizaciones_bot WHERE id_cotizacion = :id_cotizacion AND id_cliente = :id_cliente";
+                $stmt = $this->pdo->prepare($query);
+                $stmt->execute(['id_cotizacion' => $id_cotizacion, 'id_cliente' => $id_cliente]);
+            }
+        }
+        header('Location: /BOLIBOX/cotizaciones');
         exit();
     }
 

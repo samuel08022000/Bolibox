@@ -10,12 +10,13 @@ class AdminPedidoController {
         $this->conn = $db->conectar();
     }
 
-    public function index() {
+    public function locales() {
         $sql = $this->conn->prepare("
-            SELECT p.*, pr.nombre as nombre_producto, c.nombre as cliente_nombre 
+            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente, c.nombre as cliente_nombre 
             FROM pedidos p
             LEFT JOIN producto pr ON p.id_producto = pr.id_producto
             LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+            WHERE p.origen_pedido = 'Local' AND p.estado = 1
             ORDER BY p.fecha DESC
         ");
         $sql->execute();
@@ -28,7 +29,29 @@ class AdminPedidoController {
         $sqlProd->execute();
         $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
 
-        require __DIR__ . '/../../views/admin/pedidos.php';
+        require __DIR__ . '/../../views/admin/pedidos_locales.php';
+    }
+
+    public function externos() {
+        $sql = $this->conn->prepare("
+            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente, c.nombre as cliente_nombre 
+            FROM pedidos p
+            LEFT JOIN producto pr ON p.id_producto = pr.id_producto
+            LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+            WHERE (p.origen_pedido != 'Local' OR p.origen_pedido IS NULL) AND p.estado = 1
+            ORDER BY p.fecha DESC
+        ");
+        $sql->execute();
+        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+        $sqlProd = $this->conn->prepare("
+            SELECT id_producto, nombre, precio_unitario 
+            FROM producto
+        ");
+        $sqlProd->execute();
+        $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
+
+        require __DIR__ . '/../../views/admin/pedidos_externos.php';
     }
 
     public function guardar() {
@@ -134,6 +157,7 @@ class AdminPedidoController {
 
     public function actualizar() {
         if ($_POST) {
+            $origen = $_POST['origen'] ?? 'locales';
             try {
                 $this->conn->beginTransaction();
 
@@ -169,9 +193,13 @@ class AdminPedidoController {
                 $this->conn->rollBack();
                 echo "Error: " . $e->getMessage();
             }
+
+            header("Location: " . url('admin/pedidos_' . $origen));
+            exit;
         }
 
-        header("Location: " . url('admin/pedidos'));
+        header("Location: " . url('admin/pedidos_locales'));
+        exit;
     }
 
 
@@ -179,6 +207,7 @@ class AdminPedidoController {
         if ($_POST) {
             $id = $_POST['id_pedido'];
             $estado_actual = $_POST['estado_actual'];
+            $origen = $_POST['origen'] ?? 'locales';
 
             $nuevo_estado = ($estado_actual == 1) ? 0 : 1;
 
@@ -188,9 +217,24 @@ class AdminPedidoController {
                 WHERE id_pedido = ?
             ");
             $sql->execute([$nuevo_estado, $id]);
+
+            if ($nuevo_estado == 0) {
+                $_SESSION['flash_estado'] = [
+                    'mensaje' => 'PEDIDO ENTREGADO',
+                    'tipo' => 'warning'
+                ];
+            } else {
+                $_SESSION['flash_estado'] = [
+                    'mensaje' => 'Pedido marcado como NO ENTREGADO',
+                    'tipo' => 'info'
+                ];
+            }
+
+            header("Location: " . url('admin/pedidos_' . $origen));
+            exit;
         }
 
-        header("Location: " . url('admin/pedidos'));
+        header("Location: " . url('admin/pedidos_locales'));
         exit;
     }
 

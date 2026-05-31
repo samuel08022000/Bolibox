@@ -10,7 +10,7 @@ class PedidoController {
         $this->conn = $db->conectar();
     }
 
-    public function index() {
+    public function locales() {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
@@ -26,19 +26,50 @@ class PedidoController {
         $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
 
         $sql = $this->conn->prepare("
-            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente
+            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente, c.nombre as cliente_nombre
             FROM pedidos p
             LEFT JOIN producto pr ON p.id_producto = pr.id_producto
             LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
             JOIN empleados e ON p.id_empleado = e.id_empleado
-            WHERE e.id_usuario = ? AND p.estado = 1
+            WHERE e.id_usuario = ? AND p.estado = 1 AND p.origen_pedido = 'Local'
             ORDER BY p.fecha DESC
         ");
         $sql->execute([$id_usuario]);
 
         $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-        require_once __DIR__ . '/../../views/empleado/pedidos.php';
+        require_once __DIR__ . '/../../views/empleado/pedidos_locales.php';
+    }
+
+    public function externos() {
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $id_usuario = $_SESSION['usuario']['id_usuario'];
+
+        $sqlProd = $this->conn->prepare("
+            SELECT id_producto, nombre, precio_unitario 
+            FROM producto
+            WHERE estado = 1
+        ");
+        $sqlProd->execute();
+        $productosPropios = $sqlProd->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql = $this->conn->prepare("
+            SELECT p.*, pr.nombre as nombre_producto, c.nombre as nombre_cliente, c.nombre as cliente_nombre
+            FROM pedidos p
+            LEFT JOIN producto pr ON p.id_producto = pr.id_producto
+            LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+            JOIN empleados e ON p.id_empleado = e.id_empleado
+            WHERE e.id_usuario = ? AND p.estado = 1 AND (p.origen_pedido != 'Local' OR p.origen_pedido IS NULL)
+            ORDER BY p.fecha DESC
+        ");
+        $sql->execute([$id_usuario]);
+
+        $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+        require_once __DIR__ . '/../../views/empleado/pedidos_externos.php';
     }
 
     public function guardar() {
@@ -142,6 +173,7 @@ class PedidoController {
 
     public function actualizar() {
         if ($_POST) {
+            $origen = $_POST['origen'] ?? 'locales';
             try {
                 $this->conn->beginTransaction();
 
@@ -164,7 +196,8 @@ class PedidoController {
 
                 $this->conn->commit();
 
-                header("Location: " . url('empleado/pedidos'));
+                header("Location: " . url('empleado/pedidos_' . $origen));
+                exit;
 
             } catch (Exception $e) {
                 $this->conn->rollBack();
@@ -217,6 +250,7 @@ class PedidoController {
         if ($_POST) {
             $id = $_POST['id_pedido'];
             $estado_actual = $_POST['estado_actual'];
+            $origen = $_POST['origen'] ?? 'locales';
 
             $nuevo_estado = ($estado_actual == 1) ? 0 : 1;
 
@@ -226,9 +260,24 @@ class PedidoController {
                 WHERE id_pedido = ?
             ");
             $sql->execute([$nuevo_estado, $id]);
+
+            if ($nuevo_estado == 0) {
+                $_SESSION['flash_estado'] = [
+                    'mensaje' => 'PEDIDO ENTREGADO',
+                    'tipo' => 'warning'
+                ];
+            } else {
+                $_SESSION['flash_estado'] = [
+                    'mensaje' => 'Pedido marcado como NO ENTREGADO',
+                    'tipo' => 'info'
+                ];
+            }
+
+            header("Location: " . url('empleado/pedidos_' . $origen));
+            exit;
         }
 
-        header("Location: " . url('empleado/pedidos'));
+        header("Location: " . url('empleado/pedidos_locales'));
         exit;
     }
 
